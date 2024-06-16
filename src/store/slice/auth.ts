@@ -1,11 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 // import { authApi } from '../services/auth';
-import {
-  AUTH_TOKEN,
-  getAuthCookie,
-  removeCookies,
-  setAuthCookie,
-} from "@/lib/cookies";
+import { AUTH_TOKEN, removeCookies, setAuthCookie } from "@/lib/cookies";
 import { LoginResponse } from "@/interfaces/loginResponse";
 import { authApi } from "../services/auth";
 
@@ -18,6 +13,17 @@ const slice = createSlice({
     logout: () => {
       removeCookies([AUTH_TOKEN]);
       return {};
+    },
+    login: (
+      state,
+      { payload }: PayloadAction<{ email: string; password: string }>
+    ) => {
+      setAuthCookie(JSON.stringify(payload), AUTH_TOKEN);
+      return {
+        ...state,
+        userEmail: payload.email,
+        userName: payload.email.split("@")[0],
+      };
     },
   },
   extraReducers: builder => {
@@ -37,5 +43,5 @@ const slice = createSlice({
   },
 });
 
-export const { logout } = slice.actions;
+export const { logout, login } = slice.actions;
 export const authReducer = slice.reducer;

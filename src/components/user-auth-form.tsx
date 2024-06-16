@@ -18,6 +18,8 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { AUTH_TOKEN, setAuthCookie } from '@/lib/cookies'
 import { useRouter } from 'next/navigation'
+import { login } from '@/store/slice/auth'
+import { useDispatch } from 'react-redux'
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -38,6 +40,7 @@ const formSchema = z.object({
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const dispatch = useDispatch()
   const { push } = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,8 +53,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // console.log(data)
+
     setAuthCookie(data.email, AUTH_TOKEN)
+    dispatch(login({ email: data.email, password: data.password }))
 
     setTimeout(() => {
       setIsLoading(false)

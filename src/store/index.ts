@@ -3,11 +3,13 @@ import { counterReducer } from "./slice/count";
 import { pokemonApi } from "./services/pokemon";
 import { authReducer } from "./slice/auth";
 import { authApi } from "./services/auth";
+import { themeReducer } from "./slice/theme";
 
 export const makeStore = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
+    theme: themeReducer,
     [pokemonApi.reducerPath]: pokemonApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
   },

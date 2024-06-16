@@ -1,3 +1,4 @@
+'use client'
 
 import { IconChevronDown } from '@tabler/icons-react'
 import { Button, buttonVariants } from './custom/button'
@@ -63,7 +64,7 @@ export default function Nav({
     <div
       data-collapsed={isCollapsed}
       className={cn(
-        'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
+        'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none ',
         className
       )}
     >

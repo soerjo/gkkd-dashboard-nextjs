@@ -11,7 +11,7 @@ export default function useLocalStorage<T>({
   key,
   defaultValue,
 }: LocalStorageProps<T>) {
-  const [value, setValue] = useState<T>({} as T)
+  const [value, setValue] = useState<T>(defaultValue)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

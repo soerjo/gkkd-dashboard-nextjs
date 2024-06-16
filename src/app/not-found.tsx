@@ -2,10 +2,13 @@
 
 import { Button } from '@/components/custom/button'
 import { useRouter } from 'next/navigation';
-// import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 export default function NotFoundError() {
     const { push, back } = useRouter();
+
+    useEffect(() => { setTimeout(() => push('/'), 5000); }, [push])
+
     return (
         <div className='h-svh'>
             <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
