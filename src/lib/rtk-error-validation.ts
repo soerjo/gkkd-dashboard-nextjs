@@ -22,3 +22,12 @@ export function isErrorWithMessage(
     typeof (error as any).message === "string"
   );
 }
+
+export function getErroMessage(error: unknown) {
+  if (isFetchBaseQueryError(error)) {
+    const errorData = error.data as { message?: string };
+    return errorData.message;
+  } else if (isErrorWithMessage(error)) {
+    return error.message;
+  }
+}

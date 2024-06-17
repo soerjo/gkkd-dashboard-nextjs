@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { HTMLAttributes } from "react";
 import { useForm } from "react-hook-form";
@@ -19,18 +19,13 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { useLoginMutation } from "@/store/services/auth";
-import {
-  isErrorWithMessage,
-  isFetchBaseQueryError,
-} from "@/lib/rtk-error-validation";
+import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "Please enter your email" }),
+  email: z.string().min(1, { message: "Please enter your email" }),
   // .email({ message: "Invalid email address" }),
   password: z
     .string()
@@ -64,25 +59,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         password: data.password,
       }).unwrap();
 
-      push('/')
+      push("/");
     } catch (error) {
-      if (isFetchBaseQueryError(error)) {
-        const errorData = error.data as { message?: string };
-        const errMsg = errorData.message;
-        toast({
-          className: "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5  sm:flex-col md:max-w-sm",
-          variant: "destructive",
-          title: "something error",
-          description: errMsg,
-        });
-      } else if (isErrorWithMessage(error)) {
-        toast({
-          className: "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5  sm:flex-col md:max-w-sm",
-          variant: "destructive",
-          title: "something error",
-          description: error.message,
-        });
-      }
+      const errorMessage = getErroMessage(error);
+      toast({
+        className:
+          "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+        variant: "destructive",
+        title: "something error",
+        description: errorMessage,
+
+      });
     }
   }
 

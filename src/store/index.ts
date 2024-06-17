@@ -3,24 +3,17 @@ import { counterReducer } from "./slice/count";
 import { pokemonApi } from "./services/pokemon";
 import { authReducer } from "./slice/auth";
 import { authApi } from "./services/auth";
-import { themeReducer } from "./slice/theme";
-// import { rtkQueryErrorLogger } from "./middleware";
 
 export const makeStore = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
-    theme: themeReducer,
     [pokemonApi.reducerPath]: pokemonApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
   },
 
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware().concat([
-      // rtkQueryErrorLogger,
-      pokemonApi.middleware,
-      authApi.middleware,
-    ]),
+    getDefaultMiddleware().concat([pokemonApi.middleware, authApi.middleware]),
 });
 
 export type RootState = ReturnType<typeof makeStore.getState>;

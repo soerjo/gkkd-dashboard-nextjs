@@ -2,9 +2,9 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-// import StoreProvider from "./storeProvider";
-// import { AuthWrapper } from "@/components/auth-wrapper";
-// import { Toaster } from "@/components/ui/toaster"
+import StoreProvider from "./storeProvider";
+import { AuthWrapper } from "@/components/auth-wrapper";
+import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/next-theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,14 +22,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         >
 
-          {/* <StoreProvider> */}
-          {/* <AuthWrapper> */}
+          <StoreProvider>
+            <AuthWrapper>
 
-          {children}
-          {/* </AuthWrapper> */}
+              {children}
+            </AuthWrapper>
 
-          {/* <Toaster /> */}
-          {/* </StoreProvider> */}
+            <Toaster />
+          </StoreProvider>
         </ThemeProvider>
       </body>
     </html>
