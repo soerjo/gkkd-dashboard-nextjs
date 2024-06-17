@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AUTH_TOKEN, getAuthCookie } from '@/lib/cookies';
 import { useEffect, useState } from 'react';
 import { login, logout } from '@/store/slice/auth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import LodingPage from './loading';
 import { RootState } from '@/store';
 import { setInitialState } from '@/store/slice/theme';
@@ -13,11 +13,15 @@ type Props = {
     children?: React.ReactNode;
 };
 
+const skipValidationPathName = ["/login"]
+
 export const AuthWrapper = ({ children }: Props) => {
     const [isTokenExist, setTokenExist] = useState<string | undefined>()
     const theme = useSelector((state: RootState) => state.theme)
     const dispatch = useDispatch();
     const { push } = useRouter();
+    const pathname = usePathname()
+    // const searchParams = useSearchParams()
 
     const token = getAuthCookie(AUTH_TOKEN)
 
@@ -32,27 +36,23 @@ export const AuthWrapper = ({ children }: Props) => {
         }
     }, [token, push, dispatch]);
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const root = window.document.documentElement
+    // useEffect(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const root = window.document.documentElement
+    //         root.classList.remove('light', 'dark', 'system')
+    //         root.classList.add(theme.isDark)
+    //     }
+    // }, [theme])
 
+    // useEffect(() => {
+    //     if (typeof window !== 'undefined') {
+    //         dispatch(setInitialState())
+    //     }
+    // }, [dispatch])
 
-            // console.log({ themDarkBefore: root.classList.value })
-            root.classList.remove('light', 'dark', 'system')
+    if (skipValidationPathName.includes(pathname)) return children
 
-            // console.log({ isDark: theme })
-            root.classList.add(theme.isDark)
-            // console.log({ themDark: root.classList.value })
-        }
-    }, [theme])
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            dispatch(setInitialState())
-        }
-    }, [dispatch])
-
-    // const root = window.document.documentElement
-    // root.classList.add(theme.isDark)
+    // console.log({ pathname })
     return <> {isTokenExist ? children : <LodingPage />} </>
+    return children
 };

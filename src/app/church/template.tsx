@@ -7,12 +7,12 @@ import { Toaster } from "@/components/ui/toaster";
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <>
-            <AuthWrapper>
-                <AppShell>
-                    {children}
-                </AppShell>
-                < Toaster />
-            </AuthWrapper>
+            {/* <AuthWrapper> */}
+            <AppShell>
+                {children}
+            </AppShell>
+            < Toaster />
+            {/* </AuthWrapper> */}
         </>
     );
 }

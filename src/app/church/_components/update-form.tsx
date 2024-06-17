@@ -3,7 +3,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/custom/button'
 import { Textarea } from "@/components/ui/textarea";
 import AsyncSelect from "@/components/react-select";
 import React, { useState } from "react";
@@ -224,10 +224,11 @@ export const UpdateFormInput = ({
                             disabled={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
                                 }`}
+                            loading={isSubmitting}
                         >
-                            {isSubmitting && (
-                                <Spinner show className="text-secondary" size={"small"} />
-                            )}
+                            {/* {isSubmitting && (
+                        <Spinner show className="text-secondary" size={"small"} />
+                    )} */}
                             Save changes
                         </Button>
                     }
