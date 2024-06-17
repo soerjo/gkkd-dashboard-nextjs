@@ -1,6 +1,12 @@
+export type UserPayload = {
+  id?: number;
+  email?: string;
+  region?: Record<string, any>;
+  role?: string;
+  username?: string;
+};
+
 export type LoginResponse = {
-  token: string;
-  userEmail: string;
-  userName: string;
-  id: string;
+  jwt: string;
+  payload: UserPayload;
 };

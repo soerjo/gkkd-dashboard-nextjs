@@ -4,6 +4,7 @@ import { pokemonApi } from "./services/pokemon";
 import { authReducer } from "./slice/auth";
 import { authApi } from "./services/auth";
 import { themeReducer } from "./slice/theme";
+// import { rtkQueryErrorLogger } from "./middleware";
 
 export const makeStore = configureStore({
   reducer: {
@@ -15,7 +16,8 @@ export const makeStore = configureStore({
   },
 
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({ serializableCheck: false }).concat([
+    getDefaultMiddleware().concat([
+      // rtkQueryErrorLogger,
       pokemonApi.middleware,
       authApi.middleware,
     ]),

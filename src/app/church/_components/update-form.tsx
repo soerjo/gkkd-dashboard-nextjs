@@ -58,14 +58,9 @@ export const UpdateFormInput = ({
         },
     });
 
-    const {
-        formState: { isDirty, isSubmitting },
-        setValue,
-        reset,
-    } = form;
+    const { formState: { isDirty, isSubmitting }, reset } = form;
 
     const onSubmit = (values: z.infer<typeof FormSchema>) => {
-        console.log({ values });
         return new Promise<ColourOption[]>(resolve => {
             setTimeout(() => {
                 console.log("triger submit button");
@@ -98,7 +93,7 @@ export const UpdateFormInput = ({
                 createdAt: new Date().toLocaleDateString(),
             });
         }
-    }, [searchParams]);
+    }, [searchParams, reset]);
 
     return (
         <div

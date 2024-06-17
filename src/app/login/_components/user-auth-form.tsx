@@ -1,7 +1,9 @@
-import { HTMLAttributes, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+'use client'
+
+import { HTMLAttributes } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -9,74 +11,94 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/custom/button'
-import { PasswordInput } from '@/components/custom/password-input'
-import { cn } from '@/lib/utils'
-import Link from 'next/link'
-import { AUTH_TOKEN, setAuthCookie } from '@/lib/cookies'
-import { useRouter } from 'next/navigation'
-import { login } from '@/store/slice/auth'
-import { useDispatch } from 'react-redux'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/custom/button";
+import { PasswordInput } from "@/components/custom/password-input";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
+import { useLoginMutation } from "@/store/services/auth";
+import {
+  isErrorWithMessage,
+  isFetchBaseQueryError,
+} from "@/lib/rtk-error-validation";
+import { useRouter } from "next/navigation";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
   email: z
     .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
+    .min(1, { message: "Please enter your email" }),
+  // .email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(1, {
-      message: 'Please enter your password',
+      message: "Please enter your password",
     })
     .min(7, {
-      message: 'Password must be at least 7 characters long',
+      message: "Password must be at least 7 characters long",
     }),
-})
+});
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const dispatch = useDispatch()
-  const { push } = useRouter()
+  const [login, { isLoading }] = useLoginMutation();
+  const { toast } = useToast();
+  const { push } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-  })
+  });
 
-  const { handleSubmit, formState: { isSubmitting } } = form
+  const { handleSubmit } = form;
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      await login({
+        usernameOrEmail: data.email,
+        password: data.password,
+      }).unwrap();
 
-    setAuthCookie(data.email, AUTH_TOKEN)
-    dispatch(login({ email: data.email, password: data.password }))
-
-    setTimeout(() => {
-      setIsLoading(false)
       push('/')
-    }, 10000)
+    } catch (error) {
+      if (isFetchBaseQueryError(error)) {
+        const errorData = error.data as { message?: string };
+        const errMsg = errorData.message;
+        toast({
+          className: "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5  sm:flex-col md:max-w-sm",
+          variant: "destructive",
+          title: "something error",
+          description: errMsg,
+        });
+      } else if (isErrorWithMessage(error)) {
+        toast({
+          className: "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5  sm:flex-col md:max-w-sm",
+          variant: "destructive",
+          title: "something error",
+          description: error.message,
+        });
+      }
+    }
   }
 
   return (
-    <div className={cn('grid gap-6', className)} {...props}>
+    <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='grid gap-2'>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-2">
             <FormField
               control={form.control}
-              name='email'
+              name="email"
               render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Email</FormLabel>
+                <FormItem className="space-y-1">
+                  <FormLabel>Username or email</FormLabel>
                   <FormControl>
-                    <Input placeholder='name@example.com' {...field} />
+                    <Input placeholder="name@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,32 +106,31 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             />
             <FormField
               control={form.control}
-              name='password'
+              name="password"
               render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <div className='flex items-center justify-between'>
+                <FormItem className="space-y-1">
+                  <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
                     <Link
-                      href='/forgot-password'
-                      className='text-sm font-medium text-muted-foreground hover:opacity-75'
+                      href="/forgot-password"
+                      className="text-sm font-medium text-muted-foreground hover:opacity-75"
                     >
                       Forgot password?
                     </Link>
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder='********' {...field} />
+                    <PasswordInput placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button className='mt-2' loading={isSubmitting}>
+            <Button className="mt-2" loading={isLoading}>
               Login
             </Button>
-
           </div>
         </form>
       </Form>
     </div>
-  )
+  );
 }

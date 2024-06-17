@@ -1,16 +1,17 @@
 'use client'
 
 import { IconMoon, IconSun } from '@tabler/icons-react'
-import { useTheme } from './theme-provider'
 import { Button } from './custom/button'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { toggleDark } from '@/store/slice/theme'
+import { useTheme } from 'next-themes'
 
 export default function ThemeSwitch() {
-  const theme = useSelector((state: RootState) => state.theme)
-  const dispatch = useDispatch()
+  const { setTheme, theme } = useTheme()
+  // const theme = useSelector((state: RootState) => state.theme)
+  // const dispatch = useDispatch()
 
 
 
@@ -27,9 +28,9 @@ export default function ThemeSwitch() {
       size='icon'
       variant='ghost'
       className='rounded-full'
-      onClick={() => dispatch(toggleDark())}
+      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
     >
-      {theme?.isDark === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
+      {theme === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
     </Button>
   )
 }

@@ -31,7 +31,7 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             {/* <AvatarImage src='/avatars/01.png' alt='@shadcn' /> */}
-            <AvatarFallback>{authData?.userName?.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{authData?.username?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -39,10 +39,10 @@ export function UserNav() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <Link href={'/profile'}>
-              <p className='text-sm font-medium leading-none hover:underline'>{authData?.userName}</p>
+              <p className='text-sm font-medium leading-none hover:underline'>{authData?.username}</p>
             </Link>
             <p className='text-xs leading-none text-muted-foreground'>
-              {authData?.userEmail}
+              {authData?.email}
             </p>
           </div>
         </DropdownMenuLabel>

@@ -1,6 +1,7 @@
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 
 export const AUTH_TOKEN = "token";
+export const AUTH_PAYLOAD = "payload";
 
 export const setAuthCookie = (token: string, name: string) => {
   const toBase64 = Buffer.from(token).toString("base64");

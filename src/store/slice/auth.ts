@@ -1,10 +1,16 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 // import { authApi } from '../services/auth';
-import { AUTH_TOKEN, removeCookies, setAuthCookie } from "@/lib/cookies";
-import { LoginResponse } from "@/interfaces/loginResponse";
+import {
+  AUTH_PAYLOAD,
+  AUTH_TOKEN,
+  getAuthCookie,
+  removeCookies,
+  setAuthCookie,
+} from "@/lib/cookies";
+import { LoginResponse, UserPayload } from "@/interfaces/loginResponse";
 import { authApi } from "../services/auth";
 
-const initialState: Partial<LoginResponse> = {};
+const initialState: UserPayload = {} as UserPayload;
 
 const slice = createSlice({
   name: "auth",
@@ -14,34 +20,25 @@ const slice = createSlice({
       removeCookies([AUTH_TOKEN]);
       return {};
     },
-    login: (
-      state,
-      { payload }: PayloadAction<{ email: string; password: string }>
-    ) => {
-      setAuthCookie(JSON.stringify(payload), AUTH_TOKEN);
-      return {
-        ...state,
-        userEmail: payload.email,
-        userName: payload.email.split("@")[0],
-      };
+    setInitialState: () => {
+      const payload = getAuthCookie(AUTH_PAYLOAD);
+      const data: UserPayload = payload && JSON.parse(payload);
+
+      return data;
     },
   },
   extraReducers: builder => {
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
-      (_state, { payload }) => {
-        setAuthCookie(payload.data.token, AUTH_TOKEN);
-        return payload.data;
-      }
-    );
-    builder.addMatcher(
-      authApi.endpoints.getAuthData.matchFulfilled,
-      (_state, { payload }) => {
-        return payload.data;
+      (state, { payload }) => {
+        state = payload.data.payload;
+        console.log({ state });
+        setAuthCookie(payload.data.jwt, AUTH_TOKEN);
+        setAuthCookie(JSON.stringify(payload.data.payload), AUTH_PAYLOAD);
       }
     );
   },
 });
 
-export const { logout, login } = slice.actions;
+export const { logout, setInitialState } = slice.actions;
 export const authReducer = slice.reducer;
