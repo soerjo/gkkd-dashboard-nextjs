@@ -1,15 +1,21 @@
-import { IApiResponse } from "@/interfaces/apiResponse";
+import { IApiResponse, TPaginationResponse } from "@/interfaces/apiResponse";
 import {
   CreateChurch,
   GetChurchFilter,
   GetChurchResponse,
 } from "@/interfaces/churchResponse";
+import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const authApi = createApi({
-  reducerPath: "authApi",
+export const churchApi = createApi({
+  reducerPath: "churchApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL + "/region",
+    prepareHeaders: headers => {
+      const token = getAuthCookie(AUTH_TOKEN);
+      if (token) headers.set("authorization", `Bearer ${token}`);
+      return headers;
+    },
   }),
   endpoints: builder => ({
     createChurch: builder.mutation<IApiResponse<GetChurchFilter>, CreateChurch>(
@@ -49,7 +55,7 @@ export const authApi = createApi({
       }),
     }),
     GetAllChurch: builder.query<
-      IApiResponse<GetChurchResponse>,
+      IApiResponse<TPaginationResponse<GetChurchResponse[]>>,
       GetChurchFilter
     >({
       query: payload => ({
@@ -74,6 +80,8 @@ export const {
   useCreateChurchMutation,
   useUpdateChurchMutation,
   useGetAllChurchQuery,
+  useLazyGetAllChurchQuery,
   useGetChurchByIdQuery,
+  useLazyGetChurchByIdQuery,
   useDeleteChurchMutation,
-} = authApi;
+} = churchApi;

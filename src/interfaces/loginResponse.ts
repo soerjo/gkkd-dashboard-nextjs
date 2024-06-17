@@ -4,6 +4,7 @@ export type UserPayload = {
   region?: Record<string, any>;
   role?: string;
   username?: string;
+  token?: string;
 };
 
 export type LoginResponse = {

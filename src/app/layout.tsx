@@ -14,23 +14,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+        <StoreProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
 
-        >
+          >
 
-          <StoreProvider>
             <AuthWrapper>
 
               {children}
             </AuthWrapper>
 
             <Toaster />
-          </StoreProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </StoreProvider>
       </body>
     </html>
   );

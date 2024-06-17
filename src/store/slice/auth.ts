@@ -22,9 +22,10 @@ const slice = createSlice({
     },
     setInitialState: () => {
       const payload = getAuthCookie(AUTH_PAYLOAD);
+      const token = getAuthCookie(AUTH_TOKEN);
       const data: UserPayload = payload && JSON.parse(payload);
 
-      return data;
+      return { ...data, token };
     },
   },
   extraReducers: builder => {
