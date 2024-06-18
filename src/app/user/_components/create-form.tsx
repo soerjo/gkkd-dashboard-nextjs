@@ -1,10 +1,7 @@
-import { ColourOption, colourOptions } from "@/data/color-data";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
-import { Textarea } from "@/components/ui/textarea";
-// import AsyncSelect from "@/components/react-select";
 import React from "react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -19,12 +16,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
-import {
-    useCreateChurchMutation,
-    useGetAllChurchQuery,
-    useLazyGetAllChurchQuery,
-} from "@/store/services/church";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams } from "next/navigation";
@@ -65,6 +57,7 @@ export const CreateForm = ({
 
     const page = parseInt(searchParams.get("page") || "1");
     const take = parseInt(searchParams.get("take") || "10");
+    const search = searchParams.get('search') || '';
 
     const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
         resolver: zodResolver(FormSchema),
@@ -92,7 +85,7 @@ export const CreateForm = ({
                 role: values.role,
                 regions_id: values.region.id,
             }).unwrap();
-            await getAllUser({ page, take }).unwrap();
+            await getAllUser({ page, take, search }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

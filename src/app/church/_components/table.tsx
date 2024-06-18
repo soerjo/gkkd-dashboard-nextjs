@@ -51,11 +51,6 @@ import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/hooks/use-debounce";
 
 export const columns: ColumnDef<GetChurchResponse>[] = [
-    // {
-    //     accessorKey: "No",
-    //     header: "No",
-    //     cell: ({ row }) => <div className="">{row.index + 1}</div>,
-    // },
     {
         accessorKey: "name",
         header: "Name",
@@ -95,15 +90,16 @@ export function DataTable() {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const pageSizeOptions = [5, 10, 20, 30, 50]
 
+    const router = useRouter();
+    const pathname = usePathname()
+    const searchParams = useSearchParams();
+
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
 
-    const router = useRouter();
-    const pathname = usePathname()
-    const searchParams = useSearchParams();
 
     // search params
     const page = Number(searchParams?.get("page") ?? "1") // default is page: 1

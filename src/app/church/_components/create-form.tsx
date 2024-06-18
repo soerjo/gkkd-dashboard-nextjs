@@ -39,13 +39,13 @@ export const CreateForm = ({
 }) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const { toast } = useToast();
-    const [createNewChurch, { isLoading }] = useCreateChurchMutation();
 
     const searchParams = useSearchParams();
 
     const page = parseInt(searchParams.get('page') || "1");
     const take = parseInt(searchParams.get('take') || "10");
     const search = searchParams.get('search') || '';
+    const [createNewChurch] = useCreateChurchMutation();
     const [getAllChurch] = useLazyGetAllChurchQuery();
 
     const form = useForm<CreateChurch & { status: "active" | "inactive" }>({
@@ -82,21 +82,6 @@ export const CreateForm = ({
             });
         }
     };
-
-    // dummy async
-    const filterSelect = (inputValue: string) => {
-        return colourOptions.filter(i =>
-            i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
-    };
-
-    // dummy async
-    const promiseOptions = async (inputValue: string): Promise<any[]> =>
-        new Promise<any[]>(resolve => {
-            setTimeout(() => {
-                resolve(filterSelect(inputValue));
-            }, 1000);
-        });
 
     return (
         <div

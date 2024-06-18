@@ -8,16 +8,11 @@ import {
 } from "@radix-ui/react-icons";
 import {
     ColumnDef,
-    ColumnFiltersState,
-    SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
     getPaginationRowModel,
-    getSortedRowModel,
     useReactTable,
-    PaginationState
+    PaginationState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,46 +38,64 @@ import { DropdownAction } from "./drop-down-action";
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllUserQuery } from "@/store/services/user";
-import { GetUserResponse } from "@/interfaces/userResponse";
+import { useGetAllMemberQuery } from "@/store/services/member";
+import { Member, MemberResponse } from "@/interfaces/memberResponse";
 import { useToast } from "@/components/ui/use-toast";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/hooks/use-debounce";
 import AsyncSelect from "@/components/react-select";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import { useAppSelector } from "@/lib/store";
+import { RootState } from "@/store";
 
-export const columns: ColumnDef<GetUserResponse>[] = [
+export const columns: ColumnDef<MemberResponse>[] = [
+    {
+        accessorKey: "full_name",
+        header: "full_name",
+        cell: ({ row }) => (
+            <div className="">{row.getValue("full_name")}</div>
+        ),
+    },
     {
         accessorKey: "name",
-        header: "Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        header: "name",
+        cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "email",
         header: "Alternative Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        cell: ({ row }) => <div className="">{row.getValue("email")}</div>,
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("status") || "active"}</div>
-        ),
+        accessorKey: "gender",
+        header: "gender",
+        cell: ({ row }) => <div className="">{row.getValue("gender")}</div>,
     },
     {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("role")}</div>
-        ),
+        accessorKey: "region_service",
+        header: "region_service",
+        cell: ({ row }) => <div className="">{row.getValue("region_service")}</div>,
     },
     {
-        accessorKey: "region",
-        header: "Region",
-        cell: ({ row }) => (
-            <div className="">{row.original?.region?.name || "-"}</div>
-        ),
+        accessorKey: "date_birthday",
+        header: "date_birthday",
+        cell: ({ row }) => <div className="">{row.getValue("date_birthday")}</div>,
+    },
+    {
+        accessorKey: "place_birthday",
+        header: "place_birthday",
+        cell: ({ row }) => <div className="">{row.getValue("place_birthday")}</div>,
+    },
+    {
+        accessorKey: "phone_number",
+        header: "phone_number",
+        cell: ({ row }) => <div className="">{row.getValue("phone_number")}</div>,
+    },
+    {
+        accessorKey: "marital_status",
+        header: "marital_status",
+        cell: ({ row }) => <div className="">{row.getValue("marital_status") ? "menikah" : "belum menikah"}</div>,
     },
     {
         id: "actions",
@@ -95,35 +108,34 @@ export const columns: ColumnDef<GetUserResponse>[] = [
 
 export function DataTable() {
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const pageSizeOptions = [5, 10, 20, 30, 50]
+    const pageSizeOptions = [5, 10, 20, 30, 50];
+
+    const { entities, meta } = useAppSelector((state: RootState) => state.member);
 
     const router = useRouter();
-    const pathname = usePathname()
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const [getListChurch] = useLazyGetAllChurchQuery();
 
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
     const [regionsId, setRegionsId] = useState("");
-
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
 
     // search params
-    const page = Number(searchParams?.get("page") ?? "1") // default is page: 1
-    const take = Number(searchParams?.get("take") ?? "5") // default 5 record per page
-    const search = searchParams?.get("search") ?? "" // default 5 record per page
-    const region_id = searchParams?.get("region_id") ?? "" // default 5 record per page
-
+    const page = Number(searchParams?.get("page") ?? "1"); // default is page: 1
+    const take = Number(searchParams?.get("take") ?? "5"); // default 5 record per page
+    const search = searchParams?.get("search") ?? ""; // default 5 record per page
+    const region_id = searchParams?.get("region_id") ?? ""; // default 5 record per page
 
     const { toast } = useToast();
-    const { data, error, isLoading } = useGetAllUserQuery({
+    const { error, isLoading, data } = useGetAllMemberQuery({
         page: page,
         take: take,
         search: search,
-        region_id: region_id ? Number(region_id) : undefined
-
+        region_id: region_id ? Number(region_id) : undefined,
     });
 
     useEffect(() => {
@@ -139,32 +151,30 @@ export function DataTable() {
         }
     }, [error]);
 
-
-
     // create query string
     const createQueryString = React.useCallback(
         (params: Record<string, string | number | null>) => {
-            const newSearchParams = new URLSearchParams(searchParams?.toString())
+            const newSearchParams = new URLSearchParams(searchParams?.toString());
 
             for (const [key, value] of Object.entries(params)) {
                 if (value === null) {
-                    newSearchParams.delete(key)
+                    newSearchParams.delete(key);
                 } else {
-                    newSearchParams.set(key, String(value))
+                    newSearchParams.set(key, String(value));
                 }
             }
 
-            return newSearchParams.toString()
+            return newSearchParams.toString();
         },
         [searchParams]
-    )
+    );
 
     // handle server-side pagination
     const [{ pageIndex, pageSize }, setPagination] =
         React.useState<PaginationState>({
             pageIndex: Number(page) - 1,
             pageSize: Number(take),
-        })
+        });
 
     const pagination = React.useMemo(
         () => ({
@@ -172,14 +182,14 @@ export function DataTable() {
             pageSize,
         }),
         [pageIndex, pageSize]
-    )
+    );
 
     React.useEffect(() => {
         setPagination({
             pageIndex: Number(page) - 1,
             pageSize: Number(take),
-        })
-    }, [page, take])
+        });
+    }, [page, take]);
 
     // changed the route as well
     React.useEffect(() => {
@@ -188,16 +198,15 @@ export function DataTable() {
                 page: pageIndex + 1,
                 take: pageSize,
                 search: debouncedSearchTerm,
-                region_id: regionsId || '',
+                region_id: regionsId || "",
             })}`
-        )
-    }, [pageIndex, pageSize, debouncedSearchTerm, regionsId])
-
+        );
+    }, [pageIndex, pageSize, debouncedSearchTerm, regionsId]);
 
     const table = useReactTable({
         data: data?.data?.entities || [],
         columns,
-        pageCount: data?.data?.meta.pageCount ?? -1,
+        pageCount: data?.data?.meta?.pageCount ?? -1,
         state: {
             pagination,
         },
@@ -205,16 +214,20 @@ export function DataTable() {
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
-    })
+    });
 
     const promiseRegionOptions = async (inputValue: string) => {
         try {
-            const listChurch = await getListChurch({ take: 5, page: 1, search: inputValue }).unwrap();
+            const listChurch = await getListChurch({
+                take: 5,
+                page: 1,
+                search: inputValue,
+            }).unwrap();
             const data = listChurch.data.entities.map(list => ({
                 value: list,
                 label: list.name,
             }));
-            // data.push({ value: { id: 0 }, label: "clear..." })
+
             return data.filter(d =>
                 d.label.toLowerCase().includes(inputValue.toLowerCase())
             );
@@ -249,9 +262,9 @@ export function DataTable() {
                         placeholder="church filter..."
                         isClearable={true}
                         onChange={(e: any) => {
-                            if (regionsId === e?.value?.id) return setRegionsId("")
+                            if (regionsId === e?.value?.id) return setRegionsId("");
                             setPagination({ pageIndex: 0, pageSize: 5 })
-                            return setRegionsId(e?.value?.id)
+                            return setRegionsId(e?.value?.id);
                         }}
                     />
                 </div>
@@ -259,7 +272,7 @@ export function DataTable() {
                     <MyDrawer>
                         <Button variant="outline" size="sm" className="flex gap-2">
                             <PlusIcon className="size-4" aria-hidden="true" />
-                            {isDesktop && "New User"}
+                            {isDesktop && "New Member"}
                         </Button>
                     </MyDrawer>
                     <Button variant="outline" size="sm" className="flex gap-2">

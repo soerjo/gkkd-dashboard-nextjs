@@ -8,14 +8,9 @@ import {
 } from "@radix-ui/react-icons";
 import {
     ColumnDef,
-    ColumnFiltersState,
-    SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
     getPaginationRowModel,
-    getSortedRowModel,
     useReactTable,
     PaginationState
 } from "@tanstack/react-table";
@@ -51,15 +46,8 @@ import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/hooks/use-debounce";
 import AsyncSelect from "@/components/react-select";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { clear } from "console";
-
 
 export const columns: ColumnDef<GetUserResponse>[] = [
-    // {
-    //     accessorKey: "No",
-    //     header: "No",
-    //     cell: ({ row }) => <div className="capitalize">{row.index + 1}</div>,
-    // },
     {
         accessorKey: "name",
         header: "Name",
@@ -254,11 +242,10 @@ export function DataTable() {
                         className="w-full"
                         loadOptions={promiseRegionOptions}
                         placeholder="church filter..."
-                        // value={regionsId}
                         isClearable={true}
                         onChange={(e: any) => {
-                            console.log({ regionsId, id: e?.value?.id })
                             if (regionsId === e?.value?.id) return setRegionsId("")
+                            setPagination({ pageIndex: 0, pageSize: 5 })
                             return setRegionsId(e?.value?.id)
                         }}
                     />

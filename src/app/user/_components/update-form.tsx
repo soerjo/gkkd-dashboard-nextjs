@@ -56,9 +56,7 @@ export const UpdateFormInput = ({
 }) => {
     const { toast } = useToast();
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { isLoading, payload } = useAppSelector(
-        (state: RootState) => state.user
-    );
+    const { isLoading, payload } = useAppSelector((state: RootState) => state.user);
 
     const searchParams = useSearchParams();
 
@@ -80,10 +78,7 @@ export const UpdateFormInput = ({
         },
     });
 
-    const {
-        formState: { isDirty, isSubmitting },
-        reset,
-    } = form;
+    const { formState: { isDirty, isSubmitting }, reset } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         await updateData({
@@ -305,9 +300,6 @@ export const UpdateFormInput = ({
                                 }`}
                             loading={isSubmitting}
                         >
-                            {/* {isSubmitting && (
-                        <Spinner show className="text-secondary" size={"small"} />
-                    )} */}
                             Save changes
                         </Button>
                     )}
