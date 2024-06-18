@@ -91,4 +91,5 @@ export const {
   useLazyGetUserByIdQuery,
   useDeleteUserMutation,
   useUpdateUserPasswordMutation,
+  useResetUserPasswordMutation,
 } = userApi;

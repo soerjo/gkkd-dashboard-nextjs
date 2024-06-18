@@ -109,14 +109,12 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
                                     <IconEdit size={18} />
                                     Update
                                 </DropdownMenuItem>
-                                <AlertDialogTrigger>
-                                    <DropdownMenuItem
-                                        className="flex gap-2"
-                                    >
+                                <DropdownMenuItem >
+                                    <AlertDialogTrigger className="flex gap-2">
                                         <IconTrash size={18} />
                                         Delete
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <SheetContent className="">

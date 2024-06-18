@@ -57,7 +57,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       await login({
         usernameOrEmail: data.email,
         password: data.password,
-      })
+      }).unwrap()
 
       push("/");
     } catch (error) {
@@ -68,7 +68,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         variant: "destructive",
         title: "something error",
         description: errorMessage,
-
       });
     }
   }

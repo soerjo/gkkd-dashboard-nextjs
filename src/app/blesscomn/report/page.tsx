@@ -1,136 +1,81 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/custom/button'
-import { MyDrawer } from '@/components/my-drawer'
+import { ChevronDownIcon, SlashIcon } from "@radix-ui/react-icons";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { DataTable } from "./_components/table";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { IconBible, IconUserSquare, IconUsers, IconUsersGroup } from '@tabler/icons-react'
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   return (
     <>
-      <div className='flex items-center justify-between space-y-2'>
-        <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-          Dashboard
+      <div className="flex flex-col space-y-2 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+          Blesscomn
         </h1>
-        {/* <div className='flex items-center space-x-2'>
-            <Button>Download</Button>
-          </div> */}
-      </div>
-      <Tabs
-        orientation='vertical'
-        defaultValue='overview'
-        className='space-y-4'
-      >
-        {/* <div className='w-full overflow-x-scroll pb-2'>
-            <TabsList>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-              <TabsTrigger value='reports'>Reports</TabsTrigger>
-              <TabsTrigger value='notifications'>Notifications</TabsTrigger>
-            </TabsList>
-          </div> */}
-        <TabsContent value='overview' className='space-y-4'>
-          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Total Jemaat
-                </CardTitle>
-                <IconUserSquare size={18} color='currentColor' className='text-muted-foreground' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>$45,231.89</div>
-                <p className='text-xs text-muted-foreground'>
-                  +20.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Sunday Service
-                </CardTitle>
-                <IconBible size={18} color='currentColor' className='text-muted-foreground' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>+2350</div>
-                <p className='text-xs text-muted-foreground'>
-                  +180.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Blesscomn
-                </CardTitle>
-                <IconUsersGroup size={18} color='currentColor' className='text-muted-foreground' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>+12,234</div>
-                <p className='text-xs text-muted-foreground'>
-                  +19% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
-                  Desciple
-                </CardTitle>
-                <IconUsers size={18} color='currentColor' className='text-muted-foreground' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>+573</div>
-                <p className='text-xs text-muted-foreground'>
-                  +201 since last hour
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
-            <Card className='col-span-1 lg:col-span-5'>
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className='pl-2'>
-                <div className='p-4 w-full flex flex-col justify-center items-center'>
 
-                  {/* <MyDrawer /> */}
-                  <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4">
-                    {`Jokester began sneaking into the castle in the middle of the night and leaving
-                    jokes all over the place: under the king's pillow, in his soup, even in the
-                    royal toilet. The king was furious, but he couldn't seem to stop Jokester. And
-                    then, one day, the people of the kingdom discovered that the jokes left by
-                    Jokester were so funny that they couldn't help but laugh. And once they
-                    started laughing, they couldn't stop.`}
-                  </ScrollArea>
-                </div>
-                {/* <LineChartComp /> */}
-              </CardContent>
-            </Card>
-            <Card className='col-span-1 lg:col-span-2'>
-              <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>
-                  You made 265 sales this month.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* <RecentSales /> */}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={() => router.push("/dashboard")}>
+                Dashboard
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="cursor-pointer" onClick={() => router.push("/dashboard")}>
+                Blesscomn
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <SlashIcon />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <DropdownMenu>
+                <BreadcrumbPage>
+                  <DropdownMenuTrigger className="flex items-center gap-1">
+                    Report
+                    <ChevronDownIcon />
+                  </DropdownMenuTrigger>
+                </BreadcrumbPage>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => router.push("/blesscomn/data")}
+                  >
+                    Data
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => router.push("/blesscomn/report")}
+                  >
+                    Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      <DataTable />
     </>
-  )
+  );
 }
