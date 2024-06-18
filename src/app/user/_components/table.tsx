@@ -53,6 +53,7 @@ import AsyncSelect from "@/components/react-select";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { clear } from "console";
 
+
 export const columns: ColumnDef<GetUserResponse>[] = [
     // {
     //     accessorKey: "No",
@@ -110,11 +111,11 @@ export function DataTable() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [regionsId, setRegionsId] = useState("");
+
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
-
 
     // search params
     const page = Number(searchParams?.get("page") ?? "1") // default is page: 1
@@ -122,12 +123,14 @@ export function DataTable() {
     const search = searchParams?.get("search") ?? "" // default 5 record per page
     const region_id = searchParams?.get("region_id") ?? "" // default 5 record per page
 
+
     const { toast } = useToast();
     const { data, error, isLoading } = useGetAllUserQuery({
         page: page,
         take: take,
         search: search,
         region_id: region_id ? Number(region_id) : undefined
+
     });
 
     useEffect(() => {
@@ -197,6 +200,7 @@ export function DataTable() {
         )
     }, [pageIndex, pageSize, debouncedSearchTerm, regionsId])
 
+
     const table = useReactTable({
         data: data?.data?.entities || [],
         columns,
@@ -209,8 +213,7 @@ export function DataTable() {
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
     })
-
-
+    
     const promiseRegionOptions = async (inputValue: string) => {
         try {
             const listChurch = await getListChurch({ take: 5, page: 1, search: inputValue }).unwrap();
