@@ -61,7 +61,7 @@ export const CreateForm = ({
     const { formState: { isSubmitting } } = form
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        console.log("triger!!")
+        // console.log("triger!!")
         try {
             await createNewChurch({
                 name: values.name,

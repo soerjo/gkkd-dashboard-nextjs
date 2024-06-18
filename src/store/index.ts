@@ -3,9 +3,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import { counterReducer } from "./slice/count";
 import { authReducer } from "./slice/auth";
 import { churchReducer } from "./slice/church";
+import { userReducer } from "./slice/user";
 
 import { authApi } from "./services/auth";
 import { churchApi } from "./services/church";
+import { userApi } from "./services/user";
+import { myParamApi } from "./services/params";
 import { pokemonApi } from "./services/pokemon";
 
 export const makeStore = configureStore({
@@ -13,9 +16,12 @@ export const makeStore = configureStore({
     counter: counterReducer,
     auth: authReducer,
     church: churchReducer,
+    user: userReducer,
     [pokemonApi.reducerPath]: pokemonApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [churchApi.reducerPath]: churchApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
+    [myParamApi.reducerPath]: myParamApi.reducer,
   },
 
   middleware: getDefaultMiddleware =>
@@ -23,6 +29,8 @@ export const makeStore = configureStore({
       pokemonApi.middleware,
       authApi.middleware,
       churchApi.middleware,
+      userApi.middleware,
+      myParamApi.middleware,
     ]),
 });
 

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/custom/button'
 import { MyDrawer } from '@/components/my-drawer'
-import { DataTable } from '@/components/table'
+import { DataTable } from './_components/table'
 import {
   Card,
   CardContent,
@@ -23,11 +23,11 @@ export default function Dashboard() {
           User
         </h1>
       </div>
-      <DateRangePicker
+      {/* <DateRangePicker
         triggerSize="sm"
         triggerClassName="ml-auto w-56 sm:w-60"
         align="end"
-      />
+      /> */}
       <DataTable />
 
     </>
