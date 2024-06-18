@@ -43,45 +43,50 @@ import { DropdownAction } from "./drop-down-action";
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllChurchQuery } from "@/store/services/church";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
+import { useGetAllUserQuery } from "@/store/services/user";
+import { GetUserResponse } from "@/interfaces/userResponse";
 import { useToast } from "@/components/ui/use-toast";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/hooks/use-debounce";
 
-export const columns: ColumnDef<GetChurchResponse>[] = [
+export const columns: ColumnDef<GetUserResponse>[] = [
     // {
     //     accessorKey: "No",
     //     header: "No",
-    //     cell: ({ row }) => <div className="">{row.index + 1}</div>,
+    //     cell: ({ row }) => <div className="capitalize">{row.index + 1}</div>,
     // },
     {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
     },
     {
-        accessorKey: "alt_name",
+        accessorKey: "email",
         header: "Alternative Name",
-        cell: ({ row }) => <div className="">{row.getValue("alt_name")}</div>,
+        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
     },
     {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <div className="">{row.getValue("status")}</div>
+            <div className="">{row.getValue("status") || "active"}</div>
         ),
     },
-
     {
-        accessorKey: "parent",
-        header: "Parent",
+        accessorKey: "role",
+        header: "Role",
         cell: ({ row }) => (
-            <div className="">{row.getValue("parent")}</div>
+            <div className="">{row.getValue("role")}</div>
         ),
     },
-
+    {
+        accessorKey: "region",
+        header: "Region",
+        cell: ({ row }) => (
+            <div className="">{row.original?.region?.name || "-"}</div>
+        ),
+    },
     {
         id: "actions",
         enableHiding: true,
@@ -111,7 +116,7 @@ export function DataTable() {
     const search = searchParams?.get("search") ?? "" // default 5 record per page
 
     const { toast } = useToast();
-    const { data, error, isLoading } = useGetAllChurchQuery({
+    const { data, error, isLoading } = useGetAllUserQuery({
         page: page,
         take: take,
         search: search
@@ -184,9 +189,9 @@ export function DataTable() {
     }, [pageIndex, pageSize, debouncedSearchTerm])
 
     const table = useReactTable({
-        data: data?.data.entities || [],
+        data: data?.data?.entities || [],
         columns,
-        pageCount: data?.data.meta.pageCount ?? -1,
+        pageCount: data?.data?.meta.pageCount ?? -1,
         state: {
             pagination,
         },
@@ -210,7 +215,7 @@ export function DataTable() {
                     <MyDrawer>
                         <Button variant="outline" size="sm" className="flex gap-2">
                             <PlusIcon className="size-4" aria-hidden="true" />
-                            {isDesktop && "New Church"}
+                            {isDesktop && "New User"}
                         </Button>
                     </MyDrawer>
                     <Button variant="outline" size="sm" className="flex gap-2">

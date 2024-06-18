@@ -22,13 +22,16 @@ export const AuthWrapper = ({ children }: Props) => {
     const pathname = usePathname()
 
     const token = getAuthCookie(AUTH_TOKEN)
+    const payload = getAuthCookie(AUTH_PAYLOAD)
 
     useEffect(() => {
         setTokenExist(token)
         if (!token) {
             push('/login');
             dispatch(logout());
-        } else {
+        } else if (payload) {
+            const jsonPayload = JSON.parse(payload)
+            if (jsonPayload.tempPassword) push('/update-password');
             dispatch(setInitialState())
         }
     }, [token, push, dispatch]);

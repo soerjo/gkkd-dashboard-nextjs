@@ -21,13 +21,21 @@ import { useToast } from "@/components/ui/use-toast";
 import { useLoginMutation } from "@/store/services/auth";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
+import { useUpdateUserPasswordMutation } from "@/store/services/user";
+import { logout } from "@/store/slice/auth";
+import { useDispatch } from "react-redux";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
-  email: z.string().min(1, { message: "Please enter your email" }),
-  // .email({ message: "Invalid email address" }),
-  password: z
+  new_password: z.string()
+    .min(1, {
+      message: "Please enter your password",
+    })
+    .min(7, {
+      message: "Password must be at least 7 characters long",
+    }),
+  confirm_password: z
     .string()
     .min(1, {
       message: "Please enter your password",
@@ -35,18 +43,27 @@ const formSchema = z.object({
     .min(7, {
       message: "Password must be at least 7 characters long",
     }),
+}).superRefine(({ confirm_password, new_password }, ctx) => {
+  if (confirm_password !== new_password) {
+    ctx.addIssue({
+      code: "custom",
+      message: "The passwords did not match",
+      path: ['confirm_password']
+    });
+  }
 });
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const [login, { isLoading }] = useLoginMutation();
+  const [updatePassword, { isLoading }] = useUpdateUserPasswordMutation();
+  const dispatch = useDispatch()
   const { toast } = useToast();
   const { push } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      new_password: "",
+      confirm_password: "",
     },
   });
 
@@ -54,12 +71,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
-      await login({
-        usernameOrEmail: data.email,
-        password: data.password,
-      })
-
-      push("/");
+      await updatePassword({ new_password: data.new_password }).unwrap();
+      dispatch(logout())
+      push("/login");
     } catch (error) {
       const errorMessage = getErroMessage(error);
       toast({
@@ -80,12 +94,12 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           <div className="grid gap-2">
             <FormField
               control={form.control}
-              name="email"
+              name="new_password"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel>Username or email</FormLabel>
+                  <FormLabel>new password</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <PasswordInput placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -93,17 +107,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             />
             <FormField
               control={form.control}
-              name="password"
+              name="confirm_password"
               render={({ field }) => (
                 <FormItem className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm font-medium text-muted-foreground hover:opacity-75"
-                    >
-                      Forgot password?
-                    </Link>
+                    <FormLabel>confirm password</FormLabel>
                   </div>
                   <FormControl>
                     <PasswordInput placeholder="********" {...field} />

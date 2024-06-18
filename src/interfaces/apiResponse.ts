@@ -14,3 +14,9 @@ export type Meta = {
   itemCount: number;
   pageCount: number;
 };
+
+export type Role = {
+  id: number;
+  name: string;
+  category: string;
+};

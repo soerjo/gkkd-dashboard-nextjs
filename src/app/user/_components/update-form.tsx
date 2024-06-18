@@ -2,7 +2,7 @@ import { ColourOption, colourOptions } from "@/data/color-data";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
-import { Button } from '@/components/custom/button'
+import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
 import AsyncSelect from "@/components/react-select";
 import React from "react";
@@ -19,94 +19,147 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { GetUserResponse } from "@/interfaces/userResponse";
 import { GetChurchResponse } from "@/interfaces/churchResponse";
 import { useAppSelector } from "@/lib/store";
 import { RootState } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
-import { useUpdateChurchMutation, useLazyGetAllChurchQuery } from "@/store/services/church";
+import {
+    useUpdateUserMutation,
+    useLazyGetAllUserQuery,
+} from "@/store/services/user";
 import { useSearchParams } from "next/navigation";
+import { useLazyGetParamsQuery } from "@/store/services/params";
+import { useToast } from "@/components/ui/use-toast";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
 
 const FormSchema = z
     .object({
-        name: z.string().min(1, { message: "required" }),
-        alt_name: z.string().min(1, { message: "required" }),
-        // parent: z.string(),
+        name: z.string().min(1, { message: "required" }).max(25),
+        email: z.string().min(1, { message: "required" }).max(25).email(),
+        role: z.string().min(1, { message: "required" }).max(25),
         status: z.enum(["inactive", "active"]),
-        location: z.string().optional(),
+        region: z.object({
+            id: z.number(),
+            name: z.string(),
+        }, { message: "required" }),
     })
-    .required({ name: true });
+    .required({ name: true, email: true, role: true, region: true });
 
 export const UpdateFormInput = ({
-    onOpenChange, data
+    onOpenChange,
+    data,
 }: React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data?: GetChurchResponse
+    data?: GetUserResponse;
 }) => {
+    const { toast } = useToast();
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { isLoading, payload } = useAppSelector((state: RootState) => state.church)
+    const { isLoading, payload } = useAppSelector(
+        (state: RootState) => state.user
+    );
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get('page') || "1");
-    const take = parseInt(searchParams.get('take') || "10");
-    const search = searchParams.get('search') || '';
-    const [updateChurch] = useUpdateChurchMutation()
-    const [getAllChurch] = useLazyGetAllChurchQuery();
+    const page = parseInt(searchParams.get("page") || "1");
+    const take = parseInt(searchParams.get("take") || "10");
+    const search = searchParams.get("search") || "";
+    const [updateData] = useUpdateUserMutation();
+    const [getAllData] = useLazyGetAllUserQuery();
+    const [getListChurch] = useLazyGetAllChurchQuery();
+    const [getParams] = useLazyGetParamsQuery();
 
-
-    const form = useForm<GetChurchResponse & { status: "active" | "inactive" }>({
+    const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
-            alt_name: "",
+            email: "",
+            role: "",
             status: "active",
-            location: "",
         },
     });
 
-    const { formState: { isDirty, isSubmitting }, reset } = form;
+    const {
+        formState: { isDirty, isSubmitting },
+        reset,
+    } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        await updateChurch({
+        await updateData({
             id: payload.id,
             name: values.name,
-            alt_name: values.alt_name,
-            location: values.location
-        }).unwrap()
-        await getAllChurch({ page, take, search }).unwrap()
+            email: values.email,
+            role: values.role,
+            regions_id: values.region.id,
+        }).unwrap();
+        await getAllData({ page, take, search }).unwrap();
         onOpenChange(val => !val);
     };
 
-    const filterColors = (inputValue: string) => {
-        return colourOptions.filter(i =>
-            i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
+    const promiseRoleOptions = async (inputValue: string) => {
+        try {
+            const listRole = await getParams({ param: "role" }).unwrap();
+            const data = listRole.data.map(listRole => ({
+                value: listRole.name,
+                label: listRole.name,
+            }));
+            return data.filter(d =>
+                d.value.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                title: "something error",
+                description: errorMessage,
+            });
+            return [];
+        }
     };
 
-    const promiseOptions = async (inputValue: string): Promise<any[]> =>
-        new Promise<ColourOption[]>(resolve => {
-            setTimeout(() => {
-                resolve(filterColors(inputValue));
-            }, 1000);
-        });
+    const promiseRegionOptions = async (inputValue: string) => {
+        try {
+            const listChurch = await getListChurch({ take: 20, page: 1, search: inputValue }).unwrap();
+            const data = listChurch.data.entities.map(list => ({
+                value: list,
+                label: list.name,
+            }));
+            return data.filter(d =>
+                d.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                title: "something error",
+                description: errorMessage,
+            });
+            return [];
+        }
+    };
 
     React.useEffect(() => {
         reset({
             name: payload.name,
-            alt_name: payload.alt_name,
-            status: "active",
-            // parent: "parent",
-            location: payload.location,
+            email: payload.email,
+            role: payload.role,
+            region: payload.region,
         });
     }, [payload, reset]);
 
-    // console.log({ payload })
-    if (isLoading) return <>
-        <div className="flex items-center justify-center h-full gap-3">
-            <Spinner size="large" >
-                <span >Loading page...</span>
-            </Spinner>
-        </div></>
+    if (isLoading)
+        return (
+            <div className="flex items-center justify-center h-full gap-3">
+                <Spinner size="large">
+                    <span>Loading page...</span>
+                </Spinner>
+            </div>
+        );
 
     return (
         <div
@@ -114,7 +167,7 @@ export const UpdateFormInput = ({
                 }`}
         >
             <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                Update Church
+                Update User
             </h2>
             <div className="h-14 w-14">
                 <svg
@@ -156,44 +209,41 @@ export const UpdateFormInput = ({
                                         placeholder="my church name"
                                         {...field}
                                     />
-                                    {/* <Input placeholder="shadcn"  /> */}
                                 </FormControl>
-                                {/* <FormDescription>
-                                    This is your public display name.
-                                </FormDescription> */}
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
-                        name="alt_name"
+                        name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Aleternative Name</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input type="text" id="alt_name" placeholder="my church name" {...field} />
-                                    {/* <Input placeholder="shadcn"  /> */}
+                                    <Input
+                                        type="text"
+                                        id="email"
+                                        placeholder="email"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                {/* <FormDescription>
-                                    This is your public display name.
-                                </FormDescription> */}
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
+                    <FormField
                         control={form.control}
-                        name="parent"
+                        name="role"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Parent</FormLabel>
+                                <FormLabel>Role</FormLabel>
                                 <FormControl>
                                     <AsyncSelect
-                                        id="parent"
+                                        id="role"
                                         cacheOptions
                                         defaultOptions
-                                        loadOptions={promiseOptions}
+                                        loadOptions={promiseRoleOptions}
                                         value={
                                             field.value && { value: field.value, label: field.value }
                                         }
@@ -203,7 +253,32 @@ export const UpdateFormInput = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> */}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="region"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Region</FormLabel>
+                                <FormControl>
+                                    <AsyncSelect
+                                        id="region"
+                                        cacheOptions
+                                        defaultOptions
+                                        loadOptions={promiseRegionOptions}
+                                        value={
+                                            field.value?.name && { value: field.value?.name, label: field.value?.name }
+                                        }
+                                        onChange={(e: any) => {
+                                            console.log({ data: e?.value })
+                                            field.onChange(e?.value)
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="status"
@@ -222,25 +297,7 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="location"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Address</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        id="location"
-                                        placeholder="my church address..."
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {isDirty &&
+                    {isDirty && (
                         <Button
                             type="submit"
                             disabled={isSubmitting}
@@ -253,8 +310,7 @@ export const UpdateFormInput = ({
                     )} */}
                             Save changes
                         </Button>
-                    }
-
+                    )}
                 </form>
             </Form>
         </div>

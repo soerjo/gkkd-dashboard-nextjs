@@ -5,6 +5,7 @@ export type UserPayload = {
   role?: string;
   username?: string;
   token?: string;
+  tempPassword?: boolean;
 };
 
 export type LoginResponse = {
