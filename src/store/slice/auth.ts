@@ -33,7 +33,6 @@ const slice = createSlice({
       authApi.endpoints.login.matchFulfilled,
       (state, { payload }) => {
         state = payload.data.payload;
-        console.log({ state });
         setAuthCookie(payload.data.jwt, AUTH_TOKEN);
         setAuthCookie(JSON.stringify(payload.data.payload), AUTH_PAYLOAD);
       }

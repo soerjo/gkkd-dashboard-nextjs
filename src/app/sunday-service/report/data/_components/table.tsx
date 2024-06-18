@@ -49,10 +49,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/hooks/use-debounce";
-import AsyncSelect from "@/components/react-select";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { clear } from "console";
-
 
 export const columns: ColumnDef<GetUserResponse>[] = [
     // {
@@ -104,33 +100,26 @@ export function DataTable() {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const pageSizeOptions = [5, 10, 20, 30, 50]
 
-    const router = useRouter();
-    const pathname = usePathname()
-    const searchParams = useSearchParams();
-    const [getListChurch] = useLazyGetAllChurchQuery();
-
     const [searchTerm, setSearchTerm] = useState('');
-    const [regionsId, setRegionsId] = useState("");
-
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
 
+    const router = useRouter();
+    const pathname = usePathname()
+    const searchParams = useSearchParams();
+
     // search params
     const page = Number(searchParams?.get("page") ?? "1") // default is page: 1
     const take = Number(searchParams?.get("take") ?? "5") // default 5 record per page
     const search = searchParams?.get("search") ?? "" // default 5 record per page
-    const region_id = searchParams?.get("region_id") ?? "" // default 5 record per page
-
 
     const { toast } = useToast();
     const { data, error, isLoading } = useGetAllUserQuery({
         page: page,
         take: take,
-        search: search,
-        region_id: region_id ? Number(region_id) : undefined
-
+        search: search
     });
 
     useEffect(() => {
@@ -195,11 +184,9 @@ export function DataTable() {
                 page: pageIndex + 1,
                 take: pageSize,
                 search: debouncedSearchTerm,
-                region_id: regionsId || '',
             })}`
         )
-    }, [pageIndex, pageSize, debouncedSearchTerm, regionsId])
-
+    }, [pageIndex, pageSize, debouncedSearchTerm])
 
     const table = useReactTable({
         data: data?.data?.entities || [],
@@ -213,54 +200,15 @@ export function DataTable() {
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
     })
-    
-    const promiseRegionOptions = async (inputValue: string) => {
-        try {
-            const listChurch = await getListChurch({ take: 5, page: 1, search: inputValue }).unwrap();
-            const data = listChurch.data.entities.map(list => ({
-                value: list,
-                label: list.name,
-            }));
-            // data.push({ value: { id: 0 }, label: "clear..." })
-            return data.filter(d =>
-                d.label.toLowerCase().includes(inputValue.toLowerCase())
-            );
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                title: "something error",
-                description: errorMessage,
-            });
-            return [];
-        }
-    };
 
     return (
         <div className="w-full">
             <div className="flex items-center pb-4 justify-between">
-                <div className="flex items-center gap-2 w-1/3">
+                <div className="flex items-center gap-2">
                     <Input
                         placeholder="Search..."
-                        className="w-1/3"
+                        className="max-w-xs"
                         onChange={handleChange}
-                    />
-                    <AsyncSelect
-                        id="region"
-                        cacheOptions
-                        defaultOptions
-                        className="w-1/3"
-                        loadOptions={promiseRegionOptions}
-                        placeholder="church filter..."
-                        // value={regionsId}
-                        isClearable={true}
-                        onChange={(e: any) => {
-                            console.log({ regionsId, id: e?.value?.id })
-                            if (regionsId === e?.value?.id) return setRegionsId("")
-                            return setRegionsId(e?.value?.id)
-                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">

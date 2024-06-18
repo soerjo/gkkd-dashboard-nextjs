@@ -12,7 +12,7 @@ export type GetUserFilter = {
   take: number;
   page: number;
   search?: string;
-  region_id?: number;
+  region_id?: number | undefined;
 };
 
 export type CreateUser = {

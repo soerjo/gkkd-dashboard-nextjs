@@ -64,11 +64,14 @@ export const userApi = createApi({
       IApiResponse<TPaginationResponse<GetUserResponse[]>>,
       GetUserFilter
     >({
-      query: payload => ({
-        url: "/",
-        method: "GET",
-        params: payload,
-      }),
+      query: payload => {
+        console.log({ payload });
+        return {
+          url: "/",
+          method: "GET",
+          params: payload,
+        };
+      },
     }),
     GetUserById: builder.query<IApiResponse<GetUserResponse>, { id: number }>({
       query: ({ id }) => ({
@@ -87,4 +90,5 @@ export const {
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
   useDeleteUserMutation,
+  useUpdateUserPasswordMutation,
 } = userApi;
