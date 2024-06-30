@@ -5,8 +5,6 @@ import { Button } from "./custom/button";
 import Nav from "./nav";
 import { cn } from "@/lib/utils";
 import { sidelinks } from "@/data/sidelinks";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -19,7 +17,6 @@ export default function Sidebar2({
   setIsCollapsed,
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false);
-  const theme = useSelector((state: RootState) => state.theme);
 
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {

@@ -2,10 +2,6 @@
 
 import { IconMoon, IconSun } from '@tabler/icons-react'
 import { Button } from './custom/button'
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store'
-import { toggleDark } from '@/store/slice/theme'
 import { useTheme } from 'next-themes'
 
 export default function ThemeSwitch() {
