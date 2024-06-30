@@ -12,13 +12,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
-import { useLoginMutation } from "@/store/services/auth";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
 import { useUpdateUserPasswordMutation } from "@/store/services/user";
@@ -80,7 +77,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         className:
           "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
         variant: "destructive",
-        title: "something error",
         description: errorMessage,
 
       });

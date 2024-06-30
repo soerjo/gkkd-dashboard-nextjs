@@ -21,23 +21,9 @@ export const authApi = createApi({
         },
       }),
     }),
-    authLogin: builder.query<
-      IApiResponse<LoginResponse>,
-      { usernameOrEmail: string; password: string }
-    >({
-      query: ({ usernameOrEmail, password }) => ({
-        url: "/login",
-        method: "POST",
-        body: {
-          usernameOrEmail,
-          password,
-        },
-      }),
-    }),
     getAuthData: builder.query<IApiResponse<LoginResponse>, { token: string }>({
       query: ({ token }) => ({
         url: "/details",
-        // this is the default but I'm leaving it here for reference
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -47,5 +33,4 @@ export const authApi = createApi({
   }),
 });
 
-export const { useLoginMutation, useGetAuthDataQuery, useAuthLoginQuery } =
-  authApi;
+export const { useLoginMutation, useGetAuthDataQuery } = authApi;

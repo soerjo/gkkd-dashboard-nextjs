@@ -26,7 +26,6 @@ interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
   email: z.string().min(1, { message: "Please enter your email" }),
-  // .email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(1, {
@@ -62,11 +61,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       push("/");
     } catch (error) {
       const errorMessage = getErroMessage(error);
+
+      // FOR DEVELOPMENT =================
+      if ((error as any).status === 'FETCH_ERROR') {
+        push("/");
+      }
+      // =================================
+
       toast({
         className:
           "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
         variant: "destructive",
-        title: "something error",
         description: errorMessage,
       });
     }

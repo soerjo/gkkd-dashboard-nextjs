@@ -143,7 +143,6 @@ export const UpdateFormInput = ({
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
         }
@@ -169,7 +168,6 @@ export const UpdateFormInput = ({
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
             return [];

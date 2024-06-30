@@ -30,7 +30,7 @@ import AsyncSelect from "@/components/react-select";
 
 const FormSchema = z
     .object({
-        name: z.string().min(1, { message: "required" }).max(25),
+        name: z.string().min(1, { message: "required" }).max(25).refine(s => !s.includes(' '), 'No Spaces!'),
         email: z.string().min(1, { message: "required" }).max(25).email(),
         role: z.string().min(1, { message: "required" }).max(25),
         status: z.enum(["inactive", "active"]),
@@ -93,7 +93,6 @@ export const CreateForm = ({
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
         }
@@ -115,7 +114,6 @@ export const CreateForm = ({
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
             return [];
@@ -142,7 +140,6 @@ export const CreateForm = ({
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
             return [];
@@ -222,28 +219,6 @@ export const CreateForm = ({
                     />
                     <FormField
                         control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Role</FormLabel>
-                                <FormControl>
-                                    <AsyncSelect
-                                        id="role"
-                                        cacheOptions
-                                        defaultOptions
-                                        loadOptions={promiseRoleOptions}
-                                        value={
-                                            field.value && { value: field.value, label: field.value }
-                                        }
-                                        onChange={(e: any) => field.onChange(e?.value)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
                         name="region"
                         render={({ field }) => (
                             <FormItem>
@@ -260,10 +235,29 @@ export const CreateForm = ({
                                                 label: field.value?.name,
                                             }
                                         }
-                                        onChange={(e: any) => {
-                                            console.log({ data: e?.value });
-                                            field.onChange(e?.value);
-                                        }}
+                                        onChange={(e: any) => field.onChange(e?.value)}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Role</FormLabel>
+                                <FormControl>
+                                    <AsyncSelect
+                                        id="role"
+                                        cacheOptions
+                                        defaultOptions
+                                        loadOptions={promiseRoleOptions}
+                                        value={
+                                            field.value && { value: field.value, label: field.value }
+                                        }
+                                        onChange={(e: any) => field.onChange(e?.value)}
                                     />
                                 </FormControl>
                                 <FormMessage />

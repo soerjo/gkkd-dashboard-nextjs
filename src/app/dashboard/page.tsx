@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/custom/button'
 import {
   Card,
   CardContent,
@@ -8,9 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { RecentSales } from './components/component.recen-data'
-import { Overview } from './components/component.review'
 import { LineChartComp } from './components/line-chart.component'
 import { IconBible, IconUserSquare, IconUsers, IconUsersGroup } from '@tabler/icons-react'
 
@@ -30,14 +28,6 @@ export default function Dashboard() {
         defaultValue='overview'
         className='space-y-4'
       >
-        {/* <div className='w-full overflow-x-scroll pb-2'>
-            <TabsList>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-              <TabsTrigger value='reports'>Reports</TabsTrigger>
-              <TabsTrigger value='notifications'>Notifications</TabsTrigger>
-            </TabsList>
-          </div> */}
         <TabsContent value='overview' className='space-y-4'>
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
             <Card>
@@ -48,7 +38,7 @@ export default function Dashboard() {
                 <IconUserSquare size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>$45,231.89</div>
+                <div className='text-2xl font-bold'>45,231.89</div>
                 <p className='text-xs text-muted-foreground'>
                   +20.1% from last month
                 </p>
@@ -62,7 +52,7 @@ export default function Dashboard() {
                 <IconBible size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>+2350</div>
+                <div className='text-2xl font-bold'>2350</div>
                 <p className='text-xs text-muted-foreground'>
                   +180.1% from last month
                 </p>
@@ -76,7 +66,7 @@ export default function Dashboard() {
                 <IconUsersGroup size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>+12,234</div>
+                <div className='text-2xl font-bold'>12,234</div>
                 <p className='text-xs text-muted-foreground'>
                   +19% from last month
                 </p>
@@ -90,7 +80,7 @@ export default function Dashboard() {
                 <IconUsers size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>+573</div>
+                <div className='text-2xl font-bold'>573</div>
                 <p className='text-xs text-muted-foreground'>
                   +201 since last hour
                 </p>

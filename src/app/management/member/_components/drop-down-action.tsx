@@ -22,22 +22,21 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit, IconRefresh } from "@tabler/icons-react";
+import { IconTrash, IconEye, IconEdit } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./update-form";
-import { GetUserResponse } from "@/interfaces/userResponse";
+import { MemberResponse } from "@/interfaces/memberResponse";
 import {
-    useDeleteUserMutation,
-    useLazyGetAllUserQuery,
-    useLazyGetUserByIdQuery,
-    useResetUserPasswordMutation,
-} from "@/store/services/user";
+    useDeleteMemberMutation,
+    useLazyGetAllMemberQuery,
+    useLazyGetMemberByIdQuery,
+} from "@/store/services/member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
 
-export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
+export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const { toast } = useToast();
@@ -50,10 +49,9 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getData] = useLazyGetUserByIdQuery();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [deleteData] = useDeleteUserMutation();
-    const [resetPassword] = useResetUserPasswordMutation();
+    const [getData] = useLazyGetMemberByIdQuery();
+    const [getAllData] = useLazyGetAllMemberQuery();
+    const [deleteData] = useDeleteMemberMutation();
 
     const setParams = () => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -76,14 +74,9 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                 className:
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
-                title: "something error",
                 description: errorMessage,
             });
         }
-    };
-
-    const handleResetPassword = async () => {
-        await resetPassword({ id: row.original.id }).unwrap();
     };
 
     React.useEffect(() => {
@@ -114,10 +107,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                                 <IconEye size={18} />
                                 View
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex gap-2 w-full cursor-pointer" onClick={setParams}>
-                                <IconEdit size={18} />
-                                Update
-                            </DropdownMenuItem>
                             <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                 <AlertDialog>
                                     <AlertDialogTrigger className="flex gap-2 w-full">
@@ -137,31 +126,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                             <AlertDialogAction onClick={handleDeleteData}>
-                                                Continue
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>{" "}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <AlertDialog>
-                                    <AlertDialogTrigger className="flex gap-2 w-full">
-                                        <IconRefresh size={18} />
-                                        Reset Password
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                                Are you sure reset password user: {row.original.name}?
-                                            </AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone.
-                                                This will change user default password from servers.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleResetPassword}>
                                                 Continue
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -207,7 +171,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <DrawerContent>
-                    <div className="h-[70vh]">
+                    <div className="h-[95vh]">
                         <UpdateFormInput onOpenChange={setOpen} />
                     </div>
                 </DrawerContent>

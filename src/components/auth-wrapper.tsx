@@ -1,22 +1,18 @@
 'use client'
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { AUTH_PAYLOAD, AUTH_TOKEN, getAuthCookie } from '@/lib/cookies';
 import { useEffect, useState } from 'react';
 import { logout, setInitialState } from '@/store/slice/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import LodingPage from './loading';
-import { RootState } from '@/store';
-import { UserPayload } from '@/interfaces/loginResponse';
 
-type Props = {
-    children?: React.ReactNode;
-};
+type Props = { children?: React.ReactNode };
 
-const skipValidationPathName = ["/login"]
+const skipValidationPathName = ["/auth/login"]
 
 export const AuthWrapper = ({ children }: Props) => {
-    const [isTokenExist, setTokenExist] = useState<string | undefined>()
+    const [isTokenExist, setIsTokenExist] = useState<string | undefined>()
     const dispatch = useDispatch();
     const { push } = useRouter();
     const pathname = usePathname()
@@ -25,13 +21,13 @@ export const AuthWrapper = ({ children }: Props) => {
     const payload = getAuthCookie(AUTH_PAYLOAD)
 
     useEffect(() => {
-        setTokenExist(token)
+        setIsTokenExist(token)
         if (!token) {
-            push('/login');
+            push('/auth/login');
             dispatch(logout());
         } else if (payload) {
             const jsonPayload = JSON.parse(payload)
-            if (jsonPayload.tempPassword) push('/update-password');
+            if (jsonPayload.tempPassword) push('/auth/update-password');
             dispatch(setInitialState())
         }
     }, [token, push, dispatch]);

@@ -1,5 +1,4 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-// import { authApi } from '../services/auth';
+import { createSlice } from "@reduxjs/toolkit";
 import {
   AUTH_PAYLOAD,
   AUTH_TOKEN,
@@ -7,7 +6,7 @@ import {
   removeCookies,
   setAuthCookie,
 } from "@/lib/cookies";
-import { LoginResponse, UserPayload } from "@/interfaces/loginResponse";
+import { UserPayload } from "@/interfaces/loginResponse";
 import { authApi } from "../services/auth";
 
 const initialState: UserPayload = {} as UserPayload;
@@ -29,14 +28,40 @@ const slice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addMatcher(
-      authApi.endpoints.login.matchFulfilled,
-      (state, { payload }) => {
-        state = payload.data.payload;
-        setAuthCookie(payload.data.jwt, AUTH_TOKEN);
-        setAuthCookie(JSON.stringify(payload.data.payload), AUTH_PAYLOAD);
-      }
-    );
+    builder
+      .addMatcher(
+        authApi.endpoints.login.matchFulfilled,
+        (state, { payload }) => {
+          state = payload.data.payload;
+          setAuthCookie(payload.data.jwt, AUTH_TOKEN);
+          setAuthCookie(JSON.stringify(payload.data.payload), AUTH_PAYLOAD);
+        }
+      )
+      .addMatcher(
+        authApi.endpoints.login.matchRejected,
+        (state, { error, payload: data }) => {
+          // FOR DEVELOPMENT =================
+          const payload = {
+            jwt: "dummy_token....",
+            payload: {
+              id: 0,
+              email: "dummy@mail.com",
+              region: {
+                id: 1,
+                name: "dummy region",
+              },
+              role: "SUPER_ADMIN",
+              username: "dummy user",
+              token: "dummy_token....",
+              tempPassword: false,
+            },
+          };
+          state = payload.payload;
+          setAuthCookie(payload.jwt, AUTH_TOKEN);
+          setAuthCookie(JSON.stringify(payload.payload), AUTH_PAYLOAD);
+          // =================================
+        }
+      );
   },
 });
 

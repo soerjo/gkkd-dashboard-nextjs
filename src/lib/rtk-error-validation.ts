@@ -26,7 +26,11 @@ export function isErrorWithMessage(
 export function getErroMessage(error: unknown) {
   if (isFetchBaseQueryError(error)) {
     const errorData = error.data as { message?: string };
-    return errorData.message;
+    // FOR DEVELOPMENT =================
+    return errorData?.message ?? "for development...";
+    // =================================
+
+    // return errorData?.message ?? "server down!";
   } else if (isErrorWithMessage(error)) {
     return error?.message;
   }

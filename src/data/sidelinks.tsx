@@ -38,87 +38,136 @@ export const sidelinks: SideLink[] = [
     icon: <IconUsersGroup size={18} />,
     sub: [
       {
+        title: 'Blesscomn',
+        label: '',
+        href: '/blesscomn/data',
+        icon: <IconReportSearch size={18} />,
+      },
+      // {
+      //   title: 'Organization',
+      //   label: '',
+      //   href: '/blesscomn/data',
+      //   icon: <IconReportSearch size={18} />,
+      // },
+      {
         title: 'Report',
         label: '',
         href: '/blesscomn/report',
         icon: <IconDatabaseExport size={18} />,
       },
-      {
-        title: 'Data',
-        label: '',
-        href: '/blesscomn/data',
-        icon: <IconReportSearch size={18} />,
-      },
     ],
   },
   {
-    title: 'Sunday Service',
+    title: 'Cermon',
     label: '',
     href: '',
     icon: <IconBible size={18} />,
     sub: [
+      {
+        title: 'Cermons',
+        label: '',
+        href: '/event',
+        icon: <IconNotebook size={18} />,
+      },
       {
         title: 'Report',
         label: '',
         href: '/sunday-service/report',
         icon: <IconDatabaseExport size={18} />,
       },
-      {
-        title: 'Data',
-        label: '',
-        href: '/sunday-service/data',
-        icon: <IconReportSearch size={18} />,
-      },
     ],
   },
   {
-    title: 'Desciples',
+    title: 'Descipleship',
     label: '',
     href: '',
     icon: <IconUsers size={18} />,
     sub: [
+      {
+        title: 'Disciples',
+        label: '',
+        href: '/desciple/data',
+        icon: <IconReportSearch size={18} />,
+      },
+      {
+        title: 'Group',
+        label: '',
+        href: '/desciple/group',
+        icon: <IconReportSearch size={18} />,
+      },
       {
         title: 'Report',
         label: '',
         href: '/desciple/report',
         icon: <IconDatabaseExport size={18} />,
       },
+    ],
+  },
+
+  {
+    title: 'Members',
+    label: '',
+    href: '',
+    icon: <IconUserSquare size={18} />,
+    sub: [
       {
-        title: 'Data',
+        title: 'Jemaat',
         label: '',
-        href: '/desciple/data',
+        href: '/memeber/jemat',
         icon: <IconReportSearch size={18} />,
+      },
+      {
+        title: 'Marital',
+        label: '',
+        href: '/memeber/marital',
+        icon: <IconReportSearch size={18} />,
+      },
+      {
+        title: 'Batism',
+        label: '',
+        href: '/memeber/baptism',
+        icon: <IconDatabaseExport size={18} />,
+      },
+      {
+        title: 'Child Dedication',
+        label: '',
+        href: '/memeber/penyerahan-anak',
+        icon: <IconDatabaseExport size={18} />,
       },
     ],
   },
   {
-    title: 'Users',
+    title: 'Management',
     label: '',
     href: '/user',
     icon: <IconUserHexagon size={18} />,
+    sub: [
+      {
+        title: 'user',
+        label: '',
+        href: 'management/user',
+        icon: <IconUserHexagon size={18} />,
+      },
+      {
+        title: 'Region',
+        label: '',
+        href: 'management/region',
+        icon: <IconBuildingChurch size={18} />,
+      },
+      // {
+      //   title: 'Article',
+      //   label: '',
+      //   href: '/article',
+      //   icon: <IconNotebook size={18} />,
+      // },
+    ]
   },
-  {
-    title: 'Members',
-    label: '',
-    href: '/member',
-    icon: <IconUserSquare size={18} />,
-  },
-  {
-    title: 'Church',
-    label: '',
-    href: '/church',
-    icon: <IconBuildingChurch size={18} />,
-  },
-  {
-    title: 'Article',
-    label: '',
-    href: '/article',
-    icon: <IconNotebook size={18} />,
-  },
-  {
-    title: 'Settings',
-    label: '',
-    href: '/settings',
-    icon: <IconSettings size={18} />,
-  },
+
+
+  // {
+  //   title: 'Settings',
+  //   label: '',
+  //   href: '/settings',
+  //   icon: <IconSettings size={18} />,
+  // },
 ]
