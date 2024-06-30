@@ -245,7 +245,7 @@ export function DataTable() {
                         defaultOptions
                         className="w-full"
                         loadOptions={promiseRegionOptions}
-                        placeholder="church filter..."
+                        placeholder="church..."
                         isClearable={true}
                         onChange={(e: any) => {
                             if (regionsId === e?.value?.id) return setRegionsId("")
