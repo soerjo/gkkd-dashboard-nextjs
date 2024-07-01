@@ -113,25 +113,25 @@ export const sidelinks: SideLink[] = [
       {
         title: 'Jemaat',
         label: '',
-        href: '/memeber/jemat',
+        href: '/member/jemat',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Marital',
         label: '',
-        href: '/memeber/marital',
+        href: '/member/marital',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Batism',
         label: '',
-        href: '/memeber/baptism',
+        href: '/member/baptism',
         icon: <IconDatabaseExport size={18} />,
       },
       {
         title: 'Child Dedication',
         label: '',
-        href: '/memeber/penyerahan-anak',
+        href: '/member/penyerahan-anak',
         icon: <IconDatabaseExport size={18} />,
       },
     ],
@@ -145,13 +145,13 @@ export const sidelinks: SideLink[] = [
       {
         title: 'user',
         label: '',
-        href: 'management/user',
+        href: '/management/user',
         icon: <IconUserHexagon size={18} />,
       },
       {
         title: 'Region',
         label: '',
-        href: 'management/region',
+        href: '/management/region',
         icon: <IconBuildingChurch size={18} />,
       },
       // {

@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDownIcon, SlashIcon } from "@radix-ui/react-icons";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SlashIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./_components/table";
 import {
   Breadcrumb,
@@ -11,17 +11,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+
 
   return (
     <>

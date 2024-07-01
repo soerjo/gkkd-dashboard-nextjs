@@ -1,6 +1,5 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { DataTable } from './_components/table'
 
 export default function Dashboard() {
