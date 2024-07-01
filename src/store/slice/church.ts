@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
+import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
 import { churchApi } from "../services/church";
 
 const initialState = {
   isLoading: true,
-  payload: {} as GetChurchResponse,
+  payload: {} as CreateChurch,
   entities: [] as GetChurchResponse[],
 };
 
@@ -13,14 +13,15 @@ const slice = createSlice({
   initialState,
   reducers: {},
   extraReducers: builder => {
-    builder.addMatcher(
-      churchApi.endpoints.GetChurchById.matchFulfilled,
-      (state, { payload }) => {
-        state.isLoading = false;
-        state.payload = payload.data;
-      }
-    ),
-      builder.addMatcher(
+    builder
+      .addMatcher(
+        churchApi.endpoints.GetChurchById.matchFulfilled,
+        (state, { payload }) => {
+          state.isLoading = false;
+          state.payload = payload.data;
+        }
+      )
+      .addMatcher(
         churchApi.endpoints.GetAllChurch.matchFulfilled,
         (state, { payload }) => {
           state.isLoading = false;

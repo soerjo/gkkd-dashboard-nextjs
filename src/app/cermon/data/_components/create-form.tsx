@@ -4,7 +4,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
-import AsyncSelect from "@/components/react-select";
+// import AsyncSelect from "@/components/react-select";
 import React from "react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -19,82 +19,88 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { GetUserResponse } from "@/interfaces/userResponse";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
-import { useAppSelector } from "@/lib/store";
-import { RootState } from "@/store";
-import { Spinner } from "@/components/ui/spinner";
+import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
 import {
-    useUpdateUserMutation,
-    useLazyGetAllUserQuery,
-} from "@/store/services/user";
+    useCreateChurchMutation,
+    useGetAllChurchQuery,
+    useLazyGetAllChurchQuery,
+} from "@/store/services/church";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams } from "next/navigation";
 import { useLazyGetParamsQuery } from "@/store/services/params";
-import { useToast } from "@/components/ui/use-toast";
-import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import {
+    useCreateUserMutation,
+    useLazyGetAllUserQuery,
+} from "@/store/services/user";
+import { GetUserResponse } from "@/interfaces/userResponse";
+import AsyncSelect from "@/components/react-select";
 
 const FormSchema = z
     .object({
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
         role: z.string().min(1, { message: "required" }).max(25),
-        status: z.enum(["inactive", "active"]),
-        region: z.object({
-            id: z.number(),
-            name: z.string(),
-        }, { message: "required" }),
+        region: z.object(
+            {
+                id: z.number(),
+                name: z.string(),
+            },
+            { message: "required" }
+        ),
     })
     .required({ name: true, email: true, role: true, region: true });
 
-export const UpdateFormInput = ({
+export const CreateForm = ({
     onOpenChange,
-    data,
 }: React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data?: GetUserResponse;
 }) => {
-    const { toast } = useToast();
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { isLoading, payload } = useAppSelector(
-        (state: RootState) => state.user
-    );
+    const { toast } = useToast();
+    const [createNewUser] = useCreateUserMutation();
 
     const searchParams = useSearchParams();
 
     const page = parseInt(searchParams.get("page") || "1");
     const take = parseInt(searchParams.get("take") || "10");
-    const search = searchParams.get("search") || "";
-    const [updateData] = useUpdateUserMutation();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
 
-    const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
+    const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
             email: "",
             role: "",
-            status: "active",
         },
     });
 
     const {
-        formState: { isDirty, isSubmitting },
-        reset,
+        formState: { isSubmitting },
     } = form;
 
+    const [getAllUser] = useLazyGetAllUserQuery();
+    const [getListChurch] = useLazyGetAllChurchQuery();
+    const [getParams] = useLazyGetParamsQuery();
+
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        await updateData({
-            id: payload.id,
-            name: values.name,
-            email: values.email,
-            role: values.role,
-            regions_id: values.region.id,
-        }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
-        onOpenChange(val => !val);
+        try {
+            await createNewUser({
+                name: values.name,
+                email: values.email,
+                role: values.role,
+                regions_id: values.region.id,
+            }).unwrap();
+            await getAllUser({ page, take }).unwrap();
+            onOpenChange(val => !val);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+        }
     };
 
     const promiseRoleOptions = async (inputValue: string) => {
@@ -121,7 +127,11 @@ export const UpdateFormInput = ({
 
     const promiseRegionOptions = async (inputValue: string) => {
         try {
-            const listChurch = await getListChurch({ take: 20, page: 1, search: inputValue }).unwrap();
+            const listChurch = await getListChurch({
+                take: 20,
+                page: 1,
+                search: inputValue,
+            }).unwrap();
             const data = listChurch.data.entities.map(list => ({
                 value: list,
                 label: list.name,
@@ -141,31 +151,13 @@ export const UpdateFormInput = ({
         }
     };
 
-    React.useEffect(() => {
-        reset({
-            name: payload.name,
-            email: payload.email,
-            role: payload.role,
-            region: payload.region,
-        });
-    }, [payload, reset]);
-
-    if (isLoading)
-        return (
-            <div className="flex items-center justify-center h-full gap-3">
-                <Spinner size="large">
-                    <span>Loading page...</span>
-                </Spinner>
-            </div>
-        );
-
     return (
         <div
             className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
                 }`}
         >
             <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                Update User
+                Input New User
             </h2>
             <div className="h-14 w-14">
                 <svg
@@ -265,11 +257,14 @@ export const UpdateFormInput = ({
                                         defaultOptions
                                         loadOptions={promiseRegionOptions}
                                         value={
-                                            field.value?.name && { value: field.value?.name, label: field.value?.name }
+                                            field.value?.name && {
+                                                value: field.value?.name,
+                                                label: field.value?.name,
+                                            }
                                         }
                                         onChange={(e: any) => {
-                                            console.log({ data: e?.value })
-                                            field.onChange(e?.value)
+                                            console.log({ data: e?.value });
+                                            field.onChange(e?.value);
                                         }}
                                     />
                                 </FormControl>
@@ -277,38 +272,15 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={e =>
-                                            e ? field.onChange("active") : field.onChange("inactive")
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    {isDirty && (
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                }`}
-                            loading={isSubmitting}
-                        >
-                            {/* {isSubmitting && (
-                        <Spinner show className="text-secondary" size={"small"} />
-                    )} */}
-                            Save changes
-                        </Button>
-                    )}
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
+                            }`}
+                        loading={isSubmitting}
+                    >
+                        Save changes
+                    </Button>
                 </form>
             </Form>
         </div>

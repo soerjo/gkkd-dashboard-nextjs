@@ -22,7 +22,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit, IconRefresh } from "@tabler/icons-react";
+import { IconTrash, IconEye, IconEdit, IconRefresh, IconHistory } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -33,6 +33,7 @@ import {
     useLazyGetAllUserQuery,
     useLazyGetUserByIdQuery,
     useResetUserPasswordMutation,
+    useRestoreUserMutation,
 } from "@/store/services/user";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
@@ -54,6 +55,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const [getAllData] = useLazyGetAllUserQuery();
     const [deleteData] = useDeleteUserMutation();
     const [resetPassword] = useResetUserPasswordMutation();
+    const [restoreUser] = useRestoreUserMutation();
 
     const setParams = () => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -83,6 +85,11 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
 
     const handleResetPassword = async () => {
         await resetPassword({ id: row.original.id }).unwrap();
+    };
+
+    const handleRestoreUser = async () => {
+        await restoreUser({ id: row.original.id }).unwrap();
+        await getAllData({ page, take, search }).unwrap();
     };
 
     React.useEffect(() => {
@@ -140,8 +147,35 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
-                                </AlertDialog>{" "}
+                                </AlertDialog>
                             </DropdownMenuItem>
+                            {
+                                !row.original.status &&
+                                <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger className="flex gap-2 w-full">
+                                            <IconHistory size={18} />
+                                            Restore
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Are you sure restore user: {row.original.name}?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action will restore user status. This will activate the user from servers.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleRestoreUser}>
+                                                    Continue
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </DropdownMenuItem>
+                            }
                             <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                 <AlertDialog>
                                     <AlertDialogTrigger className="flex gap-2 w-full">

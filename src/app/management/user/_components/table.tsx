@@ -62,7 +62,7 @@ export const columns: ColumnDef<GetUserResponse>[] = [
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <div className="">{row.getValue("status") || "active"}</div>
+            <div className="">{row.getValue("status") ? "active" : "not-active"}</div>
         ),
     },
     {

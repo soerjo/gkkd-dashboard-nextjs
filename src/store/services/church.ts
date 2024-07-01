@@ -27,6 +27,7 @@ export const churchApi = createApi({
             name: payload.name,
             alt_name: payload.alt_name,
             location: payload.location,
+            parent_id: payload?.parent_id,
           },
         }),
       }
@@ -42,6 +43,8 @@ export const churchApi = createApi({
           name: payload.name,
           alt_name: payload.alt_name,
           location: payload.location,
+          parent: payload?.parent?.id,
+          parent_id: payload?.parent?.id,
         },
       }),
     }),
@@ -54,6 +57,15 @@ export const churchApi = createApi({
         method: "DELETE",
       }),
     }),
+    restoreChurch: builder.mutation<
+      IApiResponse<GetChurchFilter>,
+      { id: number }
+    >({
+      query: ({ id }) => ({
+        url: `/restore/${id}`,
+        method: "POST",
+      }),
+    }),
     GetAllChurch: builder.query<
       IApiResponse<TPaginationResponse<GetChurchResponse[]>>,
       GetChurchFilter
@@ -64,10 +76,7 @@ export const churchApi = createApi({
         params: payload,
       }),
     }),
-    GetChurchById: builder.query<
-      IApiResponse<GetChurchResponse>,
-      { id: number }
-    >({
+    GetChurchById: builder.query<IApiResponse<CreateChurch>, { id: number }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "GET",
@@ -84,4 +93,5 @@ export const {
   useGetChurchByIdQuery,
   useLazyGetChurchByIdQuery,
   useDeleteChurchMutation,
+  useRestoreChurchMutation,
 } = churchApi;

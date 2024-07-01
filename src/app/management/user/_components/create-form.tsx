@@ -3,7 +3,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import React from "react";
-import { Switch } from "@/components/ui/switch";
 import {
     Form,
     FormControl,
@@ -28,12 +27,14 @@ import {
 import { GetUserResponse } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
 
+const phoneRegex = new RegExp(/^(\+?\d[\s\d]*)?(\d{3}|\(\d+\))?([\s-]?\d)+$/);
+
 const FormSchema = z
     .object({
         name: z.string().min(1, { message: "required" }).max(25).refine(s => !s.includes(' '), 'No Spaces!'),
         email: z.string().min(1, { message: "required" }).max(25).email(),
         role: z.string().min(1, { message: "required" }).max(25),
-        status: z.enum(["inactive", "active"]),
+        phone: z.string().regex(phoneRegex, 'Invalid Number!'),
         region: z.object(
             {
                 id: z.number(),
@@ -51,21 +52,19 @@ export const CreateForm = ({
 }) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const { toast } = useToast();
-    const [createNewUser] = useCreateUserMutation();
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const take = parseInt(searchParams.get("take") || "10");
-    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const take = parseInt(searchParams.get("take") ?? "10");
+    const search = searchParams.get('search') ?? '';
 
-    const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
+    const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
             email: "",
             role: "",
-            status: "active",
         },
     });
 
@@ -76,6 +75,7 @@ export const CreateForm = ({
     const [getAllUser] = useLazyGetAllUserQuery();
     const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
+    const [createNewUser] = useCreateUserMutation();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
@@ -219,6 +219,25 @@ export const CreateForm = ({
                     />
                     <FormField
                         control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>phone</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        id="phone"
+                                        placeholder="my church name"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
                         name="region"
                         render={({ field }) => (
                             <FormItem>
@@ -264,24 +283,7 @@ export const CreateForm = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={e =>
-                                            e ? field.onChange("active") : field.onChange("inactive")
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+
                     <Button
                         type="submit"
                         disabled={isSubmitting}

@@ -39,7 +39,6 @@ const FormSchema = z
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
         role: z.string().min(1, { message: "required" }).max(25),
-        status: z.enum(["inactive", "active"]),
         region: z.object({
             id: z.number(),
             name: z.string(),
@@ -62,21 +61,20 @@ export const UpdateFormInput = ({
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const take = parseInt(searchParams.get("take") || "10");
-    const search = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const take = parseInt(searchParams.get("take") ?? "10");
+    const search = searchParams.get("search") ?? "";
     const [updateData] = useUpdateUserMutation();
     const [getAllData] = useLazyGetAllUserQuery();
     const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
 
-    const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
+    const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
             email: "",
             role: "",
-            status: "active",
         },
     });
 
@@ -277,24 +275,6 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={e =>
-                                            e ? field.onChange("active") : field.onChange("inactive")
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     {isDirty && (
                         <Button
                             type="submit"
@@ -303,9 +283,6 @@ export const UpdateFormInput = ({
                                 }`}
                             loading={isSubmitting}
                         >
-                            {/* {isSubmitting && (
-                        <Spinner show className="text-secondary" size={"small"} />
-                    )} */}
                             Save changes
                         </Button>
                     )}

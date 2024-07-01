@@ -39,7 +39,6 @@ const FormSchema = z
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
         role: z.string().min(1, { message: "required" }).max(25),
-        status: z.enum(["inactive", "active"]),
         region: z.object({
             id: z.number(),
             name: z.string(),
@@ -60,36 +59,52 @@ export const UpdateFormInput = ({
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const take = parseInt(searchParams.get("take") || "10");
-    const search = searchParams.get("search") || "";
-    const [updateData] = useUpdateUserMutation();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const take = parseInt(searchParams.get("take") ?? "10");
+    const search = searchParams.get("search") ?? "";
 
-    const form = useForm<GetUserResponse & { status: "active" | "inactive" }>({
+
+    const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
             email: "",
             role: "",
-            status: "active",
+            region: {}
+            // status: "active",
         },
     });
 
     const { formState: { isDirty, isSubmitting }, reset } = form;
 
+    const [updateData] = useUpdateUserMutation();
+    const [getAllUser] = useLazyGetAllUserQuery();
+    const [getListChurch] = useLazyGetAllChurchQuery();
+    const [getParams] = useLazyGetParamsQuery();
+
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        await updateData({
-            id: payload.id,
-            name: values.name,
-            email: values.email,
-            role: values.role,
-            regions_id: values.region.id,
-        }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
-        onOpenChange(val => !val);
+
+        try {
+            console.log("triger!")
+            await updateData({
+                id: payload.id,
+                name: values.name,
+                email: values.email,
+                role: values.role,
+                regions_id: values.region.id,
+            }).unwrap();
+            console.log("triger!")
+            await getAllUser({ page, take, search }).unwrap();
+            onOpenChange(val => !val);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+        }
     };
 
     const promiseRoleOptions = async (inputValue: string) => {
@@ -272,24 +287,7 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={e =>
-                                            e ? field.onChange("active") : field.onChange("inactive")
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+
                     {isDirty && (
                         <Button
                             type="submit"

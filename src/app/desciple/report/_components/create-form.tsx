@@ -2,7 +2,7 @@ import { ColourOption, colourOptions } from "@/data/color-data";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
-import { Button } from '@/components/custom/button'
+import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
 // import AsyncSelect from "@/components/react-select";
 import React from "react";
@@ -14,23 +14,42 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
-import { useCreateChurchMutation, useGetAllChurchQuery, useLazyGetAllChurchQuery } from "@/store/services/church";
+import {
+    useCreateChurchMutation,
+    useGetAllChurchQuery,
+    useLazyGetAllChurchQuery,
+} from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams } from "next/navigation";
+import { useLazyGetParamsQuery } from "@/store/services/params";
+import {
+    useCreateUserMutation,
+    useLazyGetAllUserQuery,
+} from "@/store/services/user";
+import { GetUserResponse } from "@/interfaces/userResponse";
+import AsyncSelect from "@/components/react-select";
 
-const FormSchema = z.object({
-    name: z.string().min(1, { message: "required" }),
-    alt_name: z.string().min(1, { message: "required" }),
-    status: z.enum(['inactive', 'active']),
-    location: z.string().optional(),
-}).required({ name: true })
+const FormSchema = z
+    .object({
+        name: z.string().min(1, { message: "required" }).max(25),
+        email: z.string().min(1, { message: "required" }).max(25).email(),
+        role: z.string().min(1, { message: "required" }).max(25),
+        region: z.object(
+            {
+                id: z.number(),
+                name: z.string(),
+            },
+            { message: "required" }
+        ),
+    })
+    .required({ name: true, email: true, role: true, region: true });
 
 export const CreateForm = ({
     onOpenChange,
@@ -39,36 +58,39 @@ export const CreateForm = ({
 }) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const { toast } = useToast();
-    const [createNewChurch, { isLoading }] = useCreateChurchMutation();
+    const [createNewUser] = useCreateUserMutation();
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get('page') || "1");
-    const take = parseInt(searchParams.get('take') || "10");
-    const search = searchParams.get('search') || '';
-    const [getAllChurch] = useLazyGetAllChurchQuery();
+    const page = parseInt(searchParams.get("page") || "1");
+    const take = parseInt(searchParams.get("take") || "10");
 
-    const form = useForm<CreateChurch & { status: "active" | "inactive" }>({
+    const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
-            status: "active",
-            alt_name: "",
-            location: ""
+            email: "",
+            role: "",
         },
-    })
+    });
 
-    const { formState: { isSubmitting } } = form
+    const {
+        formState: { isSubmitting },
+    } = form;
+
+    const [getAllUser] = useLazyGetAllUserQuery();
+    const [getListChurch] = useLazyGetAllChurchQuery();
+    const [getParams] = useLazyGetParamsQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        console.log("triger!!")
         try {
-            await createNewChurch({
+            await createNewUser({
                 name: values.name,
-                alt_name: values.alt_name,
-                location: values.location,
+                email: values.email,
+                role: values.role,
+                regions_id: values.region.id,
             }).unwrap();
-            await getAllChurch({ page, take, search }).unwrap()
+            await getAllUser({ page, take }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -77,25 +99,57 @@ export const CreateForm = ({
                     "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
                 variant: "destructive",
                 description: errorMessage,
-
             });
         }
     };
 
-    // dummy async
-    const filterSelect = (inputValue: string) => {
-        return colourOptions.filter(i =>
-            i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
+    const promiseRoleOptions = async (inputValue: string) => {
+        try {
+            const listRole = await getParams({ param: "role" }).unwrap();
+            const data = listRole.data.map(listRole => ({
+                value: listRole.name,
+                label: listRole.name,
+            }));
+            return data.filter(d =>
+                d.value.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+            return [];
+        }
     };
 
-    // dummy async
-    const promiseOptions = async (inputValue: string): Promise<any[]> =>
-        new Promise<any[]>(resolve => {
-            setTimeout(() => {
-                resolve(filterSelect(inputValue));
-            }, 1000);
-        });
+    const promiseRegionOptions = async (inputValue: string) => {
+        try {
+            const listChurch = await getListChurch({
+                take: 20,
+                page: 1,
+                search: inputValue,
+            }).unwrap();
+            const data = listChurch.data.entities.map(list => ({
+                value: list,
+                label: list.name,
+            }));
+            return data.filter(d =>
+                d.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+            return [];
+        }
+    };
 
     return (
         <div
@@ -103,7 +157,7 @@ export const CreateForm = ({
                 }`}
         >
             <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                Input New Church
+                Input New User
             </h2>
             <div className="h-14 w-14">
                 <svg
@@ -127,8 +181,11 @@ export const CreateForm = ({
                 </svg>
             </div>
             <Form {...form}>
-
-                <form onSubmit={form.handleSubmit(onSubmit)} className={`w-full flex flex-col gap-4 h-full relative  ${isDesktop ? "px-0" : "px-2"}`}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className={`w-full flex flex-col gap-4 h-full relative  ${isDesktop ? "px-0" : "px-2"
+                        }`}
+                >
                     <FormField
                         control={form.control}
                         name="name"
@@ -136,83 +193,85 @@ export const CreateForm = ({
                             <FormItem>
                                 <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input type="text" id="name" placeholder="my church name" {...field} />
-                                    {/* <Input placeholder="shadcn"  /> */}
+                                    <Input
+                                        type="text"
+                                        id="name"
+                                        placeholder="my church name"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                {/* <FormDescription>
-                                    This is your public display name.
-                                </FormDescription> */}
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
-                        name="alt_name"
+                        name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Aleternative Name</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input type="text" id="alt_name" placeholder="my church name" {...field} />
-                                    {/* <Input placeholder="shadcn"  /> */}
+                                    <Input
+                                        type="text"
+                                        id="email"
+                                        placeholder="email"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                {/* <FormDescription>
-                                    This is your public display name.
-                                </FormDescription> */}
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
+                    <FormField
                         control={form.control}
-                        name="parent"
+                        name="role"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Parent</FormLabel>
+                                <FormLabel>Role</FormLabel>
                                 <FormControl>
                                     <AsyncSelect
-                                        id="parent"
+                                        id="role"
                                         cacheOptions
                                         defaultOptions
-                                        loadOptions={promiseOptions}
-                                        value={field.value && { value: field.value, label: field.value }}
+                                        loadOptions={promiseRoleOptions}
+                                        value={
+                                            field.value && { value: field.value, label: field.value }
+                                        }
                                         onChange={(e: any) => field.onChange(e?.value)}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> */}
+                    />
                     <FormField
                         control={form.control}
-                        name="status"
+                        name="region"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
+                            <FormItem>
+                                <FormLabel>Region</FormLabel>
                                 <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={(e) => e ? field.onChange("active") : field.onChange("inactive")}
+                                    <AsyncSelect
+                                        id="region"
+                                        cacheOptions
+                                        defaultOptions
+                                        loadOptions={promiseRegionOptions}
+                                        value={
+                                            field.value?.name && {
+                                                value: field.value?.name,
+                                                label: field.value?.name,
+                                            }
+                                        }
+                                        onChange={(e: any) => {
+                                            console.log({ data: e?.value });
+                                            field.onChange(e?.value);
+                                        }}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="location"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Address</FormLabel>
-                                <FormControl>
-                                    <Textarea id="location" placeholder="my church address..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     <Button
                         type="submit"
                         disabled={isSubmitting}
@@ -220,14 +279,10 @@ export const CreateForm = ({
                             }`}
                         loading={isSubmitting}
                     >
-                        {/* {isSubmitting && (
-                            <Spinner show className="text-secondary" size={"small"} />
-                        )} */}
                         Save changes
                     </Button>
                 </form>
             </Form>
-
         </div>
     );
 };

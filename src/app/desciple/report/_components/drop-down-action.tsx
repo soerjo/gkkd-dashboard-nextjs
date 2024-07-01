@@ -10,7 +10,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { Row } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,121 +21,144 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Drawer,
-    DrawerContent,
-} from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit } from "@tabler/icons-react";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { IconTrash, IconEye, IconEdit, IconRefresh } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./update-form";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
-import { useDeleteChurchMutation, useLazyGetAllChurchQuery, useLazyGetChurchByIdQuery } from "@/store/services/church";
+import { GetUserResponse } from "@/interfaces/userResponse";
+import {
+    useDeleteUserMutation,
+    useLazyGetAllUserQuery,
+    useLazyGetUserByIdQuery,
+    useResetUserPasswordMutation,
+} from "@/store/services/user";
 
-
-
-export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
+export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const router = useRouter()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get('page') || "1");
-    const take = parseInt(searchParams.get('take') || "10");
-    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get("page") || "1");
+    const take = parseInt(searchParams.get("take") || "10");
+    const search = searchParams.get("search") || "";
 
-    const [getChurch] = useLazyGetChurchByIdQuery();
-    const [getAllChurch] = useLazyGetAllChurchQuery();
-    const [deleteChurch] = useDeleteChurchMutation()
+    const [getData] = useLazyGetUserByIdQuery();
+    const [getAllData] = useLazyGetAllUserQuery();
+    const [deleteData] = useDeleteUserMutation();
+    const [resetPassword] = useResetUserPasswordMutation();
 
     const setParams = () => {
-        const newSearchParams = new URLSearchParams(searchParams)
-        newSearchParams.set("id", row.original.id + "")
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("id", row.original.id + "");
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
             scroll: false,
-        })
+        });
 
-        getChurch({ id: row.original.id })
-        setOpen(true)
-    }
+        getData({ id: row.original.id });
+        setOpen(true);
+    };
 
-    const deleteData = async () => {
-        await deleteChurch({ id: row.original.id }).unwrap()
-        await getAllChurch({ page, take, search }).unwrap()
-    }
+    const handleDeleteData = async () => {
+        await deleteData({ id: row.original.id }).unwrap();
+        await getAllData({ page, take, search }).unwrap();
+    };
+
+    const handleResetPassword = async () => {
+        await resetPassword({ id: row.original.id }).unwrap();
+    };
 
     React.useEffect(() => {
-        const newSearchParams = new URLSearchParams(searchParams)
+        const newSearchParams = new URLSearchParams(searchParams);
         if (!open) {
-            newSearchParams.delete("id")
+            newSearchParams.delete("id");
             router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
-            })
+            });
         }
-
-    }, [open])
-
+    }, [open]);
 
     if (isDesktop)
         return (
             <div className="flex items-center justify-center">
                 <Sheet open={open} onOpenChange={setOpen}>
-                    <AlertDialog>
-                        <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <DotsHorizontalIcon className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="flex gap-2"
-                                    onClick={setParams}
-                                >
-                                    <IconEye size={18} />
-                                    View
-
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="flex gap-2"
-                                    onClick={setParams}
-                                >
-                                    <IconEdit size={18} />
-                                    Update
-                                </DropdownMenuItem>
-                                <AlertDialogTrigger>
-                                    <DropdownMenuItem
-                                        className="flex gap-2"
-                                    >
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <DotsHorizontalIcon className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="flex gap-2 w-full cursor-pointer" onClick={setParams}>
+                                <IconEye size={18} />
+                                View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex gap-2 w-full cursor-pointer" onClick={setParams}>
+                                <IconEdit size={18} />
+                                Update
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                <AlertDialog>
+                                    <AlertDialogTrigger className="flex gap-2 w-full">
                                         <IconTrash size={18} />
                                         Delete
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <SheetContent className="">
-                            <UpdateFormInput onOpenChange={setOpen} />
-                        </SheetContent>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure delete Church: {row.original.name}?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete
-                                    and remove your data from our servers.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={deleteData}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you sure delete user: {row.original.name}?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently
+                                                delete and remove your data from servers.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDeleteData}>
+                                                Continue
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>{" "}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                <AlertDialog>
+                                    <AlertDialogTrigger className="flex gap-2 w-full">
+                                        <IconRefresh size={18} />
+                                        Reset Password
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you sure reset password user: {row.original.name}?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone.
+                                                This will change user default password from servers.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleResetPassword}>
+                                                Continue
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <SheetContent className="">
+                        <UpdateFormInput onOpenChange={setOpen} />
+                    </SheetContent>
                 </Sheet>
             </div>
         );
@@ -143,8 +166,7 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             <AlertDialog>
-
-                <DropdownMenu >
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
@@ -154,25 +176,16 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            className="flex gap-2"
-                            onClick={setParams}
-                        >
+                        <DropdownMenuItem className="flex gap-2" onClick={setParams}>
                             <IconEye size={18} />
                             View
-
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                            className="flex gap-2"
-                            onClick={setParams}
-                        >
+                        <DropdownMenuItem className="flex gap-2" onClick={setParams}>
                             <IconEdit size={18} />
                             Update
                         </DropdownMenuItem>
                         <AlertDialogTrigger>
-                            <DropdownMenuItem
-                                className="flex gap-2"
-                            >
+                            <DropdownMenuItem className="flex gap-2">
                                 <IconTrash size={18} />
                                 Delete
                             </DropdownMenuItem>
@@ -188,16 +201,18 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete
-                            and remove your data from our servers.
+                            This action cannot be undone. This will permanently delete and
+                            remove your data from our servers.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={deleteData}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={handleDeleteData}>
+                            Continue
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </Drawer>
-    )
-}
+    );
+};

@@ -65,7 +65,7 @@ export const columns: ColumnDef<GetChurchResponse>[] = [
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <div className="">{row.getValue("status")}</div>
+            <div className="">{row.getValue("status") ? "active" : "not-active"}</div>
         ),
     },
 

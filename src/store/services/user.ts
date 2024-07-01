@@ -60,12 +60,17 @@ export const userApi = createApi({
         method: "DELETE",
       }),
     }),
+    restoreUser: builder.mutation<IApiResponse<GetUserFilter>, { id: number }>({
+      query: ({ id }) => ({
+        url: `/restore/${id}`,
+        method: "POST",
+      }),
+    }),
     GetAllUser: builder.query<
       IApiResponse<TPaginationResponse<GetUserResponse[]>>,
       GetUserFilter
     >({
       query: payload => {
-        console.log({ payload });
         return {
           url: "/",
           method: "GET",
@@ -90,6 +95,7 @@ export const {
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
   useDeleteUserMutation,
+  useRestoreUserMutation,
   useUpdateUserPasswordMutation,
   useResetUserPasswordMutation,
 } = userApi;

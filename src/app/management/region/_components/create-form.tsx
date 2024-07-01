@@ -24,12 +24,19 @@ import { useCreateChurchMutation, useGetAllChurchQuery, useLazyGetAllChurchQuery
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams } from "next/navigation";
+import AsyncSelect from "@/components/react-select";
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: "required" }),
     alt_name: z.string().min(1, { message: "required" }),
-    status: z.enum(['inactive', 'active']),
     location: z.string().optional(),
+    parent: z.object(
+        {
+            id: z.number(),
+            name: z.string(),
+        },
+        { message: "required" }
+    ).optional(),
 }).required({ name: true })
 
 export const CreateForm = ({
@@ -42,31 +49,60 @@ export const CreateForm = ({
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get('page') || "1");
-    const take = parseInt(searchParams.get('take') || "10");
-    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') ?? "1");
+    const take = parseInt(searchParams.get('take') ?? "10");
+    const search = searchParams.get('search') ?? '';
     const [createNewChurch] = useCreateChurchMutation();
+    const [getListChurch] = useLazyGetAllChurchQuery();
+
     const [getAllChurch] = useLazyGetAllChurchQuery();
 
-    const form = useForm<CreateChurch & { status: "active" | "inactive" }>({
+    const form = useForm<CreateChurch>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
-            status: "active",
+            // status: "active",
             alt_name: "",
-            location: ""
+            location: "",
+            parent: {},
         },
     })
+
+    const promiseRegionOptions = async (inputValue: string) => {
+        try {
+            const listChurch = await getListChurch({
+                take: 20,
+                page: 1,
+                search: inputValue,
+            }).unwrap();
+            const data = listChurch.data.entities.map(list => ({
+                value: list,
+                label: list.name,
+            }));
+            return data.filter(d =>
+                d.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+            return [];
+        }
+    };
 
     const { formState: { isSubmitting } } = form
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        // console.log("triger!!")
         try {
             await createNewChurch({
                 name: values.name,
                 alt_name: values.alt_name,
                 location: values.location,
+                parent_id: values?.parent?.id
             }).unwrap();
             await getAllChurch({ page, take, search }).unwrap()
             onOpenChange(val => !val);
@@ -148,36 +184,26 @@ export const CreateForm = ({
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
+                    <FormField
                         control={form.control}
                         name="parent"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Parent</FormLabel>
+                                <FormLabel>parent</FormLabel>
                                 <FormControl>
                                     <AsyncSelect
                                         id="parent"
                                         cacheOptions
                                         defaultOptions
-                                        loadOptions={promiseOptions}
-                                        value={field.value && { value: field.value, label: field.value }}
+                                        loadOptions={promiseRegionOptions}
+                                        isClearable={true}
+                                        value={
+                                            field.value?.name && {
+                                                value: field.value?.name,
+                                                label: field.value?.name,
+                                            }
+                                        }
                                         onChange={(e: any) => field.onChange(e?.value)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={(e) => e ? field.onChange("active") : field.onChange("inactive")}
                                     />
                                 </FormControl>
                                 <FormMessage />

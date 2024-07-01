@@ -1,4 +1,4 @@
-import { ColourOption, colourOptions } from "@/data/color-data";
+import { colourOptions } from "@/data/color-data";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,6 @@ import { Button } from '@/components/custom/button'
 import { Textarea } from "@/components/ui/textarea";
 import AsyncSelect from "@/components/react-select";
 import React from "react";
-import { Switch } from "@/components/ui/switch";
 import {
     Form,
     FormControl,
@@ -19,22 +18,27 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
+import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
 import { useAppSelector } from "@/lib/store";
 import { RootState } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdateChurchMutation, useLazyGetAllChurchQuery } from "@/store/services/church";
 import { useSearchParams } from "next/navigation";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useToast } from "@/components/ui/use-toast";
 
-const FormSchema = z
-    .object({
-        name: z.string().min(1, { message: "required" }),
-        alt_name: z.string().min(1, { message: "required" }),
-        // parent: z.string(),
-        status: z.enum(["inactive", "active"]),
-        location: z.string().optional(),
-    })
-    .required({ name: true });
+const FormSchema = z.object({
+    name: z.string().min(1, { message: "required" }),
+    alt_name: z.string().min(1, { message: "required" }),
+    location: z.string().optional(),
+    parent: z.object(
+        {
+            id: z.number(),
+            name: z.string(),
+        },
+        { message: "required" }
+    ).optional(),
+}).required({ name: true })
 
 export const UpdateFormInput = ({
     onOpenChange, data
@@ -46,67 +50,96 @@ export const UpdateFormInput = ({
     const { isLoading, payload } = useAppSelector((state: RootState) => state.church)
 
     const searchParams = useSearchParams();
+    const { toast } = useToast();
 
-    const page = parseInt(searchParams.get('page') || "1");
-    const take = parseInt(searchParams.get('take') || "10");
-    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') ?? "1");
+    const take = parseInt(searchParams.get('take') ?? "10");
+    const search = searchParams.get('search') ?? '';
     const [updateChurch] = useUpdateChurchMutation()
     const [getAllChurch] = useLazyGetAllChurchQuery();
 
 
-    const form = useForm<GetChurchResponse & { status: "active" | "inactive" }>({
+    const form = useForm<CreateChurch>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
             alt_name: "",
-            status: "active",
             location: "",
+            parent: {},
         },
     });
 
     const { formState: { isDirty, isSubmitting }, reset } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        await updateChurch({
-            id: payload.id,
-            name: values.name,
-            alt_name: values.alt_name,
-            location: values.location
-        }).unwrap()
-        await getAllChurch({ page, take, search }).unwrap()
-        onOpenChange(val => !val);
+        try {
+            await updateChurch({
+                id: payload?.id ?? 0,
+                name: values.name,
+                alt_name: values.alt_name,
+                location: values.location,
+                parent: values.parent
+            }).unwrap()
+            await getAllChurch({ page, take, search }).unwrap()
+            onOpenChange(val => !val);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+
+            });
+        }
     };
 
-    const filterColors = (inputValue: string) => {
-        return colourOptions.filter(i =>
-            i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
+    const promiseRegionOptions = async (inputValue: string) => {
+        try {
+            const listChurch = await getAllChurch({
+                take: 20,
+                page: 1,
+                search: inputValue,
+            }).unwrap();
+            const data = listChurch.data.entities.map(list => ({
+                value: list,
+                label: list.name,
+            }));
+            return data.filter(d =>
+                d.label.toLowerCase().includes(inputValue.toLowerCase())
+            );
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
+            return [];
+        }
     };
-
-    const promiseOptions = async (inputValue: string): Promise<any[]> =>
-        new Promise<ColourOption[]>(resolve => {
-            setTimeout(() => {
-                resolve(filterColors(inputValue));
-            }, 1000);
-        });
 
     React.useEffect(() => {
         reset({
             name: payload.name,
             alt_name: payload.alt_name,
-            status: "active",
-            // parent: "parent",
+            parent: payload?.parent,
             location: payload.location,
         });
+        console.log({ payload })
     }, [payload, reset]);
 
+
+
     // console.log({ payload })
-    if (isLoading) return <>
+    if (isLoading) return (
         <div className="flex items-center justify-center h-full gap-3">
             <Spinner size="large" >
                 <span >Loading page...</span>
             </Spinner>
-        </div></>
+        </div>
+    )
 
     return (
         <div
@@ -182,46 +215,6 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
-                        control={form.control}
-                        name="parent"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Parent</FormLabel>
-                                <FormControl>
-                                    <AsyncSelect
-                                        id="parent"
-                                        cacheOptions
-                                        defaultOptions
-                                        loadOptions={promiseOptions}
-                                        value={
-                                            field.value && { value: field.value, label: field.value }
-                                        }
-                                        onChange={(e: any) => field.onChange(e?.value)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-                    <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Status</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value === "active"}
-                                        onCheckedChange={e =>
-                                            e ? field.onChange("active") : field.onChange("inactive")
-                                        }
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     <FormField
                         control={form.control}
                         name="location"
@@ -239,6 +232,35 @@ export const UpdateFormInput = ({
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="parent"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>parent</FormLabel>
+                                <FormControl>
+                                    <AsyncSelect
+                                        id="parent"
+                                        cacheOptions
+                                        defaultOptions
+                                        loadOptions={promiseRegionOptions}
+                                        isClearable={true}
+                                        value={
+                                            field.value?.name && {
+                                                value: field.value?.name,
+                                                label: field.value?.name,
+                                            }
+                                        }
+                                        onChange={(e: any) => {
+                                            console.log({ e })
+                                            return field.onChange(e?.value)
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     {isDirty &&
                         <Button
@@ -248,9 +270,6 @@ export const UpdateFormInput = ({
                                 }`}
                             loading={isSubmitting}
                         >
-                            {/* {isSubmitting && (
-                        <Spinner show className="text-secondary" size={"small"} />
-                    )} */}
                             Save changes
                         </Button>
                     }

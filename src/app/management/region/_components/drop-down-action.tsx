@@ -25,13 +25,13 @@ import {
     Drawer,
     DrawerContent,
 } from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit } from "@tabler/icons-react";
+import { IconTrash, IconEye, IconEdit, IconHistory } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./update-form";
 import { GetChurchResponse } from "@/interfaces/churchResponse";
-import { useDeleteChurchMutation, useLazyGetAllChurchQuery, useLazyGetChurchByIdQuery } from "@/store/services/church";
+import { useDeleteChurchMutation, useLazyGetAllChurchQuery, useLazyGetChurchByIdQuery, useRestoreChurchMutation } from "@/store/services/church";
 
 
 
@@ -50,6 +50,8 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const [getChurch] = useLazyGetChurchByIdQuery();
     const [getAllChurch] = useLazyGetAllChurchQuery();
     const [deleteChurch] = useDeleteChurchMutation()
+    const [restoreChurch] = useRestoreChurchMutation()
+
 
     const setParams = () => {
         const newSearchParams = new URLSearchParams(searchParams)
@@ -64,6 +66,11 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
 
     const deleteData = async () => {
         await deleteChurch({ id: row.original.id }).unwrap()
+        await getAllChurch({ page, take, search }).unwrap()
+    }
+
+    const handleRestoreRegion = async () => {
+        await restoreChurch({ id: row.original.id }).unwrap()
         await getAllChurch({ page, take, search }).unwrap()
     }
 
@@ -109,6 +116,34 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
                                     <IconEdit size={18} />
                                     Update
                                 </DropdownMenuItem>
+                                {
+                                    !row.original.status &&
+                                    <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger className="flex gap-2 w-full">
+                                                <IconHistory size={18} />
+                                                Restore
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Are you sure restore church: {row.original.name}?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action will restore church status. This will activate the church from servers.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleRestoreRegion}>
+                                                        Continue
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </DropdownMenuItem>
+                                }
+
                                 <DropdownMenuItem >
                                     <AlertDialogTrigger className="flex gap-2">
                                         <IconTrash size={18} />

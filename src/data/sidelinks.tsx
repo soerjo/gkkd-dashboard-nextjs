@@ -66,13 +66,13 @@ export const sidelinks: SideLink[] = [
       {
         title: 'Cermons',
         label: '',
-        href: '/event',
+        href: '/cermon/data',
         icon: <IconNotebook size={18} />,
       },
       {
         title: 'Report',
         label: '',
-        href: '/sunday-service/report',
+        href: '/cermon/report',
         icon: <IconDatabaseExport size={18} />,
       },
     ],
