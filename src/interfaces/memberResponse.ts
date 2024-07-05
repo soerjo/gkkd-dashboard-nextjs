@@ -6,7 +6,7 @@ export type Member = {
   email: string;
   gender: string;
   place_birthday: string;
-  date_birthday: string;
+  date_birthday: Date;
   phone_number?: string;
   address?: string;
   father_name?: string;
@@ -15,7 +15,7 @@ export type Member = {
   total_brother_sister?: number;
   marital_status?: boolean;
   husband_wife_name?: string;
-  wedding_date?: string;
+  wedding_date?: Date;
   region_id?: number;
   // region?: GetChurchResponse;
 };
