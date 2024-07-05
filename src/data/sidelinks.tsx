@@ -113,7 +113,7 @@ export const sidelinks: SideLink[] = [
       {
         title: 'Jemaat',
         label: '',
-        href: '/member/jemat',
+        href: '/member/jemaat',
         icon: <IconReportSearch size={18} />,
       },
       {
@@ -123,7 +123,7 @@ export const sidelinks: SideLink[] = [
         icon: <IconReportSearch size={18} />,
       },
       {
-        title: 'Batism',
+        title: 'Baptism',
         label: '',
         href: '/member/baptism',
         icon: <IconDatabaseExport size={18} />,
@@ -131,7 +131,7 @@ export const sidelinks: SideLink[] = [
       {
         title: 'Child Dedication',
         label: '',
-        href: '/member/penyerahan-anak',
+        href: '/member/child-dedication',
         icon: <IconDatabaseExport size={18} />,
       },
     ],

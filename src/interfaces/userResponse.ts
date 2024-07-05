@@ -11,8 +11,8 @@ export type GetUserResponse = {
 };
 
 export type GetUserFilter = {
-  take: number;
-  page: number;
+  take?: number;
+  page?: number;
   search?: string;
   region_id?: number;
 };

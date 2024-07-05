@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
@@ -11,13 +12,9 @@ import {
     DrawerContent,
     DrawerTrigger,
 } from "@/components/ui/drawer";
+import { CreateForm } from "./create-form";
 
-export type MyDrawerProps = {
-    children: React.ReactNode,
-    DrawerForm: React.FC<{ onOpenChange: React.Dispatch<React.SetStateAction<boolean>> }>
-}
-
-export function MyDrawer({ children, DrawerForm }: MyDrawerProps) {
+export function MyDrawer({ children }: Readonly<{ children: React.ReactNode }>) {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -28,7 +25,7 @@ export function MyDrawer({ children, DrawerForm }: MyDrawerProps) {
                     {children}
                 </SheetTrigger>
                 <SheetContent className="">
-                    <DrawerForm onOpenChange={setOpen} />
+                    <CreateForm onOpenChange={setOpen} />
                 </SheetContent>
             </Sheet>
         );
@@ -40,8 +37,8 @@ export function MyDrawer({ children, DrawerForm }: MyDrawerProps) {
                 {children}
             </DrawerTrigger>
             <DrawerContent>
-                <div className="h-[90vh]">
-                    <DrawerForm onOpenChange={setOpen} />
+                <div className="h-[70vh]">
+                    <CreateForm onOpenChange={setOpen} />
                 </div>
             </DrawerContent>
         </Drawer>

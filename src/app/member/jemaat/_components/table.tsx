@@ -1,0 +1,294 @@
+import * as React from "react";
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    DoubleArrowLeftIcon,
+    DoubleArrowRightIcon,
+    DownloadIcon,
+} from "@radix-ui/react-icons";
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
+    PaginationState
+} from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { PlusIcon } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { DropdownAction } from "./drop-down-action";
+
+import { useState, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useGetAllUserQuery } from "@/store/services/user";
+import { MemberResponse } from "@/interfaces/memberResponse";
+import { useToast } from "@/components/ui/use-toast";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { Spinner } from "@/components/ui/spinner";
+import useDebounce from "@/hooks/use-debounce";
+import AsyncSelect from "@/components/react-select";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import { useGetAllMemberQuery, useLazyGetAllMemberQuery } from "@/store/services/member";
+import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
+
+export const columns: ColumnDef<MemberResponse>[] = [
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    },
+    {
+        accessorKey: "email",
+        header: "Alternative Name",
+        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+            <div className="">{row.getValue("status") || "active"}</div>
+        ),
+    },
+    {
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ row }) => (
+            <div className="">{row.getValue("role")}</div>
+        ),
+    },
+    // {
+    //     accessorKey: "region",
+    //     header: "Region",
+    //     cell: ({ row }) => (
+    //         <div className="">{row.original?.region?.name || "-"}</div>
+    //     ),
+    // },
+    {
+        id: "actions",
+        enableHiding: true,
+        accessorKey: "actions",
+        header: () => <div className="text-center">Actions</div>,
+        cell: ({ row }) => <DropdownAction row={row} />,
+    },
+];
+
+export type FetchMemberProps = {
+    page?: string,
+    take?: string,
+    search?: string,
+    church?: string,
+    dateFrom?: string,
+    dateTo?: string
+}
+
+export function DataTable() {
+
+    const pageSizeOptions = [5, 10, 20, 30, 50]
+
+    // search params
+    const router = useRouter();
+    const pathname = usePathname()
+    const searchParams = useSearchParams();
+
+    const [fetchData, { data, error, isLoading }] = useLazyGetAllMemberQuery()
+
+    const fetchMember = async (props: FetchMemberProps) => {
+        try {
+            const params = {
+                page: props.page ? Number(props.page) : undefined,
+                take: props.take ? Number(props.take) : undefined,
+                region_id: props.church ? Number(props.church) : undefined,
+                search: props.search,
+            }
+            await fetchData(params)
+        } catch (error) {
+            console.log({ error })
+        }
+    }
+
+    React.useEffect(() => {
+        const params = Object.fromEntries(searchParams.entries())
+        fetchMember(params)
+    }, [searchParams])
+
+    const table = useReactTable({
+        data: data?.data?.entities || [],
+        columns,
+        pageCount: data?.data?.meta.pageCount ?? -1,
+        state: {
+            pagination: {
+                pageIndex: data?.data?.meta.page ? data?.data?.meta.page - 1 : 0,
+                pageSize: data?.data?.meta.itemCount ?? 0
+            }
+        },
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+    })
+
+    return (
+        <div className="w-full">
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    );
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {!isLoading &&
+                            table.getRowModel().rows?.length > 0 &&
+                            table.getRowModel().rows.map(row => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                >
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        {!isLoading && !table.getRowModel().rows?.length && (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    No results.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {isLoading && (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    <div className="w-full flex justify-center items-center">
+                                        <Spinner size="medium" className="m-auto">
+                                            <span>Loading ...</span>
+                                        </Spinner>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 overflow-auto pt-4 sm:flex-row sm:gap-8">
+                <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+                    <div className="flex items-center space-x-2">
+                        <p className="whitespace-nowrap text-sm font-medium">
+                            Rows per page
+                        </p>
+                        <Select
+                            value={`${table.getState().pagination.pageSize}`}
+                            onValueChange={value => {
+                                table.setPageSize(Number(value));
+                            }}
+                        >
+                            <SelectTrigger className="h-8 w-[4.5rem]">
+                                <SelectValue
+                                    placeholder={table.getState().pagination.pageSize}
+                                />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                                {pageSizeOptions.map(pageSize => (
+                                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="flex items-center justify-center text-sm font-medium">
+                        Page {table.getState().pagination.pageIndex + 1} of{" "}
+                        {table.getPageCount()}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Button
+                            aria-label="Go to first page"
+                            variant="outline"
+                            className="hidden size-8 p-0 lg:flex"
+                            onClick={() => table.setPageIndex(0)}
+                            disabled={!table.getCanPreviousPage()}
+                        >
+                            <DoubleArrowLeftIcon className="size-4" aria-hidden="true" />
+                        </Button>
+                        <Button
+                            aria-label="Go to previous page"
+                            variant="outline"
+                            size="icon"
+                            className="size-8"
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                        >
+                            <ChevronLeftIcon className="size-4" aria-hidden="true" />
+                        </Button>
+                        <Button
+                            aria-label="Go to next page"
+                            variant="outline"
+                            size="icon"
+                            className="size-8"
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                        >
+                            <ChevronRightIcon className="size-4" aria-hidden="true" />
+                        </Button>
+                        <Button
+                            aria-label="Go to last page"
+                            variant="outline"
+                            size="icon"
+                            className="hidden size-8 lg:flex"
+                            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                            disabled={!table.getCanNextPage()}
+                        >
+                            <DoubleArrowRightIcon className="size-4" aria-hidden="true" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

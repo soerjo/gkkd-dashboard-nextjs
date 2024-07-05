@@ -22,26 +22,22 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit, IconRefresh, IconHistory } from "@tabler/icons-react";
+import { IconTrash, IconEye, IconEdit, IconRefresh } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { UpdateFormInput } from "./update-form";
-import { GetUserResponse } from "@/interfaces/userResponse";
+import { UpdateFormInput } from "./form-update-member";
+import { MemberResponse } from "@/interfaces/memberResponse";
 import {
     useDeleteUserMutation,
     useLazyGetAllUserQuery,
     useLazyGetUserByIdQuery,
     useResetUserPasswordMutation,
-    useRestoreUserMutation,
 } from "@/store/services/user";
-import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useToast } from "@/components/ui/use-toast";
 
-export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
+export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { toast } = useToast();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -55,7 +51,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const [getAllData] = useLazyGetAllUserQuery();
     const [deleteData] = useDeleteUserMutation();
     const [resetPassword] = useResetUserPasswordMutation();
-    const [restoreUser] = useRestoreUserMutation();
 
     const setParams = () => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -69,28 +64,12 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     };
 
     const handleDeleteData = async () => {
-        try {
-            await deleteData({ id: row.original.id }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
-            await resetPassword({ id: row.original.id }).unwrap();
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
-        }
+        await deleteData({ id: row.original.id }).unwrap();
+        await getAllData({ page, take, search }).unwrap();
     };
 
     const handleResetPassword = async () => {
         await resetPassword({ id: row.original.id }).unwrap();
-    };
-
-    const handleRestoreUser = async () => {
-        await restoreUser({ id: row.original.id }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
     };
 
     React.useEffect(() => {
@@ -148,35 +127,8 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
-                                </AlertDialog>
+                                </AlertDialog>{" "}
                             </DropdownMenuItem>
-                            {
-                                !row.original.status &&
-                                <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger className="flex gap-2 w-full">
-                                            <IconHistory size={18} />
-                                            Restore
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>
-                                                    Are you sure restore user: {row.original.name}?
-                                                </AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action will restore user status. This will activate the user from servers.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={handleRestoreUser}>
-                                                    Continue
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </DropdownMenuItem>
-                            }
                             <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                 <AlertDialog>
                                     <AlertDialogTrigger className="flex gap-2 w-full">

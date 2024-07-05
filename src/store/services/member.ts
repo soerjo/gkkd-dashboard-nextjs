@@ -3,6 +3,7 @@ import {
   Member,
   GetMemberFilter,
   MemberResponse,
+  CreateMember,
 } from "@/interfaces/memberResponse";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -18,7 +19,7 @@ export const memberApi = createApi({
     },
   }),
   endpoints: builder => ({
-    createMember: builder.mutation<IApiResponse<undefined>, Member>({
+    createMember: builder.mutation<IApiResponse<undefined>, CreateMember>({
       query: payload => ({
         url: "/",
         method: "POST",
