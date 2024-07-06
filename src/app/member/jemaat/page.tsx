@@ -46,7 +46,7 @@ export default function Dashboard() {
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
         <CustomSelect compName={'church'} fetchQuery={fetch} />
-        <DateRangePicker />
+        {/* <DateRangePicker /> */}
       </div>
       <DataTable />
 
