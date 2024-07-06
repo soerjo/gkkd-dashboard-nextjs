@@ -43,7 +43,7 @@ const FormSchema = z
             { message: "required" }
         ),
     })
-    .required({ name: true, email: true, role: true, region: true });
+    .required({ name: true, email: true, role: true });
 
 export const CreateForm = ({
     onOpenChange,

@@ -64,7 +64,7 @@ export const CreateForm = ({
             // status: "active",
             alt_name: "",
             location: "",
-            parent: {},
+            parent: undefined
         },
     })
 
