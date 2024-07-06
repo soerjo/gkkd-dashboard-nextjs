@@ -16,7 +16,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
         id='content'
         className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-64'} h-full`}
       >
-        <Layout>
+        <Layout className='h-screen'>
           <LayoutHeader>
             <div className='ml-auto flex items-center space-x-4 '>
               <ThemeSwitch />

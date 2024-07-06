@@ -217,7 +217,7 @@ export function DataTable() {
                 </Table>
             </div>
 
-            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 overflow-auto pt-4 sm:flex-row sm:gap-8">
+            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 pt-4 sm:flex-row sm:gap-8">
                 <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
                     <div className="flex items-center space-x-2">
                         <p className="whitespace-nowrap text-sm font-medium">

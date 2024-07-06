@@ -39,13 +39,7 @@ export const churchApi = createApi({
       query: ({ id, ...payload }) => ({
         url: `/${id}`,
         method: "PATCH",
-        body: {
-          name: payload.name,
-          alt_name: payload.alt_name,
-          location: payload.location,
-          parent: payload?.parent?.id,
-          parent_id: payload?.parent?.id,
-        },
+        body: payload,
       }),
     }),
     deleteChurch: builder.mutation<

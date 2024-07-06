@@ -9,9 +9,9 @@ export type GetChurchResponse = {
 };
 
 export type GetChurchFilter = {
-  take: number;
-  page: number;
-  search: string;
+  take?: number;
+  page?: number;
+  search?: string;
 };
 
 export type CreateChurch = {
@@ -20,8 +20,15 @@ export type CreateChurch = {
   alt_name: string;
   location?: string;
   parent_id?: number;
-  parent?: {
-    name: string;
-    id: number;
+};
+
+export type CreateChurchForm = {
+  id?: number;
+  name: string;
+  alt_name: string;
+  location?: string;
+  region?: {
+    label: string;
+    value: any;
   };
 };

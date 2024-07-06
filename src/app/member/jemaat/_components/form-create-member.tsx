@@ -172,7 +172,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="flex h-full"
                     >
-                        <ScrollArea className={`w-full h-5/6 rounded-md border p-4 `}>
+                        <ScrollArea >
                             <div className="flex flex-col gap-4">
                                 <FormField
                                     control={form.control}

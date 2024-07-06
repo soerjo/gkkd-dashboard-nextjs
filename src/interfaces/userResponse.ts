@@ -20,6 +20,21 @@ export type GetUserFilter = {
 export type CreateUser = {
   name: string;
   email: string;
+  phone: string;
   role: string;
-  regions_id: number;
+  regions_id?: number;
+};
+
+export type CreateUserForm = {
+  name: string;
+  email: string;
+  phone: string;
+  role: {
+    label: string;
+    value: any;
+  };
+  region?: {
+    label: string;
+    value: any;
+  };
 };

@@ -4,15 +4,23 @@ import {
     ChevronRightIcon,
     DoubleArrowLeftIcon,
     DoubleArrowRightIcon,
+    DownloadIcon,
 } from "@radix-ui/react-icons";
 import {
     ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
     flexRender,
     getCoreRowModel,
+    getFilteredRowModel,
     getPaginationRowModel,
+    getSortedRowModel,
     useReactTable,
+    PaginationState
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -28,55 +36,47 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { MyDrawer } from "./my-drawer";
+import { PlusIcon } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { DropdownAction } from "./drop-down-action";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useLazyGetAllUserQuery } from "@/store/services/user";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useGetAllChurchQuery } from "@/store/services/church";
+import { GetChurchResponse } from "@/interfaces/churchResponse";
+import { useToast } from "@/components/ui/use-toast";
+import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Spinner } from "@/components/ui/spinner";
-import useQueryParams from "@/hooks/user-query-params";
-import { GetUserResponse } from "@/interfaces/userResponse";
+import useDebounce from "@/hooks/use-debounce";
 
-export const columns: ColumnDef<GetUserResponse>[] = [
+export const columns: ColumnDef<GetChurchResponse>[] = [
     {
         accessorKey: "name",
-        header: "Username",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        header: "Name",
+        cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
     },
     {
-        accessorKey: "email",
-        header: "Email",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        accessorKey: "alt_name",
+        header: "Alternative Name",
+        cell: ({ row }) => <div className="">{row.getValue("alt_name")}</div>,
     },
     {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-            <div className="">{row.original?.status ? "active" : "non active"}</div>
-        ),
-    },
-    {
-        accessorKey: "phone",
-        header: "Phone",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("phone") ?? "-"}</div>
+            <div className="">{row.getValue("status") ? "active" : "not-active"}</div>
         ),
     },
 
     {
-        accessorKey: "role",
-        header: "Role",
+        accessorKey: "parent",
+        header: "Parent",
         cell: ({ row }) => (
-            <div className="uppercase">{row.getValue("role")}</div>
+            <div className="">{row.getValue("parent")}</div>
         ),
     },
-    {
-        accessorKey: "region",
-        header: "Region",
-        cell: ({ row }) => (
-            <div className="uppercase text-nowrap">{row.original?.region?.name || "-"}</div>
-        ),
-    },
+
     {
         id: "actions",
         enableHiding: true,
@@ -86,62 +86,134 @@ export const columns: ColumnDef<GetUserResponse>[] = [
     },
 ];
 
-export type FetchTable = {
-    page?: string,
-    take?: string,
-    search?: string,
-    church?: string,
-    dateFrom?: string,
-    dateTo?: string
-}
-
 export function DataTable() {
-    const [pagination, setPagination] = useState({
-        pageIndex: 0, //initial page index
-        pageSize: 10, //default page size
-    });
-
-    useQueryParams({ key: 'page', value: pagination.pageIndex + 1 })
-    useQueryParams({ key: 'take', value: pagination.pageSize })
-
+    const isDesktop = useMediaQuery("(min-width: 768px)");
     const pageSizeOptions = [5, 10, 20, 30, 50]
+
+    const router = useRouter();
+    const pathname = usePathname()
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllUserQuery()
-    const fetchMember = async (props: FetchTable) => {
-        try {
-            const params = {
-                page: props.page ? Number(props.page) : undefined,
-                take: props.take ? Number(props.take) : undefined,
-                region_id: props.church ? Number(props.church) : undefined,
-                search: props.search,
-            }
-            await fetchData(params)
-        } catch (error) {
-            console.log({ error })
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+
+    // search params
+    const page = Number(searchParams?.get("page") ?? "1") // default is page: 1
+    const take = Number(searchParams?.get("take") ?? "5") // default 5 record per page
+    const search = searchParams?.get("search") ?? "" // default 5 record per page
+
+    const { toast } = useToast();
+    const { data, error, isLoading } = useGetAllChurchQuery({
+        page: page,
+        take: take,
+        search: search
+    });
+
+    useEffect(() => {
+        if (error) {
+            const errorMessage = getErroMessage(error);
+            toast({
+                className:
+                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
+                variant: "destructive",
+                description: errorMessage,
+            });
         }
-    }
+    }, [error]);
+
+
+
+    // create query string
+    const createQueryString = React.useCallback(
+        (params: Record<string, string | number | null>) => {
+            const newSearchParams = new URLSearchParams(searchParams?.toString())
+
+            for (const [key, value] of Object.entries(params)) {
+                if (value === null) {
+                    newSearchParams.delete(key)
+                } else {
+                    newSearchParams.set(key, String(value))
+                }
+            }
+
+            return newSearchParams.toString()
+        },
+        [searchParams]
+    )
+
+    // handle server-side pagination
+    const [{ pageIndex, pageSize }, setPagination] =
+        React.useState<PaginationState>({
+            pageIndex: Number(page) - 1,
+            pageSize: Number(take),
+        })
+
+    const pagination = React.useMemo(
+        () => ({
+            pageIndex,
+            pageSize,
+        }),
+        [pageIndex, pageSize]
+    )
 
     React.useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries())
-        fetchMember(params)
-    }, [searchParams])
+        setPagination({
+            pageIndex: Number(page) - 1,
+            pageSize: Number(take),
+        })
+    }, [page, take])
+
+    // changed the route as well
+    React.useEffect(() => {
+        router.push(
+            `${pathname}?${createQueryString({
+                page: pageIndex + 1,
+                take: pageSize,
+                search: debouncedSearchTerm,
+            })}`
+        )
+    }, [pageIndex, pageSize, debouncedSearchTerm])
 
     const table = useReactTable({
-        data: data?.data?.entities || [],
-        columns: columns,
-        pageCount: data?.data?.meta.pageCount ?? -1,
+        data: data?.data.entities || [],
+        columns,
+        pageCount: data?.data.meta.pageCount ?? -1,
+        state: {
+            pagination,
+        },
         onPaginationChange: setPagination,
-        state: { pagination },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
     })
 
-    console.log({ data })
-
     return (
         <div className="w-full">
+            <div className="flex items-center pb-4 justify-between">
+                <div className="flex items-center gap-2">
+                    <Input
+                        placeholder="Search..."
+                        className="max-w-xs"
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <MyDrawer>
+                        <Button variant="outline" size="sm" className="flex gap-2">
+                            <PlusIcon className="size-4" aria-hidden="true" />
+                            {isDesktop && "New Church"}
+                        </Button>
+                    </MyDrawer>
+                    <Button variant="outline" size="sm" className="flex gap-2">
+                        <DownloadIcon className="size-4" aria-hidden="true" />
+                        {isDesktop && "Export"}
+                    </Button>
+                </div>
+            </div>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -207,8 +279,7 @@ export function DataTable() {
                     </TableBody>
                 </Table>
             </div>
-
-            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 pt-4 sm:flex-row sm:gap-8">
+            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 overflow-auto pt-4 sm:flex-row sm:gap-8">
                 <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
                     <div className="flex items-center space-x-2">
                         <p className="whitespace-nowrap text-sm font-medium">
