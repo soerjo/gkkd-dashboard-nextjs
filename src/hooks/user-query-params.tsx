@@ -11,7 +11,7 @@ const useQueryParams = ({ key, value }: UseQueryParamProps) => {
 
     React.useEffect(() => {
         const newSearchParams = new URLSearchParams(searchParams?.toString())
-        for (const [newKey, newValue] of Object.entries({ [key]: value })) {
+        for (const [newKey, newValue] of Object.entries({ [key]: value ?? null })) {
             if (newValue === null) {
                 newSearchParams.delete(newKey)
             } else {

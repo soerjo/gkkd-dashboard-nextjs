@@ -13,23 +13,6 @@ const slice = createSlice({
   name: "member",
   initialState,
   reducers: {},
-  extraReducers: builder => {
-    builder.addMatcher(
-      memberApi.endpoints.GetMemberById.matchFulfilled,
-      (state, { payload }) => {
-        state.isLoading = false;
-        state.payload = payload.data;
-      }
-    ),
-      builder.addMatcher(
-        memberApi.endpoints.GetAllMember.matchFulfilled,
-        (state, { payload }) => {
-          state.isLoading = false;
-          state.entities = payload.data.entities;
-          state.meta = payload.data.meta;
-        }
-      );
-  },
 });
 
 export const memberReducer = slice.reducer;

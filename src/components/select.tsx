@@ -30,7 +30,7 @@ const CustomSelect = ({ compName, fetchQuery }: CustomSelectProps) => {
       loadOptions={loadOptions}
       placeholder={`${compName}...`}
       isClearable={true}
-      onChange={(e: any) => setSearchTerm(e.value.id)}
+      onChange={(e: any) => setSearchTerm(e?.value?.id)}
     />
 
   )

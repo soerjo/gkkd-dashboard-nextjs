@@ -7,7 +7,7 @@ export const setAuthCookie = (token: string, name: string) => {
   const toBase64 = Buffer.from(token).toString("base64");
 
   setCookie(name, toBase64, {
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 30 * 8 * 60 * 60, // set all cookies up to 8 hour
     path: "/",
     // more security options here
     // sameSite: 'strict',

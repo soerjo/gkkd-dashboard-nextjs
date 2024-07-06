@@ -40,13 +40,15 @@ import {
 import { GetUserResponse } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
 import { CreateMember } from "@/interfaces/memberResponse";
-import { useCreateMemberMutation } from "@/store/services/member";
+import { useCreateMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { UserPayload } from "@/interfaces/loginResponse";
 
 
 
@@ -90,9 +92,8 @@ const FormSchema = z
         marital_status: z.boolean().optional(),
         husband_wife_name: z.string().max(25).optional(),
         wedding_date: z.date().optional(),
-        region_id: z.number().min(0).optional(),
+        // region_id: z.number().min(0).optional(),
     })
-    .required({ name: true, email: true });
 
 export type CreateFormProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>> }
 
@@ -108,17 +109,17 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
 
     const [createMember] = useCreateMemberMutation();
-    const [getAllUser] = useLazyGetAllUserQuery();
+    const [fetchMember] = useLazyGetAllMemberQuery()
     const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            const createUserBody = { ...values }
-            console.log({ createUserBody })
-
+            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+            const userPayload = JSON.parse(cookiesPayload ?? "")
+            const createUserBody = { ...values, region_id: userPayload.region.id }
             await createMember(createUserBody).unwrap();
-            await getAllUser({}).unwrap();
+            await fetchMember({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -173,6 +174,24 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                     >
                         <ScrollArea className={`w-full h-5/6 rounded-md border p-4 `}>
                             <div className="flex flex-col gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name={"full_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"full_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"full_name"}
+                                                    placeholder={"full_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <FormField
                                     control={form.control}
                                     name={"name"}

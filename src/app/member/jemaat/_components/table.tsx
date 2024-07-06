@@ -52,6 +52,9 @@ import AsyncSelect from "@/components/react-select";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { useGetAllMemberQuery, useLazyGetAllMemberQuery } from "@/store/services/member";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import useQueryParams from "@/hooks/user-query-params";
 
 export const columns: ColumnDef<MemberResponse>[] = [
     {
@@ -104,16 +107,18 @@ export type FetchMemberProps = {
 }
 
 export function DataTable() {
+    const [pagination, setPagination] = useState({
+        pageIndex: 0, //initial page index
+        pageSize: 10, //default page size
+    });
+
+    useQueryParams({ key: 'page', value: pagination.pageIndex + 1 })
+    useQueryParams({ key: 'take', value: pagination.pageSize })
 
     const pageSizeOptions = [5, 10, 20, 30, 50]
-
-    // search params
-    const router = useRouter();
-    const pathname = usePathname()
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, error, isLoading }] = useLazyGetAllMemberQuery()
-
+    const [fetchData, { data, isLoading }] = useLazyGetAllMemberQuery()
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {
@@ -135,14 +140,10 @@ export function DataTable() {
 
     const table = useReactTable({
         data: data?.data?.entities || [],
-        columns,
+        columns: columns,
         pageCount: data?.data?.meta.pageCount ?? -1,
-        state: {
-            pagination: {
-                pageIndex: data?.data?.meta.page ? data?.data?.meta.page - 1 : 0,
-                pageSize: data?.data?.meta.itemCount ?? 0
-            }
-        },
+        onPaginationChange: setPagination,
+        state: { pagination },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
