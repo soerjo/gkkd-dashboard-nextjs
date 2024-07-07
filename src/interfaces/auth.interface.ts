@@ -8,3 +8,9 @@ export type UserPayload = {
   username: string;
   region: GetChurchResponse;
 };
+
+export enum UserRole {
+  SYSTEMADMIN = "SYSTEMADMIN",
+  SUPERADMIN = "SUPERADMIN",
+  ADMIN = "ADMIN",
+}

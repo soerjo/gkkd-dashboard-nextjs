@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { logout, setInitialState } from '@/store/slice/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import LodingPage from './loading';
+import { sidelinks } from '@/data/sidelinks';
+import { UserPayload } from '@/interfaces/auth.interface';
 
 type Props = { children?: React.ReactNode };
 
@@ -20,17 +22,23 @@ export const AuthWrapper = ({ children }: Props) => {
     const token = getAuthCookie(AUTH_TOKEN)
     const payload = getAuthCookie(AUTH_PAYLOAD)
 
+
+
     useEffect(() => {
         setIsTokenExist(token)
         if (!token) {
-            push('/auth/login');
             dispatch(logout());
+            push('/auth/login');
         } else if (payload) {
             const jsonPayload = JSON.parse(payload)
-            if (jsonPayload.tempPassword) push('/auth/update-password');
+            if (jsonPayload.tempPassword)
+                push('/auth/update-password');
+
             dispatch(setInitialState())
         }
+
     }, [token, push, dispatch]);
+
 
     if (skipValidationPathName.includes(pathname)) return children
 

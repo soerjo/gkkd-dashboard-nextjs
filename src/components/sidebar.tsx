@@ -5,6 +5,8 @@ import { Button } from "./custom/button";
 import Nav from "./nav";
 import { cn } from "@/lib/utils";
 import { sidelinks } from "@/data/sidelinks";
+import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { UserPayload } from "@/interfaces/auth.interface";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -18,6 +20,10 @@ export default function Sidebar2({
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false);
 
+  const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+  const userPayload: UserPayload = JSON.parse(cookiesPayload ?? "")
+
+
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {
     if (navOpened) {
@@ -26,6 +32,8 @@ export default function Sidebar2({
       document.body.classList.remove("overflow-hidden");
     }
   }, [navOpened]);
+
+  // console.log({ my_role: userPayload.role })
 
   return (
     <aside
@@ -55,7 +63,7 @@ export default function Sidebar2({
               className={`flex flex-col justify-end truncate ${isCollapsed ? "invisible w-0" : "visible w-auto"
                 }`}
             >
-              <span className="font-medium">GKKD Ciledug</span>
+              <span className="font-bold uppercase">{userPayload?.region?.alt_name ?? "e-gereja"}</span>
               <span className="text-xs">Admin Management</span>
             </div>
           </div>
@@ -81,7 +89,13 @@ export default function Sidebar2({
             }`}
           closeNav={() => setNavOpened(false)}
           isCollapsed={isCollapsed}
-          links={sidelinks}
+          links={sidelinks.filter(datalink => {
+            return datalink.roles?.includes(userPayload.role)
+          }).map(datalink => {
+            return { ...datalink, sub: datalink.sub?.filter(side => side.roles?.includes(userPayload.role)) }
+          })
+          }
+        // links={sidelinks}
         />
 
         {/* Scrollbar width toggle button */}

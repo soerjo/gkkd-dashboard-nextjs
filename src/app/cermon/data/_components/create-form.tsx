@@ -84,12 +84,12 @@ export const CreateForm = ({
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            await createNewUser({
-                name: values.name,
-                email: values.email,
-                role: values.role,
-                regions_id: values.region.id,
-            }).unwrap();
+            // await createNewUser({
+            //     name: values.name,
+            //     email: values.email,
+            //     role: values.role,
+            //     regions_id: values.region.id,
+            // }).unwrap();
             await getAllUser({ page, take }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {

@@ -84,13 +84,13 @@ export const UpdateFormInput = ({
     } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        await updateData({
-            id: payload.id,
-            name: values.name,
-            email: values.email,
-            role: values.role,
-            regions_id: values.region.id,
-        }).unwrap();
+        // await updateData({
+        //     id: payload.id,
+        //     name: values.name,
+        //     email: values.email,
+        //     role: values.role,
+        //     regions_id: values.region.id,
+        // }).unwrap();
         await getAllData({ page, take, search }).unwrap();
         onOpenChange(val => !val);
     };
