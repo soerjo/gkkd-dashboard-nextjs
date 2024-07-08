@@ -138,8 +138,6 @@ export function DataTable() {
         manualPagination: true,
     })
 
-    console.log({ data })
-
     return (
         <div className="w-full">
             <div className="rounded-md border">

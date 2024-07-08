@@ -16,7 +16,7 @@ const slice = createSlice({
   initialState,
   reducers: {
     logout: () => {
-      removeCookies([AUTH_TOKEN]);
+      removeCookies([AUTH_TOKEN, AUTH_PAYLOAD]);
       return {};
     },
     setInitialState: () => {
@@ -36,31 +36,6 @@ const slice = createSlice({
         setAuthCookie(JSON.stringify(payload.data.payload), AUTH_PAYLOAD);
       }
     );
-    // .addMatcher(
-    //   authApi.endpoints.login.matchRejected,
-    //   (state, { error, payload: data }) => {
-    //     // FOR DEVELOPMENT =================
-    //     const payload = {
-    //       jwt: "dummy_token....",
-    //       payload: {
-    //         id: 0,
-    //         email: "dummy@mail.com",
-    //         region: {
-    //           id: 1,
-    //           name: "dummy region",
-    //         },
-    //         role: "SUPER_ADMIN",
-    //         username: "dummy user",
-    //         token: "dummy_token....",
-    //         tempPassword: false,
-    //       },
-    //     };
-    //     state = payload.payload;
-    //     setAuthCookie(payload.jwt, AUTH_TOKEN);
-    //     setAuthCookie(JSON.stringify(payload.payload), AUTH_PAYLOAD);
-    //     // =================================
-    //   }
-    // );
   },
 });
 

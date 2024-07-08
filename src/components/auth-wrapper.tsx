@@ -22,8 +22,6 @@ export const AuthWrapper = ({ children }: Props) => {
     const token = getAuthCookie(AUTH_TOKEN)
     const payload = getAuthCookie(AUTH_PAYLOAD)
 
-
-
     useEffect(() => {
         setIsTokenExist(token)
         if (!token) {

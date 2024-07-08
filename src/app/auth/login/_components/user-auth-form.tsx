@@ -58,16 +58,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         password: data.password,
       }).unwrap()
 
+      console.log("wrap up...")
       push("/");
     } catch (error) {
       const errorMessage = getErroMessage(error);
-
-      // FOR DEVELOPMENT =================
-      if ((error as any).status === 'FETCH_ERROR') {
-        push("/");
-      }
-      // =================================
-
       toast({
         className:
           "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",

@@ -9,8 +9,8 @@ import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { UserPayload } from "@/interfaces/auth.interface";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
-  isCollapsed: boolean;
-  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isCollapsed: boolean | null;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean | null>>;
 }
 
 export default function Sidebar2({
@@ -88,7 +88,7 @@ export default function Sidebar2({
           className={`h-full flex-1 overflow-auto ${navOpened ? "max-h-screen" : "max-h-0 py-0 md:max-h-screen md:py-2"
             }`}
           closeNav={() => setNavOpened(false)}
-          isCollapsed={isCollapsed}
+          isCollapsed={isCollapsed ?? false}
           links={sidelinks.filter(datalink => {
             return datalink.roles?.includes(userPayload.role)
           }).map(datalink => {
