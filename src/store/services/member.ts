@@ -5,6 +5,7 @@ import {
   MemberResponse,
   CreateMember,
   MemberDetail,
+  UpdateMember,
 } from "@/interfaces/memberResponse";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -27,7 +28,7 @@ export const memberApi = createApi({
         body: payload,
       }),
     }),
-    updateMember: builder.mutation<IApiResponse<undefined>, Member>({
+    updateMember: builder.mutation<IApiResponse<undefined>, UpdateMember>({
       query: ({ id, ...payload }) => ({
         url: `/${id}`,
         method: "PATCH",

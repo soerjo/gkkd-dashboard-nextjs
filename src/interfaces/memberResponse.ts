@@ -44,6 +44,30 @@ export type MemberDetail = {
   region?: GetChurchResponse;
 };
 
+export type UpdateMember = {
+  id: number;
+  nij: string;
+  full_name: string;
+  name: string;
+  email: string;
+  gender: string;
+  place_birthday: string;
+  date_birthday: Date;
+  phone_number: string;
+  address?: string;
+  father_name?: string;
+  mother_name?: string;
+  birth_order?: number;
+  total_brother_sister?: number;
+  marital_status?: boolean;
+  husband_wife_name?: string;
+  wedding_date?: Date;
+  region_id?: number;
+  // total_son_daughter: number;
+  // son_daughter_name: number;
+  // region?: GetChurchResponse;
+};
+
 export type CreateMember = {
   nij: string;
   full_name: string;
@@ -62,8 +86,8 @@ export type CreateMember = {
   husband_wife_name?: string;
   wedding_date?: Date;
   region_id?: number;
-  total_son_daughter: number;
-  son_daughter_name: number;
+  // total_son_daughter: number;
+  // son_daughter_name: number;
   // region?: GetChurchResponse;
 };
 

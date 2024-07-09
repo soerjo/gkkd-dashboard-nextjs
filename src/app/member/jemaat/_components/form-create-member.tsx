@@ -56,7 +56,7 @@ const defaultCreateMemberForm = {
     marital_status: undefined,
     husband_wife_name: "",
     wedding_date: undefined,
-    region_id: undefined,
+    // region_id: undefined,
 }
 
 const phoneRegex = new RegExp(
@@ -104,7 +104,11 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         try {
             const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
             const userPayload = JSON.parse(cookiesPayload ?? "")
-            const createUserBody = { ...values, region_id: userPayload.region.id }
+            const createUserBody: CreateMember = {
+                ...values,
+                region_id: userPayload.region.id,
+
+            }
             await createMember(createUserBody).unwrap();
             await fetchMember({}).unwrap();
             onOpenChange(val => !val);

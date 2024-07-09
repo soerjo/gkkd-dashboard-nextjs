@@ -29,7 +29,7 @@ import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
 import { useLazyGetParamsQuery } from "@/store/services/params";
-import { CreateMember, Member } from "@/interfaces/memberResponse";
+import { CreateMember, Member, UpdateMember } from "@/interfaces/memberResponse";
 import { useCreateMemberMutation, useGetMemberByIdQuery, useLazyGetAllMemberQuery, useLazyGetMemberByIdQuery, useUpdateMemberMutation } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
@@ -43,7 +43,8 @@ import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 
-const defaultCreateMemberForm = {
+const defaultCreateMemberForm: UpdateMember = {
+    id: 0,
     nij: "",
     full_name: "",
     name: "",
@@ -60,9 +61,9 @@ const defaultCreateMemberForm = {
     marital_status: false,
     husband_wife_name: "",
     wedding_date: new Date(),
-    total_son_daughter: null,
-    son_daughter_name: null,
-    baptism_date: null,
+    // total_son_daughter: null,
+    // son_daughter_name: null,
+    // baptism_date: null,
     region_id: undefined
 }
 
@@ -72,6 +73,7 @@ const phoneRegex = new RegExp(
 
 const FormSchema = z
     .object({
+        id: z.number(),
         nij: z.string().min(1, { message: "required" }).max(25),
         full_name: z.string().min(1, { message: "required" }).max(25),
         name: z.string().min(1, { message: "required" }).max(25),
@@ -88,9 +90,9 @@ const FormSchema = z
         marital_status: z.boolean().optional(),
         husband_wife_name: z.string().max(25).optional(),
         wedding_date: z.date().optional(),
-        total_son_daughter: z.number().min(0).optional(),
-        son_daughter_name: z.string().max(25).optional(),
-        baptism_date: z.date().optional(),
+        // total_son_daughter: z.number().min(0).optional(),
+        // son_daughter_name: z.string().max(25).optional(),
+        // baptism_date: z.date().optional(),
         region_id: z.number().min(0).optional(),
     })
 
@@ -104,9 +106,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
     const [fetchMember] = useLazyGetAllMemberQuery()
     const { isLoading, data: payload } = useGetMemberByIdQuery({ id: data.nij });
 
-    const form = useForm<CreateMember>({
+    const form = useForm<UpdateMember>({
         resolver: zodResolver(FormSchema),
-        defaultValues: { ...payload?.data },
+        defaultValues: defaultCreateMemberForm,
     });
 
     const { formState: { isSubmitting, isDirty }, reset, } = form;
@@ -115,7 +117,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
         try {
             const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
             const userPayload = JSON.parse(cookiesPayload ?? "")
-            const createUserBody: Member = { ...values, id: data.id, region_id: userPayload.region.id }
+            const createUserBody: UpdateMember = { ...values, id: data.id, region_id: userPayload.region.id }
             await updateData(createUserBody).unwrap();
             await fetchMember({}).unwrap();
             onOpenChange(val => !val);
@@ -131,31 +133,31 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
     };
 
     useEffect(() => {
-        console.log({ payload })
+        // console.log({ payload })
 
-        reset({
-            nij: payload?.data?.nij,
-            full_name: payload?.data.full_name,
-            name: payload?.data.name,
-            email: payload?.data.email,
-            gender: payload?.data.gender,
-            place_birthday: payload?.data.place_birthday,
-            date_birthday: payload?.data.date_birthday,
-            phone_number: payload?.data.phone_number,
-            address: payload?.data.phone_number,
-            father_name: payload?.data.father_name,
-            mother_name: payload?.data.mother_name,
-            birth_order: payload?.data.birth_order,
-            total_brother_sister: payload?.data.total_brother_sister,
-            marital_status: payload?.data.marital_status,
-            husband_wife_name: payload?.data.email,
-            wedding_date: payload?.data.wedding_date,
-            total_son_daughter: payload?.data?.total_son_daughter,
-            son_daughter_name: payload?.data?.son_daughter_name,
-            baptism_date: payload?.data.email,
-            region_id: payload?.data.region_id
+        // reset({
+        //     nij: payload?.data?.nij,
+        //     full_name: payload?.data.full_name,
+        //     name: payload?.data.name,
+        //     email: payload?.data.email,
+        //     gender: payload?.data.gender,
+        //     place_birthday: payload?.data.place_birthday,
+        //     date_birthday: payload?.data.date_birthday,
+        //     phone_number: payload?.data.phone_number,
+        //     address: payload?.data.phone_number,
+        //     father_name: payload?.data.father_name,
+        //     mother_name: payload?.data.mother_name,
+        //     birth_order: payload?.data.birth_order,
+        //     total_brother_sister: payload?.data.total_brother_sister,
+        //     marital_status: payload?.data.marital_status,
+        //     husband_wife_name: payload?.data.email,
+        //     wedding_date: payload?.data.wedding_date,
+        //     // total_son_daughter: payload?.data?.total_son_daughter,
+        //     // son_daughter_name: payload?.data?.son_daughter_name,
+        //     // baptism_date: payload?.data.email,
+        //     region_id: payload?.data.region_id
 
-        })
+        // })
     }, [payload])
 
     if (isLoading)
