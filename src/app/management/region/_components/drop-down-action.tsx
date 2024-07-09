@@ -22,20 +22,15 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { IconTrash, IconEye, IconEdit, IconRefresh } from "@tabler/icons-react";
+import { IconTrash, IconEye, IconEdit } from "@tabler/icons-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
-import {
-    useDeleteUserMutation,
-    useLazyGetAllUserQuery,
-    useLazyGetUserByIdQuery,
-    useResetUserPasswordMutation,
-} from "@/store/services/user";
-import { GetUserResponse } from "@/interfaces/userResponse";
 import { GetChurchResponse } from "@/interfaces/churchResponse";
 import { useDeleteChurchMutation, useLazyGetAllChurchQuery } from "@/store/services/church";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const [open, setOpen] = React.useState(false);
@@ -57,8 +52,13 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     };
 
     const handleDeleteData = async () => {
-        await deleteData({ id: row.original.id }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
+        try {
+            await deleteData({ id: row.original.id }).unwrap();
+            await getAllData({ page, take, search }).unwrap();
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
     React.useEffect(() => {

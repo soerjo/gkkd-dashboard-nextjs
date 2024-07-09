@@ -23,10 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea"
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useToast } from "@/components/ui/use-toast";
-import { useLazyGetParamsQuery } from "@/store/services/params";
 import { CreateMember } from "@/interfaces/memberResponse";
 import { useCreateMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
@@ -36,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { toast } from "react-toastify";
 
 
 
@@ -88,7 +86,6 @@ export type CreateFormProps = React.ComponentProps<"form"> & { onOpenChange: Rea
 
 export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { toast } = useToast();
 
     const form = useForm<CreateMember>({
         resolver: zodResolver(FormSchema),
@@ -114,12 +111,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
+            toast(errorMessage);
         }
     };
 

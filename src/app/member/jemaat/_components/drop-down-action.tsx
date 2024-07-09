@@ -31,6 +31,7 @@ import { Member } from "@/interfaces/memberResponse";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useLazyGetMemberByIdQuery, useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
 import useQueryParams from "@/hooks/user-query-params";
+import { toast } from "react-toastify";
 
 export const DropdownAction = ({ row }: { row: Row<Member> }) => {
     const [open, setOpen] = React.useState(false);
@@ -57,13 +58,18 @@ export const DropdownAction = ({ row }: { row: Row<Member> }) => {
             setOpen(true);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.error(errorMessage)
+            toast(errorMessage);
         }
     };
 
     const handleDeleteData = async () => {
-        await deleteData({ id: row.original.id }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
+        try {
+            await deleteData({ id: row.original.id }).unwrap();
+            await getAllData({ page, take, search }).unwrap();
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
     React.useEffect(() => {

@@ -25,23 +25,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea"
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useToast } from "@/components/ui/use-toast";
-import { useLazyGetParamsQuery } from "@/store/services/params";
-import { CreateMember, Member, UpdateMember } from "@/interfaces/memberResponse";
-import { useCreateMemberMutation, useGetMemberByIdQuery, useLazyGetAllMemberQuery, useLazyGetMemberByIdQuery, useUpdateMemberMutation } from "@/store/services/member";
+import { Member, UpdateMember } from "@/interfaces/memberResponse";
+import { useGetMemberByIdQuery, useLazyGetAllMemberQuery, useUpdateMemberMutation } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
-import { RootState } from "@/store";
-import { useAppSelector } from "@/lib/store";
-import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
+import { toast } from "react-toastify";
 
 const defaultCreateMemberForm: UpdateMember = {
     id: 0,
@@ -99,9 +94,7 @@ const FormSchema = z
 export type UpdateFormInputProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>>, data: Member }
 
 export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) => {
-    // const { isLoading, payload } = useAppSelector((state: RootState) => state.member);
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { toast } = useToast();
     const [updateData] = useUpdateMemberMutation();
     const [fetchMember] = useLazyGetAllMemberQuery()
     const { isLoading, data: payload } = useGetMemberByIdQuery({ id: data.nij });
@@ -123,41 +116,36 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
+            toast(errorMessage);
         }
     };
 
     useEffect(() => {
         // console.log({ payload })
 
-        // reset({
-        //     nij: payload?.data?.nij,
-        //     full_name: payload?.data.full_name,
-        //     name: payload?.data.name,
-        //     email: payload?.data.email,
-        //     gender: payload?.data.gender,
-        //     place_birthday: payload?.data.place_birthday,
-        //     date_birthday: payload?.data.date_birthday,
-        //     phone_number: payload?.data.phone_number,
-        //     address: payload?.data.phone_number,
-        //     father_name: payload?.data.father_name,
-        //     mother_name: payload?.data.mother_name,
-        //     birth_order: payload?.data.birth_order,
-        //     total_brother_sister: payload?.data.total_brother_sister,
-        //     marital_status: payload?.data.marital_status,
-        //     husband_wife_name: payload?.data.email,
-        //     wedding_date: payload?.data.wedding_date,
-        //     // total_son_daughter: payload?.data?.total_son_daughter,
-        //     // son_daughter_name: payload?.data?.son_daughter_name,
-        //     // baptism_date: payload?.data.email,
-        //     region_id: payload?.data.region_id
+        reset({
+            nij: payload?.data?.nij,
+            full_name: payload?.data.full_name,
+            name: payload?.data.name,
+            email: payload?.data.email,
+            gender: payload?.data.gender,
+            place_birthday: payload?.data.place_birthday,
+            date_birthday: payload?.data.date_birthday,
+            phone_number: payload?.data.phone_number,
+            address: payload?.data.phone_number,
+            father_name: payload?.data.father_name,
+            mother_name: payload?.data.mother_name,
+            birth_order: payload?.data.birth_order,
+            total_brother_sister: payload?.data.total_brother_sister,
+            marital_status: payload?.data.marital_status,
+            husband_wife_name: payload?.data.email,
+            wedding_date: payload?.data.wedding_date,
+            // total_son_daughter: payload?.data?.total_son_daughter,
+            // son_daughter_name: payload?.data?.son_daughter_name,
+            // baptism_date: payload?.data.email,
+            region_id: payload?.data.region_id
 
-        // })
+        })
     }, [payload])
 
     if (isLoading)

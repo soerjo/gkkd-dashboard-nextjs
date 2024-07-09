@@ -34,6 +34,8 @@ import {
     useResetUserPasswordMutation,
 } from "@/store/services/user";
 import { GetUserResponse } from "@/interfaces/userResponse";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const [open, setOpen] = React.useState(false);
@@ -56,13 +58,23 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     };
 
     const handleDeleteData = async () => {
-        await deleteData({ id: row.original.id }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
+        try {
+            await deleteData({ id: row.original.id }).unwrap();
+            await getAllData({ page, take, search }).unwrap();
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
     const handleResetPassword = async () => {
-        await resetPassword({ id: row.original.id }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
+        try {
+            await resetPassword({ id: row.original.id }).unwrap();
+            await getAllData({ page, take, search }).unwrap();
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
     React.useEffect(() => {

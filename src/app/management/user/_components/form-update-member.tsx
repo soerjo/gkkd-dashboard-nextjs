@@ -16,45 +16,53 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CreateUserForm, GetUserResponse } from "@/interfaces/userResponse";
-import { useUpdateUserMutation, useLazyGetAllUserQuery, } from "@/store/services/user";
+import {
+    useUpdateUserMutation,
+    useLazyGetAllUserQuery,
+} from "@/store/services/user";
 import { useLazyGetParamsQuery } from "@/store/services/params";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import debounce from "lodash.debounce";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { toast } from "react-toastify";
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
 
-const FormSchema = z
-    .object({
-        name: z.string().min(1, { message: "required" }).max(25),
-        email: z.string().min(1, { message: "required" }).max(25).email(),
-        phone: z.string().regex(phoneRegex, 'invalid number'),
-        role: z.object(
+const FormSchema = z.object({
+    name: z.string().min(1, { message: "required" }).max(25),
+    email: z.string().min(1, { message: "required" }).max(25).email(),
+    phone: z.string().regex(phoneRegex, "invalid number"),
+    role: z.object(
+        {
+            label: z.string(),
+            value: z.any(),
+        },
+        { message: "required" }
+    ),
+    region: z
+        .object(
             {
                 label: z.string(),
                 value: z.any(),
             },
             { message: "required" }
-        ),
-        region: z.object(
-            {
-                label: z.string(),
-                value: z.any(),
-            },
-            { message: "required" }
-        ).optional(),
-    })
+        )
+        .optional(),
+});
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: GetUserResponse
-}
+    data: GetUserResponse;
+};
 
-export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) => {
+export const UpdateFormInput = ({
+    onOpenChange,
+    data,
+}: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateUserMutation();
@@ -69,58 +77,69 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
             email: data.email,
             phone: data.phone,
             region: { label: data.region.name, value: data.region },
-            role: { label: data.role, value: data.role }
+            role: { label: data.role, value: data.role },
         },
     });
-    const { formState: { isDirty, isSubmitting }, reset, } = form;
+    const { formState: { isDirty, isSubmitting } } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        const oldData = data
+        try {
+            const oldData = data;
 
-        const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-        const userPayload = JSON.parse(cookiesPayload ?? "")
+            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+            const userPayload = JSON.parse(cookiesPayload ?? "");
 
-        await updateData({
-            ...values,
-            id: oldData.id,
-            role: values.role.value,
-            regions_id: values.region?.value.id ?? userPayload.region.id,
-        }).unwrap();
-        await getAllData({}).unwrap();
-        onOpenChange(val => !val);
+            await updateData({
+                ...values,
+                id: oldData.id,
+                role: values.role.value,
+                regions_id: values.region?.value.id ?? userPayload.region.id,
+            }).unwrap();
+            await getAllData({}).unwrap();
+            onOpenChange(val => !val);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
-
-    const _loadRoleSuggestions = async (query: string, callback: (...arg: any) => any) => {
+    const _loadRoleSuggestions = async (
+        query: string,
+        callback: (...arg: any) => any
+    ) => {
         try {
             const response = await getParams({ param: "role" }).unwrap();
             const list = response.data.map(val => ({
                 value: val.name,
                 label: val.name,
             }));
-            return callback(list)
+            return callback(list);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
-            return [];
+            toast(errorMessage);
         }
     };
 
     const promiseRoleOptions = debounce(_loadRoleSuggestions, 300);
 
-
-
-    const _loadRegionSuggestions = async (query: string, callback: (...arg: any) => any) => {
+    const _loadRegionSuggestions = async (
+        query: string,
+        callback: (...arg: any) => any
+    ) => {
         try {
-            const response = await getListChurch({ take: 20, page: 1, search: query }).unwrap();
+            const response = await getListChurch({
+                take: 20,
+                page: 1,
+                search: query,
+            }).unwrap();
             const list = response.data.entities.map(val => ({
                 value: val,
                 label: val.name,
             }));
-            return callback(list)
+            return callback(list);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
+            toast(errorMessage);
             return [];
         }
     };
@@ -129,7 +148,8 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
 
     return (
         <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"}`}
+            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
+                }`}
         >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
@@ -158,24 +178,21 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                 </div>
             </div>
             <div
-                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"}`}
+                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"
+                    }`}
             >
-
-                <Form
-                    {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="flex h-full"
-                    >
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
                         <ScrollArea>
                             <div className="flex flex-col gap-4">
-
                                 <FormField
                                     control={form.control}
                                     name={"name"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"name".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"name".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
@@ -193,7 +210,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     name={"email"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"email".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"email".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="email"
@@ -212,7 +231,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     name={"phone"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"phone".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"phone".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
@@ -232,7 +253,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     name="role"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"role".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"role".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="role"
@@ -253,7 +276,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     name="region"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"region".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"region".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="region"
@@ -268,10 +293,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                         </FormItem>
                                     )}
                                 />
-
                             </div>
-
-
                         </ScrollArea>
 
                         {isDirty && (
@@ -288,7 +310,6 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                     </form>
                 </Form>
             </div>
-
         </div>
     );
 };

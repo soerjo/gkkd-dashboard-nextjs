@@ -8,15 +8,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useToast } from "@/components/ui/use-toast";
 import { useLazyGetParamsQuery } from "@/store/services/params";
 import { useCreateUserMutation, useLazyGetAllUserQuery, } from "@/store/services/user";
 import { CreateUserForm } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { toast } from 'react-toastify';
 
 
 
@@ -92,8 +91,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
-            return [];
+            toast(errorMessage);
         }
     };
 
@@ -108,7 +106,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listChurch.data.entities.map(value => ({ value: value, label: value.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
+            toast(errorMessage);
             return [];
         }
     };
@@ -119,7 +117,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listRole.data.map(val => ({ value: val.name, label: val.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
+            toast(errorMessage);
             return [];
         }
     };

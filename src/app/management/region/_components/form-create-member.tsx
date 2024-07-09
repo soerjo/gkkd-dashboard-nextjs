@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { CreateChurchForm } from "@/interfaces/churchResponse";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "react-toastify";
 
 
 
@@ -82,7 +83,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
+            toast(errorMessage);
             return [];
         }
     };
@@ -98,19 +99,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listChurch.data.entities.map(value => ({ value: value, label: value.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
-            return [];
-        }
-    };
-
-    const promiseRoleOptions = async (inputValue: string) => {
-        try {
-            const listRole = await getParams({ param: "role" }).unwrap();
-            return listRole.data.map(val => ({ value: val.name, label: val.name }));
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
-            return [];
+            toast(errorMessage);
+            return []
         }
     };
 

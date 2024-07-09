@@ -25,6 +25,7 @@ import debounce from "lodash.debounce";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { CreateChurch, CreateChurchForm, GetChurchResponse } from "@/interfaces/churchResponse";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "react-toastify";
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
@@ -76,18 +77,24 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
     const { formState: { isDirty, isSubmitting }, reset, } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        const oldData = data
+        try {
 
-        const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-        const userPayload = JSON.parse(cookiesPayload ?? "")
+            const oldData = data
 
-        await updateData({
-            ...values,
-            id: oldData.id,
-            parent_id: values.region?.value.id ?? userPayload.region.id,
-        }).unwrap();
-        await getAllData({}).unwrap();
-        onOpenChange(val => !val);
+            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+            const userPayload = JSON.parse(cookiesPayload ?? "")
+
+            await updateData({
+                ...values,
+                id: oldData.id,
+                parent_id: values.region?.value.id ?? userPayload.region.id,
+            }).unwrap();
+            await getAllData({}).unwrap();
+            onOpenChange(val => !val);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast(errorMessage);
+        }
     };
 
     const _loadRegionSuggestions = async (query: string, callback: (...arg: any) => any) => {
@@ -100,7 +107,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
             return callback(list)
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
+            toast(errorMessage);
             return [];
         }
     };
