@@ -78,7 +78,7 @@ export const userApi = createApi({
         };
       },
     }),
-    GetUserById: builder.query<IApiResponse<GetUserResponse>, { id: string }>({
+    GetUserById: builder.query<IApiResponse<GetUserResponse>, { id: number }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "GET",
