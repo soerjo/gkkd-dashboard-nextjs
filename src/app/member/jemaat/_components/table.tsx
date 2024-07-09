@@ -17,7 +17,7 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
-    PaginationState
+    PaginationState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,58 +36,47 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { PlusIcon } from "lucide-react";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { DropdownAction } from "./drop-down-action";
 
-import { useState, useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllUserQuery } from "@/store/services/user";
-import { MemberResponse } from "@/interfaces/memberResponse";
-import { useToast } from "@/components/ui/use-toast";
-import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Member } from "@/interfaces/memberResponse";
 import { Spinner } from "@/components/ui/spinner";
-import useDebounce from "@/hooks/use-debounce";
-import AsyncSelect from "@/components/react-select";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { useGetAllMemberQuery, useLazyGetAllMemberQuery } from "@/store/services/member";
-import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
-import { RootState } from "@/store";
-import { useSelector } from "react-redux";
+import { useLazyGetAllMemberQuery } from "@/store/services/member";
 import useQueryParams from "@/hooks/user-query-params";
 
-export const columns: ColumnDef<MemberResponse>[] = [
+export const columns: ColumnDef<Member>[] = [
     {
-        accessorKey: "name",
-        header: "Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        accessorKey: "nij",
+        header: "Nij",
+        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("nij")}</div>,
+    },
+    {
+        accessorKey: "full_name",
+        header: "Full Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("full_name")}</div>,
     },
     {
         accessorKey: "email",
-        header: "Alternative Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        header: "Email",
+        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("email")}</div>,
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("status") || "active"}</div>
-        ),
+        accessorKey: "gender",
+        header: "Gender",
+        cell: ({ row }) => <div className=" text-nowrap">{row.getValue("gender")}</div>,
     },
     {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("role")}</div>
-        ),
+        accessorKey: "place_birthday",
+        header: "Birthday",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("place_birthday") + " | " + new Date(row.original.date_birthday).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
     },
-    // {
-    //     accessorKey: "region",
-    //     header: "Region",
-    //     cell: ({ row }) => (
-    //         <div className="">{row.original?.region?.name || "-"}</div>
-    //     ),
-    // },
+    {
+        accessorKey: "phone_number",
+        header: () => <div className="flex-nowrap">Phone Number</div>,
+        cell: ({ row }) => <div className=" text-nowrap">{row.getValue("phone_number")}</div>,
+    },
+
     {
         id: "actions",
         enableHiding: true,
@@ -98,13 +87,13 @@ export const columns: ColumnDef<MemberResponse>[] = [
 ];
 
 export type FetchMemberProps = {
-    page?: string,
-    take?: string,
-    search?: string,
-    church?: string,
-    dateFrom?: string,
-    dateTo?: string
-}
+    page?: string;
+    take?: string;
+    search?: string;
+    church?: string;
+    dateFrom?: string;
+    dateTo?: string;
+};
 
 export function DataTable() {
     const [pagination, setPagination] = useState({
@@ -112,13 +101,13 @@ export function DataTable() {
         pageSize: 10, //default page size
     });
 
-    useQueryParams({ key: 'page', value: pagination.pageIndex + 1 })
-    useQueryParams({ key: 'take', value: pagination.pageSize })
+    useQueryParams({ key: "page", value: pagination.pageIndex + 1 });
+    useQueryParams({ key: "take", value: pagination.pageSize });
 
-    const pageSizeOptions = [5, 10, 20, 30, 50]
+    const pageSizeOptions = [5, 10, 20, 30, 50];
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllMemberQuery()
+    const [fetchData, { data, isLoading }] = useLazyGetAllMemberQuery();
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {
@@ -126,17 +115,17 @@ export function DataTable() {
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
-            }
-            await fetchData(params)
+            };
+            await fetchData(params);
         } catch (error) {
-            console.log({ error })
+            console.log({ error });
         }
-    }
+    };
 
     React.useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries())
-        fetchMember(params)
-    }, [searchParams])
+        const params = Object.fromEntries(searchParams.entries());
+        fetchMember(params);
+    }, [searchParams]);
 
     const table = useReactTable({
         data: data?.data?.entities || [],
@@ -147,7 +136,7 @@ export function DataTable() {
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
-    })
+    });
 
     return (
         <div className="w-full">

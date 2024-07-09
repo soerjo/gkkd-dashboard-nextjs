@@ -1,12 +1,16 @@
-import { ColourOption, colourOptions } from "@/data/color-data";
+'use client'
+
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/custom/button";
-import { Textarea } from "@/components/ui/textarea";
-import AsyncSelect from "@/components/react-select";
-import React from "react";
-import { Switch } from "@/components/ui/switch";
+import React, { useEffect } from "react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     Form,
     FormControl,
@@ -15,96 +19,106 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { GetUserResponse } from "@/interfaces/userResponse";
-import { GetChurchResponse } from "@/interfaces/churchResponse";
-import { useAppSelector } from "@/lib/store";
-import { RootState } from "@/store";
-import { Spinner } from "@/components/ui/spinner";
-import {
-    useUpdateUserMutation,
-    useLazyGetAllUserQuery,
-} from "@/store/services/user";
-import { useSearchParams } from "next/navigation";
-import { useLazyGetParamsQuery } from "@/store/services/params";
-import { useToast } from "@/components/ui/use-toast";
-import { getErroMessage } from "@/lib/rtk-error-validation";
+import { Textarea } from "@/components/ui/textarea"
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useToast } from "@/components/ui/use-toast";
+import { useLazyGetParamsQuery } from "@/store/services/params";
+import { CreateMember, Member } from "@/interfaces/memberResponse";
+import { useCreateMemberMutation, useGetMemberByIdQuery, useLazyGetAllMemberQuery, useLazyGetMemberByIdQuery, useUpdateMemberMutation } from "@/store/services/member";
+import { CalendarIcon } from "lucide-react";
+import { CalendarComponent } from "@/components/ui/date-picker";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
+import { RootState } from "@/store";
+import { useAppSelector } from "@/lib/store";
+import { useSearchParams } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/custom/button";
+
+const defaultCreateMemberForm = {
+    nij: "",
+    full_name: "",
+    name: "",
+    email: "",
+    gender: "",
+    place_birthday: "",
+    date_birthday: new Date(),
+    phone_number: "",
+    address: "",
+    father_name: "",
+    mother_name: "",
+    birth_order: 0,
+    total_brother_sister: 0,
+    marital_status: false,
+    husband_wife_name: "",
+    wedding_date: new Date(),
+    total_son_daughter: null,
+    son_daughter_name: null,
+    baptism_date: null,
+    region_id: undefined
+}
+
+const phoneRegex = new RegExp(
+    /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
+);
 
 const FormSchema = z
     .object({
+        nij: z.string().min(1, { message: "required" }).max(25),
+        full_name: z.string().min(1, { message: "required" }).max(25),
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
-        role: z.string().min(1, { message: "required" }).max(25),
-        region: z.object({
-            id: z.number(),
-            name: z.string(),
-        }, { message: "required" }),
+        gender: z.string().min(1, { message: "required" }).max(25),
+        place_birthday: z.string().min(1, { message: "required" }).max(25),
+        date_birthday: z.date(),
+        phone_number: z.string().regex(phoneRegex, 'Invalid Number!'),
+        address: z.string().max(250).optional(),
+        father_name: z.string().max(25).optional(),
+        mother_name: z.string().max(25).optional(),
+        birth_order: z.number().min(0).optional(),
+        total_brother_sister: z.number().min(0).optional(),
+        marital_status: z.boolean().optional(),
+        husband_wife_name: z.string().max(25).optional(),
+        wedding_date: z.date().optional(),
+        total_son_daughter: z.number().min(0).optional(),
+        son_daughter_name: z.string().max(25).optional(),
+        baptism_date: z.date().optional(),
+        region_id: z.number().min(0).optional(),
     })
-    .required({ name: true, email: true, role: true, region: true });
 
-export const UpdateFormInput = ({
-    onOpenChange,
-    data,
-}: React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data?: GetUserResponse;
-}) => {
-    const { toast } = useToast();
+export type UpdateFormInputProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>>, data: Member }
+
+export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) => {
+    // const { isLoading, payload } = useAppSelector((state: RootState) => state.member);
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const { isLoading, payload } = useAppSelector(
-        (state: RootState) => state.user
-    );
+    const { toast } = useToast();
+    const [updateData] = useUpdateMemberMutation();
+    const [fetchMember] = useLazyGetAllMemberQuery()
+    const { isLoading, data: payload } = useGetMemberByIdQuery({ id: data.nij });
 
-    const searchParams = useSearchParams();
-
-    const page = parseInt(searchParams.get("page") ?? "1");
-    const take = parseInt(searchParams.get("take") ?? "10");
-    const search = searchParams.get("search") ?? "";
-    const [updateData] = useUpdateUserMutation();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
-
-    const form = useForm<GetUserResponse>({
+    const form = useForm<CreateMember>({
         resolver: zodResolver(FormSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            role: "",
-        },
+        defaultValues: { ...payload?.data },
     });
 
-    const {
-        formState: { isDirty, isSubmitting },
-        reset,
-    } = form;
+    const { formState: { isSubmitting, isDirty }, reset, } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        // await updateData({
-        //     id: payload.id,
-        //     name: values.name,
-        //     email: values.email,
-        //     role: values.role,
-        //     regions_id: values.region.id,
-        // }).unwrap();
-        await getAllData({ page, take, search }).unwrap();
-        onOpenChange(val => !val);
-    };
-
-    const promiseRoleOptions = async (inputValue: string) => {
         try {
-            const listRole = await getParams({ param: "role" }).unwrap();
-            const data = listRole.data.map(listRole => ({
-                value: listRole.name,
-                label: listRole.name,
-            }));
-            return data.filter(d =>
-                d.value.toLowerCase().includes(inputValue.toLowerCase())
-            );
+            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+            const userPayload = JSON.parse(cookiesPayload ?? "")
+            const createUserBody: Member = { ...values, id: data.id, region_id: userPayload.region.id }
+            await updateData(createUserBody).unwrap();
+            await fetchMember({}).unwrap();
+            onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast({
@@ -113,40 +127,36 @@ export const UpdateFormInput = ({
                 variant: "destructive",
                 description: errorMessage,
             });
-            return [];
         }
     };
 
-    const promiseRegionOptions = async (inputValue: string) => {
-        try {
-            const listChurch = await getListChurch({ take: 20, page: 1, search: inputValue }).unwrap();
-            const data = listChurch.data.entities.map(list => ({
-                value: list,
-                label: list.name,
-            }));
-            return data.filter(d =>
-                d.label.toLowerCase().includes(inputValue.toLowerCase())
-            );
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
-            return [];
-        }
-    };
+    useEffect(() => {
+        console.log({ payload })
 
-    React.useEffect(() => {
         reset({
-            name: payload.name,
-            email: payload.email,
-            role: payload.role,
-            region: payload.region,
-        });
-    }, [payload, reset]);
+            nij: payload?.data?.nij,
+            full_name: payload?.data.full_name,
+            name: payload?.data.name,
+            email: payload?.data.email,
+            gender: payload?.data.gender,
+            place_birthday: payload?.data.place_birthday,
+            date_birthday: payload?.data.date_birthday,
+            phone_number: payload?.data.phone_number,
+            address: payload?.data.phone_number,
+            father_name: payload?.data.father_name,
+            mother_name: payload?.data.mother_name,
+            birth_order: payload?.data.birth_order,
+            total_brother_sister: payload?.data.total_brother_sister,
+            marital_status: payload?.data.marital_status,
+            husband_wife_name: payload?.data.email,
+            wedding_date: payload?.data.wedding_date,
+            total_son_daughter: payload?.data?.total_son_daughter,
+            son_daughter_name: payload?.data?.son_daughter_name,
+            baptism_date: payload?.data.email,
+            region_id: payload?.data.region_id
+
+        })
+    }, [payload])
 
     if (isLoading)
         return (
@@ -157,138 +167,400 @@ export const UpdateFormInput = ({
             </div>
         );
 
+
     return (
         <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
-                }`}
+            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"}`}
         >
-            <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                Update User
-            </h2>
-            <div className="h-14 w-14">
-                <svg
-                    viewBox="0 0 177 180"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`transition-all w-auto`}
-                >
-                    <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M75.7157 80.5704H49.4655L49.4685 80.5762L0 157.714H12.1155L54.9137 90.9774L63.5368 107.449L31.3026 157.713H43.4181L68.9819 117.85L77.1481 133.449L61.5877 157.713H73.7031L82.5932 143.851L89.8504 157.713H116.101L97.0456 121.314L99.2696 117.846L120.14 157.713H146.39L113.722 95.3103L115.946 91.8422L150.43 157.713H176.68L136.295 80.5704H123.175H111.059H110.045L110.501 81.4409L108.277 84.909L106.006 80.5704H92.8896H80.7741H79.7553L80.2132 81.445L77.9892 84.9131L75.7157 80.5704ZM85.6584 91.8463L93.8245 107.445L91.6004 110.913L83.4343 95.3143L85.6584 91.8463Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M109.043 0L109.043 35.604H157.507V73.1864H109.043V76.9236H96.8583V61.25H145.322V47.5403L96.8583 47.5403V11.9363H80.8436L80.8436 47.5403L30.3638 47.5403V61.25H80.8436V76.9236H68.6585V73.1864H18.1787V35.604L68.6585 35.604L68.6585 0H109.043ZM68.6585 161.375L68.6585 180H109.043V161.375H96.8583V168.064H80.8436V161.375H68.6585Z"
-                        fill="currentColor"
-                    />
-                </svg>
+            <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
+                <h2 className="text-xl font-semibold tracking-tight md:text-xl">
+                    Update Member
+                </h2>
+                <div className="h-14 w-14">
+                    <svg
+                        viewBox="0 0 177 180"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`transition-all w-auto`}
+                    >
+                        <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M75.7157 80.5704H49.4655L49.4685 80.5762L0 157.714H12.1155L54.9137 90.9774L63.5368 107.449L31.3026 157.713H43.4181L68.9819 117.85L77.1481 133.449L61.5877 157.713H73.7031L82.5932 143.851L89.8504 157.713H116.101L97.0456 121.314L99.2696 117.846L120.14 157.713H146.39L113.722 95.3103L115.946 91.8422L150.43 157.713H176.68L136.295 80.5704H123.175H111.059H110.045L110.501 81.4409L108.277 84.909L106.006 80.5704H92.8896H80.7741H79.7553L80.2132 81.445L77.9892 84.9131L75.7157 80.5704ZM85.6584 91.8463L93.8245 107.445L91.6004 110.913L83.4343 95.3143L85.6584 91.8463Z"
+                            fill="currentColor"
+                        />
+                        <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M109.043 0L109.043 35.604H157.507V73.1864H109.043V76.9236H96.8583V61.25H145.322V47.5403L96.8583 47.5403V11.9363H80.8436L80.8436 47.5403L30.3638 47.5403V61.25H80.8436V76.9236H68.6585V73.1864H18.1787V35.604L68.6585 35.604L68.6585 0H109.043ZM68.6585 161.375L68.6585 180H109.043V161.375H96.8583V168.064H80.8436V161.375H68.6585Z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                </div>
             </div>
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className={`w-full flex flex-col gap-4 h-full relative  ${isDesktop ? "px-0" : "px-2"
-                        }`}
-                >
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="text"
-                                        id="name"
-                                        placeholder="my church name"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="text"
-                                        id="email"
-                                        placeholder="email"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Role</FormLabel>
-                                <FormControl>
-                                    <AsyncSelect
-                                        id="role"
-                                        cacheOptions
-                                        defaultOptions
-                                        loadOptions={promiseRoleOptions}
-                                        value={
-                                            field.value && { value: field.value, label: field.value }
-                                        }
-                                        onChange={(e: any) => field.onChange(e?.value)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="region"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Region</FormLabel>
-                                <FormControl>
-                                    <AsyncSelect
-                                        id="region"
-                                        cacheOptions
-                                        defaultOptions
-                                        loadOptions={promiseRegionOptions}
-                                        value={
-                                            field.value?.name && { value: field.value?.name, label: field.value?.name }
-                                        }
-                                        onChange={(e: any) => {
-                                            console.log({ data: e?.value })
-                                            field.onChange(e?.value)
-                                        }}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+            <div
+                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"}`}
+            >
 
-                    {isDirty && (
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                }`}
-                            loading={isSubmitting}
-                        >
-                            Save changes
-                        </Button>
-                    )}
-                </form>
-            </Form>
+                <Form
+                    {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="flex h-full"
+                    >
+                        <ScrollArea >
+                            <div className="flex flex-col gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name={"nij"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"nij".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"nij"}
+                                                    placeholder={"nij"}
+                                                    disabled
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"full_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"full_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"full_name"}
+                                                    placeholder={"full_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"name"}
+                                                    placeholder={"name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"email"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"email".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="email"
+                                                    id={"email"}
+                                                    placeholder={"email"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"gender"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"gender".replaceAll("_", " ")}</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder={"gender"} />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="laki-laki">laki-laki</SelectItem>
+                                                    <SelectItem value="perempuan">perempuan</SelectItem>
+                                                </SelectContent>
+                                            </Select>{" "}
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                    }
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"place_birthday"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"place_birthday".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"place_birthday"}
+                                                    placeholder={"place_birthday"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"date_birthday"}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"date_birthday".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"phone_number"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"phone_number".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"phone_number"}
+                                                    placeholder={"phone_number"}
+                                                    pattern="[0-9]*"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"address"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"address".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Tell us a little bit about yourself"
+                                                    className="resize-none"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"father_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"father_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"father_name"}
+                                                    placeholder={"father_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"mother_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"mother_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"mother_name"}
+                                                    placeholder={"mother_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+
+                                {/* <FormField
+                                    control={form.control}
+                                    name={"birth_order"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"birth_order".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    id={"birth_order"}
+                                                    placeholder={"birth_order"}
+                                                    pattern="[0-9]*"
+                                                    {...field}
+                                                    defaultValue={field.value ?? 0}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
+
+
+                                <FormField
+                                    control={form.control}
+                                    name={"total_brother_sister"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"total_brother_sister".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"total_brother_sister"}
+                                                    placeholder={"total_brother_sister"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+
+
+                                <FormField
+                                    control={form.control}
+                                    name={"marital_status"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"marital_status".replaceAll("_", " ")}</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field?.value ? "true" : "false"}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a verified email to display" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value={"true"}>sudah menikah</SelectItem>
+                                                    <SelectItem value={"false"}>belum menikah</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* <FormField
+                                    control={form.control}
+                                    name={"husband_wife_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"husband_wife_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"husband_wife_name"}
+                                                    placeholder={"husband_wife_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
+
+
+                                {/* <FormField
+                                    control={form.control}
+                                    name={"wedding_date"}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"wedding_date".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
+
+                            </div>
+
+
+                        </ScrollArea>
+                        {isDirty && (
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
+                                    }`}
+                                loading={isSubmitting}
+
+                            >
+                                Save changes
+                            </Button>
+                        )}
+                    </form>
+                </Form>
+            </div>
+
         </div>
     );
 };

@@ -35,6 +35,7 @@ import {
 } from "@/store/services/user";
 import { GetUserResponse } from "@/interfaces/userResponse";
 import { GetChurchResponse } from "@/interfaces/churchResponse";
+import { useDeleteChurchMutation, useLazyGetAllChurchQuery } from "@/store/services/church";
 
 export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const [open, setOpen] = React.useState(false);
@@ -48,29 +49,16 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getData] = useLazyGetUserByIdQuery();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [deleteData] = useDeleteUserMutation();
-    const [resetPassword] = useResetUserPasswordMutation();
+    const [getAllData] = useLazyGetAllChurchQuery();
+    const [deleteData] = useDeleteChurchMutation();
 
     const setParams = () => {
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("id", row.original.id + "");
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-            scroll: false,
-        });
-
-        getData({ id: row.original.id });
         setOpen(true);
     };
 
     const handleDeleteData = async () => {
         await deleteData({ id: row.original.id }).unwrap();
         await getAllData({ page, take, search }).unwrap();
-    };
-
-    const handleResetPassword = async () => {
-        await resetPassword({ id: row.original.id }).unwrap();
     };
 
     React.useEffect(() => {
@@ -130,31 +118,7 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
                                     </AlertDialogContent>
                                 </AlertDialog>{" "}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <AlertDialog>
-                                    <AlertDialogTrigger className="flex gap-2 w-full">
-                                        <IconRefresh size={18} />
-                                        Reset Password
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                                Are you sure reset password user: {row.original.name}?
-                                            </AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone.
-                                                This will change user default password from servers.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleResetPassword}>
-                                                Continue
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </DropdownMenuItem>
+
                         </DropdownMenuContent>
                     </DropdownMenu>
 

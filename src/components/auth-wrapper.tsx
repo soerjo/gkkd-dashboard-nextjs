@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { logout, setInitialState } from '@/store/slice/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import LodingPage from './loading';
-import { sidelinks } from '@/data/sidelinks';
+import Head from 'next/head';
 import { UserPayload } from '@/interfaces/auth.interface';
 
 type Props = { children?: React.ReactNode };
@@ -28,7 +28,11 @@ export const AuthWrapper = ({ children }: Props) => {
             dispatch(logout());
             push('/auth/login');
         } else if (payload) {
-            const jsonPayload = JSON.parse(payload)
+            const jsonPayload: UserPayload = JSON.parse(payload)
+            const page = pathname.split('/')?.[1]
+            const regionName = jsonPayload?.region?.alt_name ?? "E-GEREJA"
+            document.title = regionName.toUpperCase() + " | " + page.charAt(0).toUpperCase() + page.slice(1);
+
             if (jsonPayload.tempPassword)
                 push('/auth/update-password');
 
@@ -37,8 +41,14 @@ export const AuthWrapper = ({ children }: Props) => {
 
     }, [token, push, dispatch]);
 
+    useEffect(() => {
+    }, []);
+
 
     if (skipValidationPathName.includes(pathname)) return children
 
-    return <> {isTokenExist ? children : <LodingPage />} </>
+    return <>
+        {isTokenExist ? children : <LodingPage />}
+
+    </>
 };

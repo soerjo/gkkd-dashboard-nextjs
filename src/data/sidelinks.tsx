@@ -27,32 +27,32 @@ export interface SideLink extends NavLink {
 }
 
 export const sidelinks: SideLink[] = [
+  // {
+  //   title: 'Dashboard',
+  //   label: '',
+  //   roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+  //   href: '/',
+  //   icon: <IconLayoutDashboard size={18} />,
+  // },
   {
-    title: 'Dashboard',
+    title: 'Fellowship',
     label: '',
     roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-    href: '/',
-    icon: <IconLayoutDashboard size={18} />,
-  },
-  {
-    title: 'Blesscomn',
-    label: '',
-    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-    href: '/blesscomn',
+    href: '/fellowship',
     icon: <IconUsersGroup size={18} />,
     sub: [
       {
-        title: 'Blesscomn',
+        title: 'Fellowship',
         label: '',
         roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-        href: '/blesscomn/data',
+        href: '/fellowship/data',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Report',
         label: '',
         roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-        href: '/blesscomn/report',
+        href: '/fellowship/report',
         icon: <IconDatabaseExport size={18} />,
       },
     ],

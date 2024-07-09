@@ -29,6 +29,7 @@ const CustomSelect = ({ compName, fetchQuery }: CustomSelectProps) => {
       className="w-full"
       loadOptions={loadOptions}
       placeholder={`${compName}...`}
+      maxMenuHeight={250}
       isClearable={true}
       onChange={(e: any) => setSearchTerm(e?.value?.id)}
     />

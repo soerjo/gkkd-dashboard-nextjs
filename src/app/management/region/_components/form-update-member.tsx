@@ -90,26 +90,6 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
         onOpenChange(val => !val);
     };
 
-
-    const _loadRoleSuggestions = async (query: string, callback: (...arg: any) => any) => {
-        try {
-            const response = await getParams({ param: "role" }).unwrap();
-            const list = response.data.map(val => ({
-                value: val.name,
-                label: val.name,
-            }));
-            return callback(list)
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            console.log({ errorMessage })
-            return [];
-        }
-    };
-
-    const promiseRoleOptions = debounce(_loadRoleSuggestions, 300);
-
-
-
     const _loadRegionSuggestions = async (query: string, callback: (...arg: any) => any) => {
         try {
             const response = await getListChurch({ take: 20, page: 1, search: query }).unwrap();

@@ -27,17 +27,18 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
-import { MemberResponse } from "@/interfaces/memberResponse";
-import {
-    useDeleteUserMutation,
-    useLazyGetAllUserQuery,
-    useLazyGetUserByIdQuery,
-    useResetUserPasswordMutation,
-} from "@/store/services/user";
+import { Member } from "@/interfaces/memberResponse";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useLazyGetMemberByIdQuery, useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
+import useQueryParams from "@/hooks/user-query-params";
 
-export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
+export const DropdownAction = ({ row }: { row: Row<Member> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
+
+    const [detailUserNij, setDetailUserNij] = React.useState<string | null>('');
+    useQueryParams({ key: 'nij', value: detailUserNij })
+
 
     const router = useRouter();
     const pathname = usePathname();
@@ -47,29 +48,22 @@ export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getData] = useLazyGetUserByIdQuery();
-    const [getAllData] = useLazyGetAllUserQuery();
-    const [deleteData] = useDeleteUserMutation();
-    const [resetPassword] = useResetUserPasswordMutation();
+    const [getAllData] = useLazyGetAllMemberQuery();
+    const [deleteData] = useDeleteMemberMutation();
 
-    const setParams = () => {
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("id", row.original.id + "");
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-            scroll: false,
-        });
-
-        getData({ id: row.original.id });
-        setOpen(true);
+    const setParams = async () => {
+        try {
+            setDetailUserNij(row.original.nij)
+            setOpen(true);
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            console.error(errorMessage)
+        }
     };
 
     const handleDeleteData = async () => {
         await deleteData({ id: row.original.id }).unwrap();
         await getAllData({ page, take, search }).unwrap();
-    };
-
-    const handleResetPassword = async () => {
-        await resetPassword({ id: row.original.id }).unwrap();
     };
 
     React.useEffect(() => {
@@ -129,35 +123,10 @@ export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
                                     </AlertDialogContent>
                                 </AlertDialog>{" "}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <AlertDialog>
-                                    <AlertDialogTrigger className="flex gap-2 w-full">
-                                        <IconRefresh size={18} />
-                                        Reset Password
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                                Are you sure reset password user: {row.original.name}?
-                                            </AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone.
-                                                This will change user default password from servers.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleResetPassword}>
-                                                Continue
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -194,7 +163,7 @@ export const DropdownAction = ({ row }: { row: Row<MemberResponse> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

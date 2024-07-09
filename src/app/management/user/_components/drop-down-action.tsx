@@ -47,19 +47,11 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getData] = useLazyGetUserByIdQuery();
     const [getAllData] = useLazyGetAllUserQuery();
     const [deleteData] = useDeleteUserMutation();
     const [resetPassword] = useResetUserPasswordMutation();
 
     const setParams = () => {
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("id", row.original.id + "");
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-            scroll: false,
-        });
-
-        getData({ id: row.original.id });
         setOpen(true);
     };
 
@@ -70,6 +62,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
 
     const handleResetPassword = async () => {
         await resetPassword({ id: row.original.id }).unwrap();
+        await getAllData({ page, take, search }).unwrap();
     };
 
     React.useEffect(() => {

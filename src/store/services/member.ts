@@ -4,6 +4,7 @@ import {
   GetMemberFilter,
   MemberResponse,
   CreateMember,
+  MemberDetail,
 } from "@/interfaces/memberResponse";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -26,10 +27,7 @@ export const memberApi = createApi({
         body: payload,
       }),
     }),
-    updateMember: builder.mutation<
-      IApiResponse<undefined>,
-      Member & { id: number }
-    >({
+    updateMember: builder.mutation<IApiResponse<undefined>, Member>({
       query: ({ id, ...payload }) => ({
         url: `/${id}`,
         method: "PATCH",
@@ -52,7 +50,7 @@ export const memberApi = createApi({
         params: payload,
       }),
     }),
-    GetMemberById: builder.query<IApiResponse<MemberResponse>, { id: number }>({
+    GetMemberById: builder.query<IApiResponse<MemberDetail>, { id: string }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "GET",

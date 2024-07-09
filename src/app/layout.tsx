@@ -9,7 +9,7 @@ import { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GKKD-Ciledug | Dashboard",
+  title: "E-GEREJA",
   description: "-",
   manifest: '/site.webmanifest',
   icons: {

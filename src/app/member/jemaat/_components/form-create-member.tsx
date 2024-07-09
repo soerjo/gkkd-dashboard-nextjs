@@ -22,23 +22,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CreateChurch, GetChurchResponse } from "@/interfaces/churchResponse";
 import { Textarea } from "@/components/ui/textarea"
-import {
-    useCreateChurchMutation,
-    useGetAllChurchQuery,
-    useLazyGetAllChurchQuery,
-} from "@/store/services/church";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useToast } from "@/components/ui/use-toast";
-import { useSearchParams } from "next/navigation";
 import { useLazyGetParamsQuery } from "@/store/services/params";
-import {
-    useCreateUserMutation,
-    useLazyGetAllUserQuery,
-} from "@/store/services/user";
-import { GetUserResponse } from "@/interfaces/userResponse";
-import AsyncSelect from "@/components/react-select";
 import { CreateMember } from "@/interfaces/memberResponse";
 import { useCreateMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
@@ -48,11 +36,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
-import { UserPayload } from "@/interfaces/loginResponse";
 
 
 
 const defaultCreateMemberForm = {
+    nij: "",
     full_name: "",
     name: "",
     email: "",
@@ -77,6 +65,7 @@ const phoneRegex = new RegExp(
 
 const FormSchema = z
     .object({
+        nij: z.string().min(1, { message: "required" }).max(25),
         full_name: z.string().min(1, { message: "required" }).max(25),
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
@@ -110,8 +99,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
     const [createMember] = useCreateMemberMutation();
     const [fetchMember] = useLazyGetAllMemberQuery()
-    const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {

@@ -1,11 +1,11 @@
-
-
+import { Inter } from "next/font/google";
 import { Metadata } from "next";
-import * as React from "react"
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "E-GEREJA | Dashboard",
-  description: "-",
+  // title: "E-GEREJA",
+  // description: "-",
   manifest: '/site.webmanifest',
   icons: {
     icon: [
@@ -22,9 +22,7 @@ export const metadata: Metadata = {
     },
   },
 };
-export default function Page() {
 
-  return (
-    <>root...</>
-  )
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return children
 }
