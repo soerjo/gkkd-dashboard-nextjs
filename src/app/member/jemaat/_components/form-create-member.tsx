@@ -111,7 +111,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

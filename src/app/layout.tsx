@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import 'react-toastify/dist/ReactToastify.css';
 import StoreProvider from "./storeProvider";
 import { AuthWrapper } from "@/components/auth-wrapper";
 import { ThemeProvider } from "@/components/next-theme-provider";

@@ -44,14 +44,14 @@ const FormSchema = z
         phone: z.string().regex(phoneRegex, 'invalid number'),
         role: z.object(
             {
-                label: z.string(),
+                label: z.string().min(1, { message: "required" }),
                 value: z.any(),
             },
             { message: "required" }
         ),
         region: z.object(
             {
-                label: z.string(),
+                label: z.string().min(1, { message: "required" }),
                 value: z.any(),
             },
             { message: "required" }
@@ -91,7 +91,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            console.log({ errorMessage })
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 
@@ -106,7 +107,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listChurch.data.entities.map(value => ({ value: value, label: value.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
             return [];
         }
     };
@@ -117,7 +118,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listRole.data.map(val => ({ value: val.name, label: val.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
             return [];
         }
     };

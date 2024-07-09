@@ -99,7 +99,7 @@ export const UpdateFormInput = ({
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 
@@ -116,7 +116,7 @@ export const UpdateFormInput = ({
             return callback(list);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 
@@ -139,7 +139,7 @@ export const UpdateFormInput = ({
             return callback(list);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
             return [];
         }
     };

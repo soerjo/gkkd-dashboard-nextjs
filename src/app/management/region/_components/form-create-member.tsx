@@ -83,7 +83,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
             return [];
         }
     };
@@ -99,7 +99,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return listChurch.data.entities.map(value => ({ value: value, label: value.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
             return []
         }
     };

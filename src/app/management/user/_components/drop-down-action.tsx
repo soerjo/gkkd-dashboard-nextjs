@@ -63,7 +63,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
             await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 
@@ -73,7 +73,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
             await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
-            toast(errorMessage);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 
