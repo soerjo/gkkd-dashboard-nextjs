@@ -116,7 +116,7 @@ export function DataTable() {
                 region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
             };
-            await fetchData(params);
+            await fetchData(params, false);
         } catch (error) {
             console.log({ error });
         }

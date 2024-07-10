@@ -14,16 +14,7 @@ import MyBreadcrum from '@/components/my-breadcrum';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [fetchChurch] = useLazyGetAllChurchQuery();
 
-  const fetch = async (query: string) => {
-    try {
-      const res = await fetchChurch({ take: 100, page: 1, search: query }).unwrap();
-      return res.data.entities.map(data => ({ label: data.name, value: data }))
-    } catch (error) {
-      return []
-    }
-  }
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex flex-col '>
@@ -48,8 +39,6 @@ export default function Dashboard() {
       </div>
       <div className='flex md:flex-row flex-col gap-4 md:w-1/3'>
         <CustomSearchInput />
-        {/* <CustomSelect compName={'church'} fetchQuery={fetch} /> */}
-        {/* <DateRangePicker /> */}
       </div>
       <DataTable />
 

@@ -27,10 +27,7 @@ const defaultValue: CreateChurchForm = {
     name: "",
     alt_name: "",
     location: "",
-    region: {
-        label: "",
-        value: ""
-    }
+    region: null,
 }
 
 const phoneRegex = new RegExp(
@@ -42,13 +39,7 @@ const FormSchema = z
         name: z.string().min(1, { message: "required" }).max(25),
         alt_name: z.string().min(1, { message: "required" }).max(25),
         location: z.string().min(1, { message: "required" }).max(125).optional(),
-        region: z.object(
-            {
-                label: z.string(),
-                value: z.any(),
-            },
-            { message: "required" }
-        ).optional(),
+        region: z.any().nullable().optional(),
     })
 
 
@@ -68,7 +59,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const [createData] = useCreateChurchMutation();
     const [fetchTable] = useLazyGetAllChurchQuery()
     const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {

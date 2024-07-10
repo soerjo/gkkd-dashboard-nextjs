@@ -15,15 +15,14 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CreateUserForm, GetUserResponse } from "@/interfaces/userResponse";
-import { useUpdateUserMutation, useLazyGetAllUserQuery, } from "@/store/services/user";
-import { useLazyGetParamsQuery } from "@/store/services/params";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useLazyGetAllChurchQuery, useUpdateChurchMutation } from "@/store/services/church";
+import {
+    useLazyGetAllChurchQuery,
+    useUpdateChurchMutation,
+} from "@/store/services/church";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import debounce from "lodash.debounce";
-import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
-import { CreateChurch, CreateChurchForm, GetChurchResponse } from "@/interfaces/churchResponse";
+import { CreateChurchForm, GetChurchResponse } from "@/interfaces/churchResponse";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
 
@@ -31,33 +30,26 @@ const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
 
-const FormSchema = z
-    .object({
-        name: z.string().min(1, { message: "required" }).max(25),
-        alt_name: z.string().min(1, { message: "required" }).max(25),
-        location: z.string().min(1, { message: "required" }).max(125).optional(),
-        region: z.object(
-            {
-                label: z.string(),
-                value: z.any(),
-            },
-            { message: "required" }
-        ).optional(),
-    })
-
+const FormSchema = z.object({
+    name: z.string().min(1, { message: "required" }).max(25),
+    alt_name: z.string().min(1, { message: "required" }).max(25),
+    location: z.string().max(125).optional(),
+    region: z.any().nullable().optional(),
+});
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: GetChurchResponse
-}
+    data: GetChurchResponse;
+};
 
-export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) => {
+export const UpdateFormInput = ({
+    onOpenChange,
+    data,
+}: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateChurchMutation();
-    const [getAllData] = useLazyGetAllUserQuery();
     const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
 
     const form = useForm<CreateChurchForm>({
         resolver: zodResolver(FormSchema),
@@ -65,31 +57,19 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
             name: data.name,
             alt_name: data.alt_name,
             location: data.location,
-            region: {
-                label: data.parent,
-                value: {
-                    id: data.parent_id,
-                    parent: data.parent
-                }
-            },
+            region: null,
         },
     });
-    const { formState: { isDirty, isSubmitting }, reset, } = form;
-
+    const { formState: { isDirty, isSubmitting } } = form;
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-
-            const oldData = data
-
-            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-            const userPayload = JSON.parse(cookiesPayload ?? "")
-
+            const oldData = data;
             await updateData({
                 ...values,
                 id: oldData.id,
-                parent_id: values.region?.value.id ?? userPayload.region.id,
+                parent_id: values.region?.value.id,
             }).unwrap();
-            await getAllData({}).unwrap();
+            await getListChurch({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -97,14 +77,21 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
         }
     };
 
-    const _loadRegionSuggestions = async (query: string, callback: (...arg: any) => any) => {
+    const _loadRegionSuggestions = async (
+        query: string,
+        callback: (...arg: any) => any
+    ) => {
         try {
-            const response = await getListChurch({ take: 20, page: 1, search: query }).unwrap();
+            const response = await getListChurch({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
             const list = response.data.entities.map(val => ({
                 value: val,
                 label: val.name,
             }));
-            return callback(list)
+            return callback(list);
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -116,7 +103,8 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
 
     return (
         <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"}`}
+            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
+                }`}
         >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
@@ -145,24 +133,21 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                 </div>
             </div>
             <div
-                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"}`}
+                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"
+                    }`}
             >
-
-                <Form
-                    {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="flex h-full"
-                    >
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
                         <ScrollArea>
                             <div className="flex flex-col gap-4">
-
                                 <FormField
                                     control={form.control}
                                     name={"name"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"name".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"name".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
@@ -176,13 +161,14 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     )}
                                 />
 
-
                                 <FormField
                                     control={form.control}
                                     name={"alt_name"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"alt_name".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"alt_name".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
@@ -201,7 +187,9 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     name={"location"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"location".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"location".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="Tell us a little bit about yourself"
@@ -214,19 +202,20 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     )}
                                 />
 
-
-
                                 <FormField
                                     control={form.control}
                                     name="region"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"region".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"region".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="region"
                                                     cacheOptions
                                                     defaultOptions
+                                                    isClearable={true}
                                                     loadOptions={promiseRegionOptions}
                                                     defaultValue={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
@@ -236,10 +225,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                         </FormItem>
                                     )}
                                 />
-
                             </div>
-
-
                         </ScrollArea>
 
                         {isDirty && (
@@ -256,7 +242,6 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                     </form>
                 </Form>
             </div>
-
         </div>
     );
 };

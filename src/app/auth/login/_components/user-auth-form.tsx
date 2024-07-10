@@ -17,10 +17,10 @@ import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
 import { useLoginMutation } from "@/store/services/auth";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -38,7 +38,6 @@ const formSchema = z.object({
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [login, { isLoading }] = useLoginMutation();
-  const { toast } = useToast();
   const { push } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,16 +57,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         password: data.password,
       }).unwrap()
 
-      console.log("wrap up...")
       push("/");
     } catch (error) {
       const errorMessage = getErroMessage(error);
-      toast({
-        className:
-          "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-        variant: "destructive",
-        description: errorMessage,
-      });
+      toast.error(errorMessage)
+
     }
   }
 
@@ -94,15 +88,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               name="password"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link
+                  {/* <div className="flex items-center justify-between"> */}
+                  <FormLabel>Password</FormLabel>
+                  {/* <Link
                       href="/forgot-password"
                       className="text-sm font-medium text-muted-foreground hover:opacity-75"
                     >
                       Forgot password?
-                    </Link>
-                  </div>
+                    </Link> */}
+                  {/* </div> */}
                   <FormControl>
                     <PasswordInput placeholder="********" {...field} />
                   </FormControl>

@@ -29,15 +29,15 @@ export const memberApi = createApi({
       }),
     }),
     updateMember: builder.mutation<IApiResponse<undefined>, UpdateMember>({
-      query: ({ id, ...payload }) => ({
-        url: `/${id}`,
+      query: ({ nij, ...payload }) => ({
+        url: `/${nij}`,
         method: "PATCH",
         body: payload,
       }),
     }),
-    deleteMember: builder.mutation<IApiResponse<undefined>, { id: number }>({
-      query: ({ id }) => ({
-        url: `/${id}`,
+    deleteMember: builder.mutation<IApiResponse<undefined>, { nij: string }>({
+      query: ({ nij }) => ({
+        url: `/${nij}`,
         method: "DELETE",
       }),
     }),
@@ -51,9 +51,9 @@ export const memberApi = createApi({
         params: payload,
       }),
     }),
-    GetMemberById: builder.query<IApiResponse<MemberDetail>, { id: string }>({
-      query: ({ id }) => ({
-        url: `/${id}`,
+    GetMemberById: builder.query<IApiResponse<MemberDetail>, { nij: string }>({
+      query: ({ nij }) => ({
+        url: `/${nij}`,
         method: "GET",
       }),
     }),

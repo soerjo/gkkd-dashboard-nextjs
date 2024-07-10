@@ -37,8 +37,11 @@ import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import debounce from "lodash.debounce";
+import AsyncSelect from "@/components/react-select";
 
-const defaultCreateMemberForm: UpdateMember = {
+const defaultCreateMemberForm: UpdateMember & { region: any } = {
     id: 0,
     nij: "",
     full_name: "",
@@ -59,12 +62,18 @@ const defaultCreateMemberForm: UpdateMember = {
     // total_son_daughter: null,
     // son_daughter_name: null,
     // baptism_date: null,
-    region_id: undefined
+    region_id: 1,
+    region: { label: "", value: {} }
 }
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
+
+const RegionSchema = z.object({
+    label: z.string(),
+    value: z.any(),
+}).nullable().optional()
 
 const FormSchema = z
     .object({
@@ -75,20 +84,21 @@ const FormSchema = z
         email: z.string().min(1, { message: "required" }).max(25).email(),
         gender: z.string().min(1, { message: "required" }).max(25),
         place_birthday: z.string().min(1, { message: "required" }).max(25),
-        date_birthday: z.date(),
+        date_birthday: z.coerce.date(),
         phone_number: z.string().regex(phoneRegex, 'Invalid Number!'),
         address: z.string().max(250).optional(),
         father_name: z.string().max(25).optional(),
         mother_name: z.string().max(25).optional(),
-        birth_order: z.number().min(0).optional(),
-        total_brother_sister: z.number().min(0).optional(),
+        birth_order: z.number().nullable().optional(),
+        total_brother_sister: z.number().nullable().optional(),
         marital_status: z.boolean().optional(),
         husband_wife_name: z.string().max(25).optional(),
-        wedding_date: z.date().optional(),
+        wedding_date: z.coerce.date().optional(),
         // total_son_daughter: z.number().min(0).optional(),
         // son_daughter_name: z.string().max(25).optional(),
         // baptism_date: z.date().optional(),
         region_id: z.number().min(0).optional(),
+        region: RegionSchema
     })
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>>, data: Member }
@@ -97,20 +107,25 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const [updateData] = useUpdateMemberMutation();
     const [fetchMember] = useLazyGetAllMemberQuery()
-    const { isLoading, data: payload } = useGetMemberByIdQuery({ id: data.nij });
+    const { isLoading, data: payload } = useGetMemberByIdQuery({ nij: data.nij }, { refetchOnMountOrArgChange: true });
 
-    const form = useForm<UpdateMember>({
+    const form = useForm<UpdateMember & { region: any }>({
         resolver: zodResolver(FormSchema),
         defaultValues: defaultCreateMemberForm,
     });
 
-    const { formState: { isSubmitting, isDirty }, reset, } = form;
+    const { formState: { isSubmitting, isDirty }, reset } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-            const userPayload = JSON.parse(cookiesPayload ?? "")
-            const createUserBody: UpdateMember = { ...values, id: data.id, region_id: userPayload.region.id }
+            const createUserBody: UpdateMember = {
+                ...values,
+                id: data.id,
+                region_id: values.region?.value.id,
+                total_brother_sister: values.total_brother_sister ?? 0,
+                birth_order: values.birth_order ?? 1,
+
+            }
             await updateData(createUserBody).unwrap();
             await fetchMember({}).unwrap();
             onOpenChange(val => !val);
@@ -120,30 +135,47 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
         }
     };
 
-    useEffect(() => {
-        // console.log({ payload })
+    const [lazy] = useLazyGetAllChurchQuery();
+    const _loadSuggestions = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+            const resp = res.data.entities.map(data => ({ label: data.name, value: data }))
+            console.log({ resp })
+            return callback(resp)
+        } catch (error) {
+            return []
+        }
+    };
+    const loadOptions = debounce(_loadSuggestions, 300);
 
+
+    useEffect(() => {
         reset({
-            nij: payload?.data?.nij,
-            full_name: payload?.data.full_name,
-            name: payload?.data.name,
-            email: payload?.data.email,
-            gender: payload?.data.gender,
-            place_birthday: payload?.data.place_birthday,
-            date_birthday: payload?.data.date_birthday,
-            phone_number: payload?.data.phone_number,
-            address: payload?.data.phone_number,
-            father_name: payload?.data.father_name,
-            mother_name: payload?.data.mother_name,
-            birth_order: payload?.data.birth_order,
-            total_brother_sister: payload?.data.total_brother_sister,
-            marital_status: payload?.data.marital_status,
-            husband_wife_name: payload?.data.email,
-            wedding_date: payload?.data.wedding_date,
-            // total_son_daughter: payload?.data?.total_son_daughter,
-            // son_daughter_name: payload?.data?.son_daughter_name,
-            // baptism_date: payload?.data.email,
-            region_id: payload?.data.region_id
+            id: payload?.data.id ?? 0,
+            nij: payload?.data?.nij ?? "",
+            full_name: payload?.data.full_name ?? "",
+            name: payload?.data.name ?? "",
+            email: payload?.data.email ?? "",
+            gender: payload?.data.gender ?? "",
+            place_birthday: payload?.data.place_birthday ?? "",
+            date_birthday: payload?.data.date_birthday ?? new Date(),
+            phone_number: payload?.data.phone_number ?? "",
+            address: payload?.data.phone_number ?? "",
+            father_name: payload?.data.father_name ?? "",
+            mother_name: payload?.data.mother_name ?? "",
+            birth_order: payload?.data.birth_order ?? 1,
+            total_brother_sister: payload?.data.total_brother_sister ?? 1,
+            marital_status: payload?.data.marital_status ?? false,
+            husband_wife_name: payload?.data.email ?? "",
+            wedding_date: payload?.data.wedding_date ?? new Date(),
+            // total_son_daughter: payload?.data?.total_son_daughter ?? "",
+            // son_daughter_name: payload?.data?.son_daughter_name ?? "",
+            // baptism_date: payload?.data.email ?? "",
+            region_id: payload?.data.region_id ?? 1,
+            region: {
+                label: payload?.data?.region?.name ?? "",
+                value: payload?.data?.region
+            }
 
         })
     }, [payload])
@@ -419,7 +451,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                 />
 
 
-                                {/* <FormField
+                                <FormField
                                     control={form.control}
                                     name={"birth_order"}
                                     render={({ field }) => (
@@ -427,18 +459,17 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                             <FormLabel className="capitalize">{"birth_order".replaceAll("_", " ")}</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="number"
+                                                    type="text"
                                                     id={"birth_order"}
                                                     placeholder={"birth_order"}
                                                     pattern="[0-9]*"
                                                     {...field}
-                                                    defaultValue={field.value ?? 0}
                                                 />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                /> */}
+                                />
 
 
                                 <FormField
@@ -451,6 +482,8 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                                 <Input
                                                     type="text"
                                                     id={"total_brother_sister"}
+                                                    pattern="[0-9]*"
+
                                                     placeholder={"total_brother_sister"}
                                                     {...field}
                                                 />
@@ -487,7 +520,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                     )}
                                 />
 
-                                {/* <FormField
+                                <FormField
                                     control={form.control}
                                     name={"husband_wife_name"}
                                     render={({ field }) => (
@@ -504,10 +537,10 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                /> */}
+                                />
 
 
-                                {/* <FormField
+                                <FormField
                                     control={form.control}
                                     name={"wedding_date"}
                                     render={({ field }) => (
@@ -529,7 +562,30 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                /> */}
+                                />
+
+
+                                <FormField
+                                    control={form.control}
+                                    name="region"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"region".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <AsyncSelect
+                                                    id="region"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptions}
+                                                    // defaultValue={field.value}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
                             </div>
 

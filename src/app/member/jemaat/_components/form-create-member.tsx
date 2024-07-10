@@ -34,11 +34,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { toast } from "react-toastify";
+import AsyncSelect from "@/components/react-select";
+import debounce from "lodash.debounce";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
 
 
 
 const defaultCreateMemberForm = {
-    nij: "",
     full_name: "",
     name: "",
     email: "",
@@ -55,15 +57,20 @@ const defaultCreateMemberForm = {
     husband_wife_name: "",
     wedding_date: undefined,
     // region_id: undefined,
+    region: {}
 }
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
 
+const RegionSchema = z.object({
+    label: z.string(),
+    value: z.any(),
+}).nullable().optional()
+
 const FormSchema = z
     .object({
-        nij: z.string().min(1, { message: "required" }).max(25),
         full_name: z.string().min(1, { message: "required" }).max(25),
         name: z.string().min(1, { message: "required" }).max(25),
         email: z.string().min(1, { message: "required" }).max(25).email(),
@@ -79,6 +86,7 @@ const FormSchema = z
         marital_status: z.boolean().optional(),
         husband_wife_name: z.string().max(25).optional(),
         wedding_date: z.date().optional(),
+        region: RegionSchema
         // region_id: z.number().min(0).optional(),
     })
 
@@ -87,11 +95,11 @@ export type CreateFormProps = React.ComponentProps<"form"> & { onOpenChange: Rea
 export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const form = useForm<CreateMember>({
+    const form = useForm<CreateMember & { region: { label: string, value: any } }>({
         resolver: zodResolver(FormSchema),
         defaultValues: defaultCreateMemberForm,
     });
-    const { formState: { isSubmitting } } = form;
+    const { formState: { isSubmitting, errors } } = form;
 
 
     const [createMember] = useCreateMemberMutation();
@@ -99,12 +107,9 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-            const userPayload = JSON.parse(cookiesPayload ?? "")
             const createUserBody: CreateMember = {
                 ...values,
-                region_id: userPayload.region.id,
-
+                region_id: values.region?.value.id,
             }
             await createMember(createUserBody).unwrap();
             await fetchMember({}).unwrap();
@@ -114,6 +119,19 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             toast.error(JSON.stringify(errorMessage));
         }
     };
+
+    const [lazy] = useLazyGetAllChurchQuery();
+    const _loadSuggestions = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+            const resp = res.data.entities.map(data => ({ label: data.name, value: data }))
+            return callback(resp)
+        } catch (error) {
+            return []
+        }
+    };
+    const loadOptions = debounce(_loadSuggestions, 300);
+
 
     return (
         <div
@@ -465,6 +483,27 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormField
+                                    control={form.control}
+                                    name="region"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"region".replaceAll("_", " ")}</FormLabel>
+                                            <FormControl>
+                                                <AsyncSelect
+                                                    id="region"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptions}
+                                                    onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
 
                             </div>
 

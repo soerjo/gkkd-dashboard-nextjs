@@ -18,10 +18,6 @@ export default function SignIn() {
         <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
             <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
                 <div className={`absolute inset-0 bg-zinc-800`} />
-                {/* <div className='relative z-20 flex items-center text-lg font-medium gap-2'>
-                    E-Gereja Admin
-                </div> */}
-
                 <svg width="731" height="745" viewBox="0 0 731 745" fill="none" xmlns="http://www.w3.org/2000/svg"
                     className='h-[200px] w-[200px] relative m-auto'
                 >

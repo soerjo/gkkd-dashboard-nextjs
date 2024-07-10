@@ -101,7 +101,7 @@ export function DataTable() {
                 take: props.take ? Number(props.take) : undefined,
                 search: props.search,
             }
-            await fetchData(params)
+            await fetchData(params, false)
         } catch (error) {
             console.log({ error })
         }

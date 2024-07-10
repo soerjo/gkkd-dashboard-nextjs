@@ -69,7 +69,6 @@ export type UpdateMember = {
 };
 
 export type CreateMember = {
-  nij: string;
   full_name: string;
   name: string;
   email: string;

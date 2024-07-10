@@ -1,10 +1,7 @@
 import * as React from "react"
 import AsyncSelect from "@/components/react-select"
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from 'lodash.debounce';
-import useDebounce from "@/hooks/use-debounce";
 import useQueryParams from "@/hooks/user-query-params";
-import { GroupBase, OptionsOrGroups } from "react-select";
 
 export type CustomSelectProps = {
   compName: string,

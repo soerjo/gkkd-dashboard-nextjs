@@ -27,8 +27,5 @@ export type CreateChurchForm = {
   name: string;
   alt_name: string;
   location?: string;
-  region?: {
-    label: string;
-    value: any;
-  };
+  region?: CreateChurch | null;
 };
