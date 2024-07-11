@@ -64,7 +64,7 @@ export const DropdownAction = ({ row }: { row: Row<Member> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ id: row.original.id }).unwrap();
+            await deleteData({ nij: row.original.nij }).unwrap();
             await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
