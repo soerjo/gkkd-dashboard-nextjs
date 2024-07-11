@@ -17,7 +17,7 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
-    PaginationState
+    PaginationState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,53 +36,35 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { MyDrawer } from "./my-drawer";
-import { PlusIcon } from "lucide-react";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { DropdownAction } from "./drop-down-action";
 
-import { useState, useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllUserQuery } from "@/store/services/user";
-import { GetUserResponse } from "@/interfaces/userResponse";
-import { useToast } from "@/components/ui/use-toast";
-import { getErroMessage } from "@/lib/rtk-error-validation";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
-import useDebounce from "@/hooks/use-debounce";
-import AsyncSelect from "@/components/react-select";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import useQueryParams from "@/hooks/user-query-params";
+import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
+import { IMarital } from "@/interfaces/marital.interface";
 
-export const columns: ColumnDef<GetUserResponse>[] = [
+export const columns: ColumnDef<IMarital>[] = [
     {
-        accessorKey: "name",
-        header: "Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        accessorKey: "unique_code",
+        header: "No Surat",
+        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("unique_code")}</div>,
     },
     {
-        accessorKey: "email",
-        header: "Alternative Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        accessorKey: "husband_name",
+        header: "Husband Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("husband_name")}</div>,
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("status") || "active"}</div>
-        ),
+        accessorKey: "wife_name",
+        header: "Wife Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("wife_name")}</div>,
     },
     {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("role")}</div>
-        ),
-    },
-    {
-        accessorKey: "region",
-        header: "Region",
-        cell: ({ row }) => (
-            <div className="">{row.original?.region?.name || "-"}</div>
-        ),
+        accessorKey: "wedding_date",
+        header: "Wedding Date",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("wedding_date")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
     },
     {
         id: "actions",
@@ -93,179 +75,60 @@ export const columns: ColumnDef<GetUserResponse>[] = [
     },
 ];
 
+export type FetchMemberProps = {
+    page?: string;
+    take?: string;
+    search?: string;
+    church?: string;
+    dateFrom?: string;
+    dateTo?: string;
+};
+
 export function DataTable() {
-    const isDesktop = useMediaQuery("(min-width: 768px)");
-    const pageSizeOptions = [5, 10, 20, 30, 50]
-
-    const router = useRouter();
-    const pathname = usePathname()
-    const searchParams = useSearchParams();
-    const [getListChurch] = useLazyGetAllChurchQuery();
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [regionsId, setRegionsId] = useState("");
-
-    const debouncedSearchTerm = useDebounce(searchTerm, 300);
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(event.target.value);
-    };
-
-    // search params
-    const page = Number(searchParams?.get("page") ?? "1") // default is page: 1
-    const take = Number(searchParams?.get("take") ?? "5") // default 5 record per page
-    const search = searchParams?.get("search") ?? "" // default 5 record per page
-    const region_id = searchParams?.get("region_id") ?? "" // default 5 record per page
-
-
-    const { toast } = useToast();
-    const { data, error, isLoading } = useGetAllUserQuery({
-        page: page,
-        take: take,
-        search: search,
-        region_id: region_id ? Number(region_id) : undefined
-
+    const [pagination, setPagination] = useState({
+        pageIndex: 0, //initial page index
+        pageSize: 10, //default page size
     });
 
-    useEffect(() => {
-        if (error) {
-            const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
+    useQueryParams({ key: "page", value: pagination.pageIndex + 1 });
+    useQueryParams({ key: "take", value: pagination.pageSize });
+
+    const pageSizeOptions = [5, 10, 20, 30, 50];
+    const searchParams = useSearchParams();
+
+    const [fetchData, { data, isLoading }] = useLazyGetAllMaritalQuery();
+    const fetchMember = async (props: FetchMemberProps) => {
+        try {
+            const params = {
+                page: props.page ? Number(props.page) : undefined,
+                take: props.take ? Number(props.take) : undefined,
+                region_id: props.church ? Number(props.church) : undefined,
+                search: props.search,
+            };
+            await fetchData(params, false);
+        } catch (error) {
+            console.log({ error });
         }
-    }, [error]);
-
-
-
-    // create query string
-    const createQueryString = React.useCallback(
-        (params: Record<string, string | number | null>) => {
-            const newSearchParams = new URLSearchParams(searchParams?.toString())
-
-            for (const [key, value] of Object.entries(params)) {
-                if (value === null) {
-                    newSearchParams.delete(key)
-                } else {
-                    newSearchParams.set(key, String(value))
-                }
-            }
-
-            return newSearchParams.toString()
-        },
-        [searchParams]
-    )
-
-    // handle server-side pagination
-    const [{ pageIndex, pageSize }, setPagination] =
-        React.useState<PaginationState>({
-            pageIndex: Number(page) - 1,
-            pageSize: Number(take),
-        })
-
-    const pagination = React.useMemo(
-        () => ({
-            pageIndex,
-            pageSize,
-        }),
-        [pageIndex, pageSize]
-    )
+    };
 
     React.useEffect(() => {
-        setPagination({
-            pageIndex: Number(page) - 1,
-            pageSize: Number(take),
-        })
-    }, [page, take])
-
-    // changed the route as well
-    React.useEffect(() => {
-        router.push(
-            `${pathname}?${createQueryString({
-                page: pageIndex + 1,
-                take: pageSize,
-                search: debouncedSearchTerm,
-                region_id: regionsId || '',
-            })}`
-        )
-    }, [pageIndex, pageSize, debouncedSearchTerm, regionsId])
-
+        const params = Object.fromEntries(searchParams.entries());
+        fetchMember(params);
+    }, [searchParams]);
 
     const table = useReactTable({
         data: data?.data?.entities || [],
-        columns,
+        columns: columns,
         pageCount: data?.data?.meta.pageCount ?? -1,
-        state: {
-            pagination,
-        },
         onPaginationChange: setPagination,
+        state: { pagination },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
-    })
-
-    const promiseRegionOptions = async (inputValue: string) => {
-        try {
-            const listChurch = await getListChurch({ take: 5, page: 1, search: inputValue }).unwrap();
-            const data = listChurch.data.entities.map(list => ({
-                value: list,
-                label: list.name,
-            }));
-            // data.push({ value: { id: 0 }, label: "clear..." })
-            return data.filter(d =>
-                d.label.toLowerCase().includes(inputValue.toLowerCase())
-            );
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast({
-                className:
-                    "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-                variant: "destructive",
-                description: errorMessage,
-            });
-            return [];
-        }
-    };
+    });
 
     return (
         <div className="w-full">
-            <div className="flex items-center pb-4 justify-between">
-                <div className="flex items-center gap-2 ">
-                    <Input
-                        placeholder="Search..."
-                        className="w-full"
-                        onChange={handleChange}
-                    />
-                    <AsyncSelect
-                        id="region"
-                        cacheOptions
-                        defaultOptions
-                        className="w-full"
-                        loadOptions={promiseRegionOptions}
-                        placeholder="church..."
-                        isClearable={true}
-                        onChange={(e: any) => {
-                            if (regionsId === e?.value?.id) return setRegionsId("")
-                            setPagination({ pageIndex: 0, pageSize: 5 })
-                            return setRegionsId(e?.value?.id)
-                        }}
-                    />
-                </div>
-                <div className="flex items-center gap-2">
-                    <MyDrawer>
-                        <Button variant="outline" size="sm" className="flex gap-2">
-                            <PlusIcon className="size-4" aria-hidden="true" />
-                            {isDesktop && "New User"}
-                        </Button>
-                    </MyDrawer>
-                    <Button variant="outline" size="sm" className="flex gap-2">
-                        <DownloadIcon className="size-4" aria-hidden="true" />
-                        {isDesktop && "Export"}
-                    </Button>
-                </div>
-            </div>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -331,7 +194,8 @@ export function DataTable() {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 overflow-auto pt-4 sm:flex-row sm:gap-8">
+
+            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 pt-4 sm:flex-row sm:gap-8">
                 <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
                     <div className="flex items-center space-x-2">
                         <p className="whitespace-nowrap text-sm font-medium">
