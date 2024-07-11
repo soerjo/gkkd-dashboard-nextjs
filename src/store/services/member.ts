@@ -20,6 +20,7 @@ export const memberApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["Member"],
   endpoints: builder => ({
     createMember: builder.mutation<IApiResponse<undefined>, CreateMember>({
       query: payload => ({
@@ -27,6 +28,7 @@ export const memberApi = createApi({
         method: "POST",
         body: payload,
       }),
+      invalidatesTags: ["Member"],
     }),
     updateMember: builder.mutation<IApiResponse<undefined>, UpdateMember>({
       query: ({ nij, ...payload }) => ({
@@ -34,6 +36,7 @@ export const memberApi = createApi({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["Member"],
     }),
     deleteMember: builder.mutation<IApiResponse<undefined>, { nij: string }>({
       query: ({ nij }) => ({
@@ -50,6 +53,7 @@ export const memberApi = createApi({
         method: "GET",
         params: payload,
       }),
+      providesTags: ["Member"],
     }),
     GetMemberById: builder.query<IApiResponse<MemberDetail>, { nij: string }>({
       query: ({ nij }) => ({

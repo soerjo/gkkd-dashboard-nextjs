@@ -103,7 +103,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
 
     const [createMember] = useCreateMemberMutation();
-    const [fetchMember] = useLazyGetAllMemberQuery()
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
@@ -112,7 +111,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 region_id: values.region?.value.id,
             }
             await createMember(createUserBody).unwrap();
-            await fetchMember({}).unwrap();
+
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

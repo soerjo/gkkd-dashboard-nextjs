@@ -73,7 +73,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
 
     const [createUser] = useCreateUserMutation();
-    const [fetchTable] = useLazyGetAllUserQuery()
     const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
 
@@ -87,7 +86,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 regions_id: values.region?.value.id ?? userPayload.region.id,
             }
             await createUser(createUserBody).unwrap();
-            await fetchTable({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

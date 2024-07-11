@@ -17,6 +17,7 @@ export const churchApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["Church"],
   endpoints: builder => ({
     createChurch: builder.mutation<IApiResponse<GetChurchFilter>, CreateChurch>(
       {
@@ -30,6 +31,7 @@ export const churchApi = createApi({
             parent_id: payload?.parent_id,
           },
         }),
+        invalidatesTags: ["Church"],
       }
     ),
     updateChurch: builder.mutation<
@@ -41,6 +43,7 @@ export const churchApi = createApi({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["Church"],
     }),
     deleteChurch: builder.mutation<
       IApiResponse<GetChurchFilter>,
@@ -50,6 +53,7 @@ export const churchApi = createApi({
         url: `/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Church"],
     }),
     restoreChurch: builder.mutation<
       IApiResponse<GetChurchFilter>,
@@ -59,6 +63,7 @@ export const churchApi = createApi({
         url: `/restore/${id}`,
         method: "POST",
       }),
+      invalidatesTags: ["Church"],
     }),
     GetAllChurch: builder.query<
       IApiResponse<TPaginationResponse<GetChurchResponse[]>>,
@@ -69,6 +74,7 @@ export const churchApi = createApi({
         method: "GET",
         params: payload,
       }),
+      providesTags: ["Church"],
     }),
     GetChurchById: builder.query<IApiResponse<CreateChurch>, { id: number }>({
       query: ({ id }) => ({

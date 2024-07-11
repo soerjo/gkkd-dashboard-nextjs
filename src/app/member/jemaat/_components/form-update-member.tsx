@@ -27,13 +27,12 @@ import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea"
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Member, UpdateMember } from "@/interfaces/memberResponse";
-import { useGetMemberByIdQuery, useLazyGetAllMemberQuery, useUpdateMemberMutation } from "@/store/services/member";
+import { useGetMemberByIdQuery, useUpdateMemberMutation } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
@@ -106,7 +105,6 @@ export type UpdateFormInputProps = React.ComponentProps<"form"> & { onOpenChange
 export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const [updateData] = useUpdateMemberMutation();
-    const [fetchMember] = useLazyGetAllMemberQuery()
     const { isLoading, data: payload } = useGetMemberByIdQuery({ nij: data.nij }, { refetchOnMountOrArgChange: true });
 
     const form = useForm<UpdateMember & { region: any }>({
@@ -127,7 +125,6 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
 
             }
             await updateData(createUserBody).unwrap();
-            await fetchMember({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

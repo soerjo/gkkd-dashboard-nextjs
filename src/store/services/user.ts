@@ -17,6 +17,7 @@ export const userApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["User"],
   endpoints: builder => ({
     createUser: builder.mutation<IApiResponse<GetUserFilter>, CreateUser>({
       query: payload => ({
@@ -24,6 +25,7 @@ export const userApi = createApi({
         method: "POST",
         body: payload,
       }),
+      invalidatesTags: ["User"],
     }),
     updateUser: builder.mutation<
       IApiResponse<GetUserFilter>,
@@ -34,6 +36,7 @@ export const userApi = createApi({
         method: "PATCH",
         body: { ...payload },
       }),
+      invalidatesTags: ["User"],
     }),
     resetUserPassword: builder.mutation<
       IApiResponse<undefined>,
@@ -43,6 +46,7 @@ export const userApi = createApi({
         url: `${id}/reset-password`,
         method: "PATCH",
       }),
+      invalidatesTags: ["User"],
     }),
     updateUserPassword: builder.mutation<
       IApiResponse<undefined>,
@@ -53,18 +57,21 @@ export const userApi = createApi({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["User"],
     }),
     deleteUser: builder.mutation<IApiResponse<GetUserFilter>, { id: number }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["User"],
     }),
     restoreUser: builder.mutation<IApiResponse<GetUserFilter>, { id: number }>({
       query: ({ id }) => ({
         url: `/restore/${id}`,
         method: "POST",
       }),
+      invalidatesTags: ["User"],
     }),
     GetAllUser: builder.query<
       IApiResponse<TPaginationResponse<GetUserResponse[]>>,
@@ -77,6 +84,7 @@ export const userApi = createApi({
           params: payload,
         };
       },
+      providesTags: ["User"],
     }),
     GetUserById: builder.query<IApiResponse<GetUserResponse>, { id: number }>({
       query: ({ id }) => ({

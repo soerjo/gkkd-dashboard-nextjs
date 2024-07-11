@@ -57,19 +57,15 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
 
     const [createData] = useCreateChurchMutation();
-    const [fetchTable] = useLazyGetAllChurchQuery()
     const [getListChurch] = useLazyGetAllChurchQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
-            const userPayload = JSON.parse(cookiesPayload ?? "")
             const requestBody = {
                 ...values,
-                regions_id: values.region?.value.id ?? userPayload.region.id,
+                parent_id: values.region?.value.id
             }
             await createData(requestBody).unwrap();
-            await fetchTable({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

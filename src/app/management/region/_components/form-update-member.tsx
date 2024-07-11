@@ -69,7 +69,6 @@ export const UpdateFormInput = ({
                 id: oldData.id,
                 parent_id: values.region?.value.id,
             }).unwrap();
-            await getListChurch({}).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

@@ -110,6 +110,7 @@ export function DataTable() {
     React.useEffect(() => {
         const params = Object.fromEntries(searchParams.entries())
         fetchMember(params)
+        console.log({ params })
     }, [searchParams])
 
     const table = useReactTable({

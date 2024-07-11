@@ -66,7 +66,6 @@ export const UpdateFormInput = ({
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateUserMutation();
-    const [getAllData] = useLazyGetAllUserQuery();
     const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
 
@@ -95,7 +94,7 @@ export const UpdateFormInput = ({
                 role: values.role.value,
                 regions_id: values.region?.value.id ?? userPayload.region.id,
             }).unwrap();
-            await getAllData({}).unwrap();
+
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
