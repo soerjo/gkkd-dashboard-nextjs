@@ -52,7 +52,6 @@ import useDebounce from "@/hooks/use-debounce";
 import AsyncSelect from "@/components/react-select";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 
-
 export const columns: ColumnDef<GetUserResponse>[] = [
     {
         accessorKey: "name",

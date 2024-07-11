@@ -62,8 +62,8 @@ export const CreateForm = ({
 
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get("page") ?? "1");
-    const take = parseInt(searchParams.get("take") ?? "10");
+    const page = parseInt(searchParams.get("page") || "1");
+    const take = parseInt(searchParams.get("take") || "10");
 
     const form = useForm<GetUserResponse>({
         resolver: zodResolver(FormSchema),
@@ -71,7 +71,6 @@ export const CreateForm = ({
             name: "",
             email: "",
             role: "",
-            // status: "active",
         },
     });
 
@@ -91,7 +90,7 @@ export const CreateForm = ({
             //     role: values.role,
             //     regions_id: values.region.id,
             // }).unwrap();
-            await getAllUser({}).unwrap();
+            await getAllUser({ page, take }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -273,7 +272,6 @@ export const CreateForm = ({
                             </FormItem>
                         )}
                     />
-
                     <Button
                         type="submit"
                         disabled={isSubmitting}
