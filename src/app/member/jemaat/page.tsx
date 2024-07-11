@@ -10,6 +10,7 @@ import { DownloadIcon, PlusIcon } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
+import MyBreadcrum from '@/components/my-breadcrum';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -24,11 +25,14 @@ export default function Dashboard() {
   }
   return (
     <>
-      <div className='flex items-center justify-between space-y-2'>
+      <div className='flex flex-col '>
         <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
           Jemaat
         </h1>
+        <MyBreadcrum currentPath='data' />
       </div>
+
+
 
       <div className="flex items-center gap-2 justify-end">
         <MyDrawer DrawerForm={CreateForm}>
