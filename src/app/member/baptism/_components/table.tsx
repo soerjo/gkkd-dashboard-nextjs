@@ -42,29 +42,34 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
-import { IMarital } from "@/interfaces/marital.interface";
+import { useLazyGetAllQuery } from "@/store/services/baptism";
+import { IBaptism } from "@/interfaces/baptism.interface";
 
-export const columns: ColumnDef<IMarital>[] = [
+export const columns: ColumnDef<IBaptism>[] = [
     {
-        accessorKey: "unique_code",
+        accessorKey: "uniq_code",
         header: "No Surat",
-        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("unique_code")}</div>,
+        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("uniq_code")}</div>,
     },
     {
-        accessorKey: "husband_name",
-        header: "Husband Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("husband_name")}</div>,
+        accessorKey: "full_name",
+        header: "Full Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("full_name")}</div>,
     },
     {
-        accessorKey: "wife_name",
-        header: "Wife Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("wife_name")}</div>,
+        accessorKey: "pastor",
+        header: "Pastor",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("pastor")}</div>,
     },
     {
-        accessorKey: "wedding_date",
-        header: "Wedding Date",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("wedding_date")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
+        accessorKey: "witness_1",
+        header: "Witness 01",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("witness_1")}</div>,
+    },
+    {
+        accessorKey: "witness_2",
+        header: "Witness 02",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("witness_2")}</div>,
     },
     {
         id: "actions",
@@ -96,7 +101,8 @@ export function DataTable() {
     const pageSizeOptions = [5, 10, 20, 30, 50];
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllMaritalQuery();
+    const [fetchData, { data, isLoading }] = useLazyGetAllQuery();
+
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {

@@ -12,7 +12,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { nullable, z } from "zod";
+import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
@@ -22,49 +22,56 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
-import { useLazyGetAllChurchQuery, useLazyGetChurchByIdQuery } from "@/store/services/church";
+import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
-import { IMarital, UpdateMarital } from "@/interfaces/marital.interface";
-import { useGetMaritalByIdQuery, useUpdateMaritalMutation } from "@/store/services/marital";
+import { CreateBaptism } from "@/interfaces/baptism.interface";
+import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/baptism";
+import { useLazyGetAllMemberQuery } from "@/store/services/member";
+import { Member } from "@/interfaces/memberResponse";
 
-const defaultCreateMemberForm: UpdateMarital & { region: any } = {
-    husband_name: "",
-    husband_nij: "",
-    husband_nik: "",
-    wife_name: "",
-    wife_nij: "",
-    wife_nik: "",
-    wedding_date: new Date(),
+type dropDown = { label: string, value: string | number }
+type dropDownJemaat = { label: string, value: Member }
+type UpdateBaptismForm = Omit<CreateBaptism, "region_id" | "full_name"> & { region: dropDown, jemaat: dropDownJemaat }
+
+const defaultCreateMemberForm: UpdateBaptismForm = {
+    nij: "",
     pastor: "",
     witness_1: "",
     witness_2: "",
-    region_id: 0,
-    region: {},
+    photo_url: "",
+    document_url: "",
+    photo_documentation_url: "",
+    region: {
+        label: "",
+        value: "",
+    },
+    jemaat: {
+        label: "",
+        value: {} as Member
+    }
+
 };
 
-const RegionSchema = z.object({
+const dropDownSchema = z.object({
     label: z.string(),
     value: z.any(),
 });
 
 const FormSchema = z.object({
-    husband_name: z.string().min(1, { message: "required" }).max(25),
-    husband_nij: z.string().max(25).optional(),
-    husband_nik: z.string().min(1, { message: "required" }).max(25),
-    wife_name: z.string().min(1, { message: "required" }).max(25),
-    wife_nij: z.string().max(25).optional(),
-    wife_nik: z.string().min(1, { message: "required" }).max(25),
-    wedding_date: z.date(),
-    pastor: z.string().min(1, { message: "required" }).max(25),
-    witness_1: z.string().min(1, { message: "required" }).max(25),
-    witness_2: z.string().min(1, { message: "required" }).max(25),
-    region: RegionSchema.nullable().optional(),
+    jemaat: dropDownSchema,
+    pastor: z.string().max(100).optional(),
+    witness_1: z.string().max(100).optional(),
+    witness_2: z.string().max(100).optional(),
+    // photo_url: z.string().max(100).optional(),
+    // document_url: z.string().max(100).optional(),
+    // photo_documentation_url: z.string().max(100).optional(),
+    region: dropDownSchema,
 });
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: IMarital;
+    data: string;
 };
 
 export const UpdateFormInput = ({
@@ -73,15 +80,16 @@ export const UpdateFormInput = ({
 }: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const [updateData] = useUpdateMaritalMutation();
+    const [updateData] = useUpdateMutation();
     const [fetchChurch] = useLazyGetAllChurchQuery();
-    const [fetchChruchById] = useLazyGetChurchByIdQuery()
-    const { isLoading, data: payload } = useGetMaritalByIdQuery(
-        { unique_code: data.unique_code },
+    const [fetchJemaat] = useLazyGetAllMemberQuery();
+    const [fetchById] = useLazyGetByIdQuery()
+    const { isLoading, data: payload } = useGetByIdQuery(
+        { unique_code: data },
         { refetchOnMountOrArgChange: true }
     );
 
-    const form = useForm<UpdateMarital & { region: any }>({
+    const form = useForm<UpdateBaptismForm>({
         resolver: zodResolver(FormSchema),
         defaultValues: defaultCreateMemberForm,
     });
@@ -91,19 +99,18 @@ export const UpdateFormInput = ({
         reset,
     } = form;
 
-    const onSubmit = async ({
-        region,
-        ...values
-    }: z.infer<typeof FormSchema>) => {
+    const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            if (!payload?.data.unique_code) return;
-
-            const bodyRequest: Partial<UpdateMarital> & { unique_code: string } = {
-                ...values,
-                unique_code: payload?.data.unique_code,
-                region_id: region?.value.id,
-            };
-            await updateData(bodyRequest).unwrap();
+            if (!payload?.data.uniq_code) return;
+            await updateData({
+                unique_code: payload?.data.uniq_code,
+                full_name: values.jemaat.value.full_name,
+                nij: values.jemaat.value.nij,
+                pastor: values.pastor,
+                witness_1: values.witness_1,
+                witness_2: values.witness_2,
+                region_id: values.region.value
+            }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -111,48 +118,59 @@ export const UpdateFormInput = ({
         }
     };
 
-    const fetch = async (query: string) => {
-        const res = await fetchChurch({
-            take: 5,
-            page: 1,
-            search: query,
-        }).unwrap();
-        const resp = res.data.entities.map(data => ({
-            label: data.name,
-            value: data,
-        }));
-        return resp
-    }
-
-    const _loadSuggestions = async (
-        query: string,
-        callback: (...arg: any) => any
-    ) => {
+    const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const resp = await fetch(query)
+            const res = await fetchChurch({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
+            }));
             return callback(resp);
         } catch (error) {
             return [];
         }
     };
-    const loadOptions = debounce(_loadSuggestions, 300);
+    const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
+
+    const _loadSuggestionsJemaat = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchJemaat({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: `[${data.nij}] - ${data.full_name}`,
+                value: data,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    };
+    const loadOptionsJemaat = debounce(_loadSuggestionsJemaat, 300);
+
 
 
     React.useEffect(() => {
         if (!payload) return
         const fetch = async () => {
-            const res = await fetchChruchById({ id: payload.data.region_id }).unwrap()
-            const region = {
-                label: res.data.name,
-                value: res.data,
-            }
+            const res = await fetchById({ unique_code: payload.data.uniq_code }).unwrap()
+
 
             reset({
-                ...payload.data,
-                husband_nij: payload.data.husband_nij ?? "",
-                wife_nij: payload.data.wife_nij ?? "",
-                wedding_date: new Date(payload.data.wedding_date),
-                region: region,
+                jemaat: { label: res.data.jemaat.full_name, value: res.data.jemaat },
+                pastor: res.data.pastor,
+                witness_1: res.data.witness_1,
+                witness_2: res.data.witness_2,
+                // photo_url: z.string().max(100).optional(),
+                // document_url: z.string().max(100).optional(),
+                // photo_documentation_url: z.string().max(100).optional(),
+                region: { label: res.data.region.alt_name, value: res.data.region.id },
             });
         }
 
@@ -207,169 +225,25 @@ export const UpdateFormInput = ({
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
                         <ScrollArea>
                             <div className="flex flex-col gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name={"husband_name"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"husband_name".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"husband_name"}
-                                                    placeholder={"husband_name"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
                                 <FormField
                                     control={form.control}
-                                    name={"husband_nij"}
+                                    name="jemaat"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"husband_nij".replaceAll("_", " ")}
+                                                {"jemaat".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"husband_nij"}
-                                                    placeholder={"husband_nij"}
-                                                    {...field}
+                                                <AsyncSelect
+                                                    id="jemaat"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptionsJemaat}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"husband_nik"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"husband_nik".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"husband_nik"}
-                                                    placeholder={"husband_nik"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"wife_name"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"wife_name".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"wife_name"}
-                                                    placeholder={"wife_name"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"wife_nij"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"wife_nij".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"wife_nij"}
-                                                    placeholder={"wife_nij"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"wife_nik"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"wife_nik".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"wife_nik"}
-                                                    placeholder={"wife_nik"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"wedding_date"}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">
-                                                {"wedding_date".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            className={cn(
-                                                                "w-full pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
-                                                            )}
-                                                            variant="outline"
-                                                        >
-                                                            {field.value ? (
-                                                                format(field.value, "dd/MM/yyyy")
-                                                            ) : (
-                                                                <span>Pick a date</span>
-                                                            )}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent align="start" className="w-auto p-2">
-                                                    <CalendarComponent
-                                                        initialFocus
-                                                        mode="single"
-                                                        selected={new Date(field.value) ?? undefined}
-                                                        translate="en"
-                                                        onSelect={field.onChange}
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -451,7 +325,7 @@ export const UpdateFormInput = ({
                                                     id="region"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptions}
+                                                    loadOptions={loadOptionsChurch}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />

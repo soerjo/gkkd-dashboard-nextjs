@@ -31,15 +31,11 @@ import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
 import useQueryParams from "@/hooks/user-query-params";
 import { toast } from "react-toastify";
-import { IMarital } from "@/interfaces/marital.interface";
+import { IBaptism } from "@/interfaces/baptism.interface";
 
-export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
+export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
-
-    const [detailUserNij, setDetailUserNij] = React.useState<string | null>('');
-    useQueryParams({ key: 'nij', value: detailUserNij })
-
 
     const router = useRouter();
     const pathname = usePathname();
@@ -54,7 +50,6 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
 
     const setParams = async () => {
         try {
-            setDetailUserNij(row.original.unique_code)
             setOpen(true);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -64,7 +59,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ nij: row.original.unique_code }).unwrap();
+            await deleteData({ nij: row.original.uniq_code }).unwrap();
             await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -113,7 +108,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
-                                                Are you sure delete user: {row.original.unique_code}?
+                                                Are you sure delete: {row.original.uniq_code}?
                                             </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 This action cannot be undone. This will permanently
@@ -132,7 +127,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -169,7 +164,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

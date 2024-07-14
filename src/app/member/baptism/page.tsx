@@ -1,6 +1,5 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { DataTable } from './_components/table'
 import { useLazyGetAllChurchQuery } from '@/store/services/church'
 import CustomSelect from '@/components/select';
@@ -36,7 +35,7 @@ export default function Dashboard() {
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New User"}
+            {isDesktop && "New Baptism"}
           </Button>
         </MyDrawer>
 
