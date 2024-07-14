@@ -73,6 +73,7 @@ export const maritalApi = createApi({
         url: `/${unique_code}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Marital"],
     }),
     GetAllMarital: builder.query<
       IApiResponse<TPaginationResponse<IMarital[]>>,

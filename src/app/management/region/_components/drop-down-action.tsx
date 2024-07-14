@@ -44,7 +44,6 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllChurchQuery();
     const [deleteData] = useDeleteChurchMutation();
 
     const setParams = () => {
@@ -54,7 +53,6 @@ export const DropdownAction = ({ row }: { row: Row<GetChurchResponse> }) => {
     const handleDeleteData = async () => {
         try {
             await deleteData({ id: row.original.id }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));

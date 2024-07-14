@@ -43,6 +43,7 @@ export const memberApi = createApi({
         url: `/${nij}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Member"],
     }),
     GetAllMember: builder.query<
       IApiResponse<TPaginationResponse<MemberResponse[]>>,

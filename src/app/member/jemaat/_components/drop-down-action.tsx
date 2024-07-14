@@ -49,7 +49,6 @@ export const DropdownAction = ({ row }: { row: Row<Member> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllMemberQuery();
     const [deleteData] = useDeleteMemberMutation();
 
     const setParams = async () => {
@@ -65,7 +64,6 @@ export const DropdownAction = ({ row }: { row: Row<Member> }) => {
     const handleDeleteData = async () => {
         try {
             await deleteData({ nij: row.original.nij }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));

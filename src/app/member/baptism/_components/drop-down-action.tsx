@@ -28,8 +28,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
-import useQueryParams from "@/hooks/user-query-params";
+import { useDeleteMutation, useLazyGetAllQuery } from "@/store/services/baptism";
 import { toast } from "react-toastify";
 import { IBaptism } from "@/interfaces/baptism.interface";
 
@@ -45,8 +44,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllMemberQuery();
-    const [deleteData] = useDeleteMemberMutation();
+    const [deleteData] = useDeleteMutation();
 
     const setParams = async () => {
         try {
@@ -59,8 +57,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ nij: row.original.uniq_code }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
+            await deleteData({ unique_code: row.original.uniq_code }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));

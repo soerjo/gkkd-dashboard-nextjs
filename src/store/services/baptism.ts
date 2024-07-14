@@ -43,6 +43,7 @@ export const baptismApi = createApi({
         url: `/${unique_code}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Baptism"],
     }),
     GetAll: builder.query<
       IApiResponse<TPaginationResponse<IBaptism[]>>,

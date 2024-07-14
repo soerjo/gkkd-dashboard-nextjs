@@ -49,7 +49,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllUserQuery();
     const [deleteData] = useDeleteUserMutation();
     const [resetPassword] = useResetUserPasswordMutation();
 
@@ -60,7 +59,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const handleDeleteData = async () => {
         try {
             await deleteData({ id: row.original.id }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -70,7 +68,6 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const handleResetPassword = async () => {
         try {
             await resetPassword({ id: row.original.id }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
