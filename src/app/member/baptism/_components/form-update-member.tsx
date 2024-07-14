@@ -42,6 +42,7 @@ const defaultCreateMemberForm: UpdateBaptismForm = {
     photo_url: "",
     document_url: "",
     photo_documentation_url: "",
+    date_baptism: new Date(),
     region: {
         label: "",
         value: "",
@@ -63,6 +64,7 @@ const FormSchema = z.object({
     pastor: z.string().max(100).optional(),
     witness_1: z.string().max(100).optional(),
     witness_2: z.string().max(100).optional(),
+    date_baptism: z.coerce.date(),
     // photo_url: z.string().max(100).optional(),
     // document_url: z.string().max(100).optional(),
     // photo_documentation_url: z.string().max(100).optional(),
@@ -76,7 +78,7 @@ export type UpdateFormInputProps = React.ComponentProps<"form"> & {
 
 export const UpdateFormInput = ({
     onOpenChange,
-    data,
+    data: unique_code,
 }: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -85,7 +87,7 @@ export const UpdateFormInput = ({
     const [fetchJemaat] = useLazyGetAllMemberQuery();
     const [fetchById] = useLazyGetByIdQuery()
     const { isLoading, data: payload } = useGetByIdQuery(
-        { unique_code: data },
+        { unique_code: unique_code },
         { refetchOnMountOrArgChange: true }
     );
 
@@ -101,9 +103,8 @@ export const UpdateFormInput = ({
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            if (!payload?.data.uniq_code) return;
             await updateData({
-                unique_code: payload?.data.uniq_code,
+                unique_code: unique_code,
                 full_name: values.jemaat.value.full_name,
                 nij: values.jemaat.value.nij,
                 pastor: values.pastor,
@@ -167,6 +168,7 @@ export const UpdateFormInput = ({
                 pastor: res.data.pastor,
                 witness_1: res.data.witness_1,
                 witness_2: res.data.witness_2,
+                date_baptism: new Date(res.data.date_baptism),
                 // photo_url: z.string().max(100).optional(),
                 // document_url: z.string().max(100).optional(),
                 // photo_documentation_url: z.string().max(100).optional(),
@@ -244,6 +246,30 @@ export const UpdateFormInput = ({
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"date_baptism"}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"date_baptism".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
                                             <FormMessage />
                                         </FormItem>
                                     )}

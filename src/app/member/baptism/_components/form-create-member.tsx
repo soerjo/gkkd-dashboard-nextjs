@@ -42,6 +42,7 @@ type CreateBaptismForm = Omit<CreateBaptism, "region_id" | "full_name"> & { regi
 
 const defaultCreateMemberForm: CreateBaptismForm = {
     nij: "",
+    date_baptism: new Date(),
     pastor: "",
     witness_1: "",
     witness_2: "",
@@ -69,6 +70,7 @@ const FormSchema = z.object({
     pastor: z.string().min(1, { message: 'required' }).max(100),
     witness_1: z.string().min(1, { message: 'required' }).max(100),
     witness_2: z.string().min(1, { message: 'required' }).max(100),
+    date_baptism: z.coerce.date(),
     // photo_url: z.string().max(100).optional(),
     // document_url: z.string().max(100).optional(),
     // photo_documentation_url: z.string().max(100).optional(),
@@ -102,7 +104,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 pastor: values.pastor,
                 witness_1: values.witness_1,
                 witness_2: values.witness_2,
-                region_id: values.region?.value
+                region_id: values.region?.value,
+                date_baptism: values.date_baptism,
             }).unwrap();
 
             onOpenChange(val => !val);
@@ -206,6 +209,30 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"date_baptism"}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"date_baptism".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
                                             <FormMessage />
                                         </FormItem>
                                     )}

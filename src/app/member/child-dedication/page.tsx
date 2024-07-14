@@ -14,15 +14,15 @@ import MyBreadcrum from '@/components/my-breadcrum';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [lazy] = useLazyGetAllChurchQuery();
-  const fetch = async (query: string) => {
-    try {
-      const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
-      return res.data.entities.map(data => ({ label: data.name, value: data }))
-    } catch (error) {
-      return []
-    }
-  }
+  // const [lazy] = useLazyGetAllChurchQuery();
+  // const fetch = async (query: string) => {
+  //   try {
+  //     const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+  //     return res.data.entities.map(data => ({ label: data.name, value: data }))
+  //   } catch (error) {
+  //     return []
+  //   }
+  // }
   return (
     <>
       <div className='flex flex-col '>
@@ -36,7 +36,7 @@ export default function Dashboard() {
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New User"}
+            {isDesktop && "New Data"}
           </Button>
         </MyDrawer>
 
@@ -47,7 +47,7 @@ export default function Dashboard() {
       </div>
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
-        <CustomSelect compName={'church'} fetchQuery={fetch} />
+        {/* <CustomSelect compName={'church'} fetchQuery={fetch} /> */}
         {/* <DateRangePicker /> */}
       </div>
       <DataTable />

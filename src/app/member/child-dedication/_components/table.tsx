@@ -42,29 +42,29 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
-import { IMarital } from "@/interfaces/marital.interface";
+import { useLazyGetAllQuery } from "@/store/services/child-dedication";
+import { IChildDedication } from "@/interfaces/child-dedication.interface";
 
-export const columns: ColumnDef<IMarital>[] = [
+export const columns: ColumnDef<IChildDedication>[] = [
     {
         accessorKey: "unique_code",
         header: "No Surat",
         cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("unique_code")}</div>,
     },
     {
-        accessorKey: "husband_name",
-        header: "Husband Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("husband_name")}</div>,
+        accessorKey: "full_name",
+        header: "Full Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("full_name")}</div>,
     },
     {
-        accessorKey: "wife_name",
-        header: "Wife Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("wife_name")}</div>,
+        accessorKey: "date_birthday",
+        header: "Birthday",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("date_birthday")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
     },
     {
-        accessorKey: "wedding_date",
-        header: "Wedding Date",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("wedding_date")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
+        accessorKey: "date_child_dedication",
+        header: "Date Child Dedication",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("date_child_dedication")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
     },
     {
         id: "actions",
@@ -96,7 +96,7 @@ export function DataTable() {
     const pageSizeOptions = [5, 10, 20, 30, 50];
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllMaritalQuery();
+    const [fetchData, { data, isLoading }] = useLazyGetAllQuery();
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {

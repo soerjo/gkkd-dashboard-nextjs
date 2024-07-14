@@ -14,6 +14,7 @@ import { myParamApi } from "./services/params";
 import { memberApi } from "./services/member";
 import { maritalApi } from "./services/marital";
 import { baptismApi } from "./services/baptism";
+import { childDedicationApi } from "./services/child-dedication";
 
 export const makeStore = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ export const makeStore = configureStore({
     [memberApi.reducerPath]: memberApi.reducer,
     [maritalApi.reducerPath]: maritalApi.reducer,
     [baptismApi.reducerPath]: baptismApi.reducer,
+    [childDedicationApi.reducerPath]: childDedicationApi.reducer,
   },
 
   middleware: getDefaultMiddleware =>
@@ -36,6 +38,7 @@ export const makeStore = configureStore({
       memberApi.middleware,
       maritalApi.middleware,
       baptismApi.middleware,
+      childDedicationApi.middleware,
     ]),
 });
 

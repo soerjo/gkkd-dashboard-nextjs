@@ -28,12 +28,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
+import { useDeleteMutation, useLazyGetAllQuery } from "@/store/services/child-dedication";
 import useQueryParams from "@/hooks/user-query-params";
 import { toast } from "react-toastify";
-import { IMarital } from "@/interfaces/marital.interface";
+import { IChildDedication } from "@/interfaces/child-dedication.interface";
 
-export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
+export const DropdownAction = ({ row }: { row: Row<IChildDedication> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -49,8 +49,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllMemberQuery();
-    const [deleteData] = useDeleteMemberMutation();
+    const [deleteData] = useDeleteMutation();
 
     const setParams = async () => {
         try {
@@ -64,8 +63,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ nij: row.original.unique_code }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
+            await deleteData({ unique_code: row.original.unique_code }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -132,7 +130,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.unique_code} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -169,7 +167,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.unique_code} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

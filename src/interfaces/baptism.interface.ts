@@ -5,6 +5,7 @@ export interface IBaptism {
   id: number;
   uniq_code: string;
   full_name: string;
+  date_baptism: Date;
   name: string;
   jemaat_id: number;
   region_id: number;
@@ -20,6 +21,7 @@ export interface IBaptism {
 
 export interface CreateBaptism {
   full_name: string;
+  date_baptism: Date;
   nij: string;
   pastor: string;
   witness_1: string;

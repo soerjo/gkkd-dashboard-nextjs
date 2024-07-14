@@ -30,40 +30,38 @@ import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { CreateMarital } from "@/interfaces/marital.interface";
 import { useCreateMaritalMutation } from "@/store/services/marital";
+import { CreateChildDedication } from "@/interfaces/child-dedication.interface";
+import { useCreateMutation } from "@/store/services/child-dedication";
 
-const defaultCreateMemberForm: CreateMarital & { region?: any } = {
-    husband_name: "",
-    husband_nij: "",
-    husband_nik: "",
-    wife_name: "",
-    wife_nij: "",
-    wife_nik: "",
-    wedding_date: new Date(),
+type CreateForm = Omit<CreateChildDedication, "region_id">
+const defaultCreateMemberForm: CreateForm = {
+    nijFather: "",
+    nijMother: "",
+    full_name: "",
+    name: "",
+    father_name: "",
+    mother_name: "",
     pastor: "",
     witness_1: "",
     witness_2: "",
-    region_id: undefined,
-    region: undefined,
+    date_birthday: new Date(),
+    date_child_dedication: new Date(),
 };
 
-const RegionSchema = z.object({
-    label: z.string(),
-    value: z.any(),
+const FormSchema = z.object({
+    nijFather: z.string().max(100).optional(),
+    nijMother: z.string().max(100).optional(),
+    full_name: z.string().min(1, { message: "required" }).max(100),
+    name: z.string().min(1, { message: "required" }).max(100),
+    father_name: z.string().min(1, { message: "required" }).max(100),
+    mother_name: z.string().min(1, { message: "required" }).max(100),
+    pastor: z.string().min(1, { message: "required" }).max(100),
+    witness_1: z.string().min(1, { message: "required" }).max(100),
+    witness_2: z.string().min(1, { message: "required" }).max(100),
+    date_birthday: z.coerce.date(),
+    date_child_dedication: z.coerce.date(),
 });
 
-const FormSchema = z.object({
-    husband_name: z.string().min(1, { message: "required" }).max(25),
-    husband_nij: z.string().max(25).optional(),
-    husband_nik: z.string().min(1, { message: "required" }).max(25),
-    wife_name: z.string().min(1, { message: "required" }).max(25),
-    wife_nij: z.string().max(25).optional(),
-    wife_nik: z.string().min(1, { message: "required" }).max(25),
-    wedding_date: z.date(),
-    pastor: z.string().min(1, { message: "required" }).max(25),
-    witness_1: z.string().min(1, { message: "required" }).max(25),
-    witness_2: z.string().min(1, { message: "required" }).max(25),
-    region: RegionSchema.nullable().optional(),
-});
 export type CreateFormProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -71,54 +69,23 @@ export type CreateFormProps = React.ComponentProps<"form"> & {
 export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const form = useForm<
-        CreateMarital & { region: { label: string; value: any } }
-    >({
+    const form = useForm<CreateForm>({
         resolver: zodResolver(FormSchema),
         defaultValues: defaultCreateMemberForm,
     });
-    const {
-        formState: { isSubmitting, errors },
-    } = form;
+    const { formState: { isSubmitting, errors } } = form;
 
-    const [createData] = useCreateMaritalMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
+    const [createData] = useCreateMutation();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
-            const createUserBody: CreateMarital = {
-                ...values,
-                region_id: values.region?.value.id,
-            };
-            await createData(createUserBody).unwrap();
-
+            await createData({ ...values }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
         }
     };
-
-    const _loadSuggestions = async (
-        query: string,
-        callback: (...arg: any) => any
-    ) => {
-        try {
-            const res = await fetchChurch({
-                take: 5,
-                page: 1,
-                search: query,
-            }).unwrap();
-            const resp = res.data.entities.map(data => ({
-                label: data.name,
-                value: data,
-            }));
-            return callback(resp);
-        } catch (error) {
-            return [];
-        }
-    };
-    const loadOptions = debounce(_loadSuggestions, 300);
 
     return (
         <div
@@ -161,17 +128,17 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                             <div className="flex flex-col gap-4">
                                 <FormField
                                     control={form.control}
-                                    name={"husband_name"}
+                                    name={"full_name"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"husband_name".replaceAll("_", " ")}
+                                                {"full_name".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
-                                                    id={"husband_name"}
-                                                    placeholder={"husband_name"}
+                                                    id={"full_name"}
+                                                    placeholder={"full_name"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -179,63 +146,20 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name={"husband_nij"}
+                                    name={"name"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"husband_nij".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    type="number"
-                                                    id={"husband_nij"}
-                                                    placeholder={"husband_nij"}
-                                                    pattern="[0-9]*"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={"husband_nik"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"husband_nik".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    type="number"
-                                                    id={"husband_nik"}
-                                                    placeholder={"husband_nik"}
-                                                    pattern="[0-9]*"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={"wife_name"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"wife_name".replaceAll("_", " ")}
+                                                {"name".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
-                                                    id={"wife_name"}
-                                                    placeholder={"wife_name"}
+                                                    id={"name"}
+                                                    placeholder={"name"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -243,21 +167,20 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name={"wife_nij"}
+                                    name={"nijFather"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"wife_nij".replaceAll("_", " ")}
+                                                {"nijFather".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    type="number"
-                                                    id={"wife_nij"}
-                                                    placeholder={"wife_nij"}
-                                                    pattern="[0-9]*"
+                                                    type="text"
+                                                    id={"nijFather"}
+                                                    placeholder={"nijFather"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -265,21 +188,20 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name={"wife_nik"}
+                                    name={"father_name"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"wife_nik".replaceAll("_", " ")}
+                                                {"father_name".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    type="number"
-                                                    id={"wife_nik"}
-                                                    placeholder={"wife_nik"}
-                                                    pattern="[0-9]*"
+                                                    type="text"
+                                                    id={"father_name"}
+                                                    placeholder={"father_name"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -287,47 +209,50 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name={"wedding_date"}
+                                    name={"nijMother"}
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-col">
+                                        <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"wedding_date".replaceAll("_", " ")}
+                                                {"nijMother".replaceAll("_", " ")}
                                             </FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            className={cn(
-                                                                "w-full pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
-                                                            )}
-                                                            variant="outline"
-                                                        >
-                                                            {field.value ? (
-                                                                format(field.value, "dd/MM/yyyy")
-                                                            ) : (
-                                                                <span>Pick a date</span>
-                                                            )}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent align="start" className="w-auto p-2">
-                                                    <CalendarComponent
-                                                        initialFocus
-                                                        mode="single"
-                                                        selected={field.value ?? undefined}
-                                                        translate="en"
-                                                        onSelect={field.onChange}
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"nijMother"}
+                                                    placeholder={"nijMother"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"mother_name"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"mother_name".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"mother_name"}
+                                                    placeholder={"mother_name"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+
                                 <FormField
                                     control={form.control}
                                     name={"pastor"}
@@ -348,6 +273,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
                                     name={"witness_1"}
@@ -368,6 +294,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
                                     name={"witness_2"}
@@ -388,29 +315,54 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name="region"
+                                    name={"date_birthday"}
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"region".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <AsyncSelect
-                                                    id="region"
-                                                    cacheOptions
-                                                    defaultOptions
-                                                    loadOptions={loadOptions}
-                                                    isClearable={true}
-                                                    value={field.value}
-                                                    onChange={(e: any) => field.onChange(e)}
-                                                />
-                                            </FormControl>
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"date_birthday".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                />{" "}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"date_child_dedication"}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel className="capitalize">{"date_child_dedication".replaceAll("_", " ")}</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')} variant="outline">
+                                                            {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent align="start" className="w-auto p-2">
+                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                         </ScrollArea>
                         <Button
