@@ -1,6 +1,5 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { DataTable } from './_components/table'
 import { useLazyGetAllChurchQuery } from '@/store/services/church'
 import CustomSelect from '@/components/select';
@@ -27,18 +26,16 @@ export default function Dashboard() {
     <>
       <div className='flex flex-col '>
         <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-          Jemaat
+          Cermon Reports
         </h1>
         <MyBreadcrum currentPath='data' />
       </div>
-
-
 
       <div className="flex items-center gap-2 justify-end">
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New Member"}
+            {isDesktop && "New Baptism"}
           </Button>
         </MyDrawer>
 

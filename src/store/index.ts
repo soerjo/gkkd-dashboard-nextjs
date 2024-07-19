@@ -15,6 +15,7 @@ import { memberApi } from "./services/member";
 import { maritalApi } from "./services/marital";
 import { baptismApi } from "./services/baptism";
 import { childDedicationApi } from "./services/child-dedication";
+import { cermonApi } from "./services/cermon";
 
 export const makeStore = configureStore({
   reducer: {
@@ -27,9 +28,10 @@ export const makeStore = configureStore({
     [maritalApi.reducerPath]: maritalApi.reducer,
     [baptismApi.reducerPath]: baptismApi.reducer,
     [childDedicationApi.reducerPath]: childDedicationApi.reducer,
+    [cermonApi.reducerPath]: cermonApi.reducer,
   },
 
-  middleware: getDefaultMiddleware =>
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([
       authApi.middleware,
       churchApi.middleware,
@@ -39,6 +41,7 @@ export const makeStore = configureStore({
       maritalApi.middleware,
       baptismApi.middleware,
       childDedicationApi.middleware,
+      cermonApi.middleware,
     ]),
 });
 
