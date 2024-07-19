@@ -28,11 +28,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMutation, useLazyGetAllQuery } from "@/store/services/baptism";
 import { toast } from "react-toastify";
-import { IBaptism } from "@/interfaces/baptism.interface";
+import { ICermonReport } from "@/interfaces/cermon-report.interface";
+import { useDeleteMutation } from "@/store/services/cermon-report";
 
-export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
+
+export const DropdownAction = ({ row }: { row: Row<ICermonReport> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -57,7 +58,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ unique_code: row.original.uniq_code }).unwrap();
+            await deleteData({ id: row.original.id }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -105,7 +106,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
-                                                Are you sure delete: {row.original.uniq_code}?
+                                                Are you sure delete: {row.original.id}?
                                             </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 This action cannot be undone. This will permanently
@@ -124,7 +125,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -161,7 +162,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

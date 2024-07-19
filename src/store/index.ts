@@ -1,11 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import { counterReducer } from "./slice/count";
 import { authReducer } from "./slice/auth";
-import { churchReducer } from "./slice/church";
-import { userReducer } from "./slice/user";
-import { memberReducer } from "./slice/member";
-import { maritalReducer } from "./slice/marital";
 
 import { authApi } from "./services/auth";
 import { churchApi } from "./services/church";
@@ -16,6 +11,7 @@ import { maritalApi } from "./services/marital";
 import { baptismApi } from "./services/baptism";
 import { childDedicationApi } from "./services/child-dedication";
 import { cermonApi } from "./services/cermon";
+import { cermonReportApi } from "./services/cermon-report";
 
 export const makeStore = configureStore({
   reducer: {
@@ -29,6 +25,7 @@ export const makeStore = configureStore({
     [baptismApi.reducerPath]: baptismApi.reducer,
     [childDedicationApi.reducerPath]: childDedicationApi.reducer,
     [cermonApi.reducerPath]: cermonApi.reducer,
+    [cermonReportApi.reducerPath]: cermonReportApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -42,6 +39,7 @@ export const makeStore = configureStore({
       baptismApi.middleware,
       childDedicationApi.middleware,
       cermonApi.middleware,
+      cermonReportApi.middleware,
     ]),
 });
 

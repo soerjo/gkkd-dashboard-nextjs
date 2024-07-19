@@ -77,8 +77,8 @@ export function DateRangePicker({
     const searchParams = useSearchParams()
 
     const [date, setDate] = React.useState<DateRange | undefined>(() => {
-        const fromParam = searchParams.get("from")
-        const toParam = searchParams.get("to")
+        const fromParam = searchParams.get("date_from")
+        const toParam = searchParams.get("date_to")
 
         let fromDay: Date | undefined
         let toDay: Date | undefined
@@ -101,15 +101,15 @@ export function DateRangePicker({
     React.useEffect(() => {
         const newSearchParams = new URLSearchParams(searchParams)
         if (date?.from) {
-            newSearchParams.set("from", format(date.from, "yyyy-MM-dd"))
+            newSearchParams.set("date_from", format(date.from, "yyyy-MM-dd"))
         } else {
-            newSearchParams.delete("from")
+            newSearchParams.delete("date_from")
         }
 
         if (date?.to) {
-            newSearchParams.set("to", format(date.to, "yyyy-MM-dd"))
+            newSearchParams.set("date_to", format(date.to, "yyyy-MM-dd"))
         } else {
-            newSearchParams.delete("to")
+            newSearchParams.delete("date_to")
         }
 
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -120,14 +120,14 @@ export function DateRangePicker({
     }, [date?.from, date?.to])
 
     return (
-        <div className="grid gap-2">
+        <div className="grid gap-2 w-full">
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
                         variant={triggerVariant}
                         size={triggerSize}
                         className={cn(
-                            "w-full justify-start truncate text-left font-normal",
+                            "w-full justify-start truncate text-left font-normal h-9 ",
                             !date && "text-muted-foreground",
                             triggerClassName
                         )}

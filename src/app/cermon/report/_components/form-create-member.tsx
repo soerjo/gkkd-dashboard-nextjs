@@ -27,37 +27,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { CreateMarital } from "@/interfaces/marital.interface";
-import { useCreateMaritalMutation } from "@/store/services/marital";
-import { CreateBaptism } from "@/interfaces/baptism.interface";
-import { useCreateMutation } from "@/store/services/baptism";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
-import { Member } from "@/interfaces/memberResponse";
-
+import { useCreateMutation } from "@/store/services/cermon-report";
+import { useLazyGetAllQuery } from "@/store/services/cermon";
+import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
 
 type dropDown = { label: string, value: string | number }
-type dropDownJemaat = { label: string, value: Member }
-type CreateBaptismForm = Omit<CreateBaptism, "region_id" | "full_name"> & { region?: dropDown, jemaat: dropDownJemaat }
+type CreateBaptismForm = Omit<CreateCermonReport, "region_id" | "cermon_id"> & { cermon: dropDown }
 
 const defaultCreateMemberForm: CreateBaptismForm = {
-    nij: "",
-    date_baptism: new Date(),
-    pastor: "",
-    witness_1: "",
-    witness_2: "",
-    photo_url: "",
-    document_url: "",
-    photo_documentation_url: "",
-    region: {
+    date: new Date(),
+    total_male: 0,
+    total_female: 0,
+    total_new_male: 0,
+    total_new_female: 0,
+    cermon: {
         label: "",
         value: "",
-    },
-    jemaat: {
-        label: "",
-        value: {} as Member
-    }
 
+    }
 };
 
 const dropDownSchema = z.object({
@@ -66,15 +53,12 @@ const dropDownSchema = z.object({
 });
 
 const FormSchema = z.object({
-    jemaat: dropDownSchema,
-    pastor: z.string().min(1, { message: 'required' }).max(100),
-    witness_1: z.string().min(1, { message: 'required' }).max(100),
-    witness_2: z.string().min(1, { message: 'required' }).max(100),
-    date_baptism: z.coerce.date(),
-    // photo_url: z.string().max(100).optional(),
-    // document_url: z.string().max(100).optional(),
-    // photo_documentation_url: z.string().max(100).optional(),
-    region: dropDownSchema.nullable().optional(),
+    date: z.coerce.date(),
+    total_male: z.coerce.number().min(0),
+    total_female: z.coerce.number().min(0),
+    total_new_male: z.coerce.number().min(0),
+    total_new_female: z.coerce.number().min(0),
+    cermon: dropDownSchema,
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
@@ -93,19 +77,14 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     } = form;
 
     const [createData] = useCreateMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
-    const [fetchJemaat] = useLazyGetAllMemberQuery();
+    const [fetchCermon] = useLazyGetAllQuery();
+
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await createData({
-                full_name: values.jemaat.value.full_name,
-                nij: values.jemaat.value.nij,
-                pastor: values.pastor,
-                witness_1: values.witness_1,
-                witness_2: values.witness_2,
-                region_id: values.region?.value,
-                date_baptism: values.date_baptism,
+                ...values,
+                cermon_id: values.cermon.value,
             }).unwrap();
 
             onOpenChange(val => !val);
@@ -115,9 +94,9 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         }
     };
 
-    const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
+    const _loadSuggestionsCermon = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const res = await fetchChurch({
+            const res = await fetchCermon({
                 take: 100,
                 page: 1,
                 search: query,
@@ -131,25 +110,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return [];
         }
     };
-    const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
-
-    const _loadSuggestionsJemaat = async (query: string, callback: (...arg: any) => any) => {
-        try {
-            const res = await fetchJemaat({
-                take: 100,
-                page: 1,
-                search: query,
-            }).unwrap();
-            const resp = res.data.entities.map(data => ({
-                label: `[${data.nij}] - ${data.full_name}`,
-                value: data,
-            }));
-            return callback(resp);
-        } catch (error) {
-            return [];
-        }
-    };
-    const loadOptionsJemaat = debounce(_loadSuggestionsJemaat, 300);
+    const loadOptionsCermon = debounce(_loadSuggestionsCermon, 300);
 
 
     return (
@@ -193,18 +154,18 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                             <div className="flex flex-col gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="jemaat"
+                                    name="cermon"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"jemaat".replaceAll("_", " ")}
+                                                {"cermon".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
-                                                    id="jemaat"
+                                                    id="cermon"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptionsJemaat}
+                                                    loadOptions={loadOptionsCermon}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
@@ -216,10 +177,10 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
                                 <FormField
                                     control={form.control}
-                                    name={"date_baptism"}
+                                    name={"date"}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"date_baptism".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">{"date".replaceAll("_", " ")}</FormLabel>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
@@ -240,17 +201,17 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
                                 <FormField
                                     control={form.control}
-                                    name={"pastor"}
+                                    name={"total_male"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"pastor".replaceAll("_", " ")}
+                                                {"total_male".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    id={"pastor"}
-                                                    placeholder={"pastor"}
+                                                    type="number"
+                                                    id={"total_male"}
+                                                    placeholder={"total_male"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -259,19 +220,60 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                     )}
                                 />
 
+
                                 <FormField
                                     control={form.control}
-                                    name={"witness_1"}
+                                    name={"total_new_male"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"witness_1".replaceAll("_", " ")}
+                                                {"total_new_male".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    id={"witness_1"}
-                                                    placeholder={"witness_1"}
+                                                    type="number"
+                                                    id={"total_new_male"}
+                                                    placeholder={"total_new_male"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"total_female"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"total_female".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    id={"total_female"}
+                                                    placeholder={"total_female"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"total_new_female"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"total_new_female".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    id={"total_new_female"}
+                                                    placeholder={"total_new_female"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -280,49 +282,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"witness_2"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"witness_2".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"witness_2"}
-                                                    placeholder={"witness_2"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="region"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"region".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <AsyncSelect
-                                                    id="region"
-                                                    cacheOptions
-                                                    defaultOptions
-                                                    loadOptions={loadOptionsChurch}
-                                                    value={field.value}
-                                                    onChange={(e: any) => field.onChange(e)}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
                             </div>
                         </ScrollArea>

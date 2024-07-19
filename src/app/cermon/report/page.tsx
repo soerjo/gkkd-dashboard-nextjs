@@ -10,6 +10,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -35,7 +36,7 @@ export default function Dashboard() {
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New Baptism"}
+            {isDesktop && "New Report"}
           </Button>
         </MyDrawer>
 
@@ -44,10 +45,10 @@ export default function Dashboard() {
           {isDesktop && "Export"}
         </Button>
       </div>
+      <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>
-        <CustomSearchInput />
         <CustomSelect compName={'church'} fetchQuery={fetch} />
-        {/* <DateRangePicker /> */}
+        <DateRangePicker />
       </div>
       <DataTable />
 

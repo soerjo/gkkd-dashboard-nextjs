@@ -22,36 +22,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
-import { CreateBaptism } from "@/interfaces/baptism.interface";
-import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/baptism";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
-import { Member } from "@/interfaces/memberResponse";
+import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
+import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/cermon-report";
+import { useLazyGetAllQuery } from "@/store/services/cermon";
 
 type dropDown = { label: string, value: string | number }
-type dropDownJemaat = { label: string, value: Member }
-type UpdateBaptismForm = Omit<CreateBaptism, "region_id" | "full_name"> & { region: dropDown, jemaat: dropDownJemaat }
+type UpdateBaptismForm = Omit<CreateCermonReport, "region_id" | "cermon_id"> & { cermon: dropDown }
 
 const defaultCreateMemberForm: UpdateBaptismForm = {
-    nij: "",
-    pastor: "",
-    witness_1: "",
-    witness_2: "",
-    photo_url: "",
-    document_url: "",
-    photo_documentation_url: "",
-    date_baptism: new Date(),
-    region: {
+    date: new Date(),
+    total_male: 0,
+    total_female: 0,
+    total_new_male: 0,
+    total_new_female: 0,
+    cermon: {
         label: "",
         value: "",
-    },
-    jemaat: {
-        label: "",
-        value: {} as Member
-    }
 
+    }
 };
 
 const dropDownSchema = z.object({
@@ -60,34 +50,31 @@ const dropDownSchema = z.object({
 });
 
 const FormSchema = z.object({
-    jemaat: dropDownSchema,
-    pastor: z.string().max(100).optional(),
-    witness_1: z.string().max(100).optional(),
-    witness_2: z.string().max(100).optional(),
-    date_baptism: z.coerce.date(),
-    // photo_url: z.string().max(100).optional(),
-    // document_url: z.string().max(100).optional(),
-    // photo_documentation_url: z.string().max(100).optional(),
-    region: dropDownSchema,
+    date: z.coerce.date(),
+    total_male: z.coerce.number().min(0),
+    total_female: z.coerce.number().min(0),
+    total_new_male: z.coerce.number().min(0),
+    total_new_female: z.coerce.number().min(0),
+    cermon: dropDownSchema,
 });
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: string;
+    data: number;
 };
 
 export const UpdateFormInput = ({
     onOpenChange,
-    data: unique_code,
+    data: id,
 }: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
-    const [fetchJemaat] = useLazyGetAllMemberQuery();
+    const [fetchCermon] = useLazyGetAllQuery();
+
     const [fetchById] = useLazyGetByIdQuery()
     const { isLoading, data: payload } = useGetByIdQuery(
-        { unique_code: unique_code },
+        { id: id },
         { refetchOnMountOrArgChange: true }
     );
 
@@ -104,13 +91,9 @@ export const UpdateFormInput = ({
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await updateData({
-                unique_code: unique_code,
-                full_name: values.jemaat.value.full_name,
-                nij: values.jemaat.value.nij,
-                pastor: values.pastor,
-                witness_1: values.witness_1,
-                witness_2: values.witness_2,
-                region_id: values.region.value
+                id: id,
+                ...values,
+                cermon_id: values.cermon.value,
             }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
@@ -119,9 +102,9 @@ export const UpdateFormInput = ({
         }
     };
 
-    const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
+    const _loadSuggestionsCermon = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const res = await fetchChurch({
+            const res = await fetchCermon({
                 take: 100,
                 page: 1,
                 search: query,
@@ -135,44 +118,27 @@ export const UpdateFormInput = ({
             return [];
         }
     };
-    const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
-
-    const _loadSuggestionsJemaat = async (query: string, callback: (...arg: any) => any) => {
-        try {
-            const res = await fetchJemaat({
-                take: 100,
-                page: 1,
-                search: query,
-            }).unwrap();
-            const resp = res.data.entities.map(data => ({
-                label: `[${data.nij}] - ${data.full_name}`,
-                value: data,
-            }));
-            return callback(resp);
-        } catch (error) {
-            return [];
-        }
-    };
-    const loadOptionsJemaat = debounce(_loadSuggestionsJemaat, 300);
+    const loadOptionsCermon = debounce(_loadSuggestionsCermon, 300);
 
 
 
     React.useEffect(() => {
         if (!payload) return
         const fetch = async () => {
-            const res = await fetchById({ unique_code: payload.data.uniq_code }).unwrap()
+            const res = await fetchById({ id: id }).unwrap()
 
 
             reset({
-                jemaat: { label: res.data.jemaat.full_name, value: res.data.jemaat },
-                pastor: res.data.pastor,
-                witness_1: res.data.witness_1,
-                witness_2: res.data.witness_2,
-                date_baptism: new Date(res.data.date_baptism),
-                // photo_url: z.string().max(100).optional(),
-                // document_url: z.string().max(100).optional(),
-                // photo_documentation_url: z.string().max(100).optional(),
-                region: { label: res.data.region.alt_name, value: res.data.region.id },
+                date: new Date(res.data.date),
+                total_male: res.data.total_male,
+                total_female: res.data.total_female,
+                total_new_male: res.data.total_new_male,
+                total_new_female: res.data.total_new_female,
+                cermon: {
+                    label: res.data.cermon_name,
+                    value: res.data.cermon_id,
+
+                }
             });
         }
 
@@ -230,18 +196,18 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name="jemaat"
+                                    name="cermon"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"jemaat".replaceAll("_", " ")}
+                                                {"cermon".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
-                                                    id="jemaat"
+                                                    id="cermon"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptionsJemaat}
+                                                    loadOptions={loadOptionsCermon}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
@@ -253,10 +219,10 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name={"date_baptism"}
+                                    name={"date"}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"date_baptism".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">{"date".replaceAll("_", " ")}</FormLabel>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
@@ -277,17 +243,39 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name={"pastor"}
+                                    name={"total_male"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"pastor".replaceAll("_", " ")}
+                                                {"total_male".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    id={"pastor"}
-                                                    placeholder={"pastor"}
+                                                    type="number"
+                                                    id={"total_male"}
+                                                    placeholder={"total_male"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+
+                                <FormField
+                                    control={form.control}
+                                    name={"total_new_male"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"total_new_male".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    id={"total_new_male"}
+                                                    placeholder={"total_new_male"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -298,17 +286,37 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name={"witness_1"}
+                                    name={"total_female"}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"witness_1".replaceAll("_", " ")}
+                                                {"total_female".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    id={"witness_1"}
-                                                    placeholder={"witness_1"}
+                                                    type="number"
+                                                    id={"total_female"}
+                                                    placeholder={"total_female"}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={"total_new_female"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"total_new_female".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    id={"total_new_female"}
+                                                    placeholder={"total_new_female"}
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -317,49 +325,6 @@ export const UpdateFormInput = ({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"witness_2"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"witness_2".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"witness_2"}
-                                                    placeholder={"witness_2"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="region"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"region".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <AsyncSelect
-                                                    id="region"
-                                                    cacheOptions
-                                                    defaultOptions
-                                                    loadOptions={loadOptionsChurch}
-                                                    value={field.value}
-                                                    onChange={(e: any) => field.onChange(e)}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                             </div>
                         </ScrollArea>
 
