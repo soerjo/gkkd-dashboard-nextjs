@@ -30,8 +30,8 @@ import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { CreateMarital } from "@/interfaces/marital.interface";
 import { useCreateMaritalMutation } from "@/store/services/marital";
-import { CreateCermon, weekDays } from "@/interfaces/cermon.interface";
-import { useCreateMutation } from "@/store/services/cermon";
+import { CreateFellowship, weekDays } from "@/interfaces/fellowship.interface";
+import { useCreateMutation } from "@/store/services/fellowship";
 import { useLazyGetAllMemberQuery } from "@/store/services/member";
 import { Member } from "@/interfaces/memberResponse";
 import { TimePickerInput } from "@/components/time-picker-input";
@@ -40,13 +40,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/format-time";
 
 type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateCermon, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
+type CreateInputForm = Omit<CreateFellowship, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
 
 const defaultCreateForm: CreateInputForm = {
     name: "",
     time: new Date(`2024-07-07`),
     segment: "",
-    description: "",
+    location: "",
     region: {
         label: "",
         value: "",
@@ -62,7 +62,7 @@ const FormSchema = z.object({
     name: z.string().min(1, { message: 'required' }).max(100),
     time: z.coerce.date(),
     segment: z.string().min(1, { message: 'required' }).max(100),
-    description: z.string().max(200),
+    location: z.string().max(200),
     region: dropDownSchema.nullable().optional(),
 });
 
@@ -213,10 +213,10 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
                                 <FormField
                                     control={form.control}
-                                    name={"description"}
+                                    name={"location"}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"description".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">{"location".replaceAll("_", " ")}</FormLabel>
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="Tell us a little bit about yourself"
