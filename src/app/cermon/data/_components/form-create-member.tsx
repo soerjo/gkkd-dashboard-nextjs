@@ -90,7 +90,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 time: formatTime(values.time),
                 day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
                 region_id: values?.region?.value || null
-            })
+            }).unwrap()
 
             onOpenChange(val => !val);
         } catch (error) {
