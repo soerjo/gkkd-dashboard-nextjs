@@ -1,7 +1,7 @@
 'use client'
 
 import { DataTable } from './_components/table'
-import { useLazyGetAllChurchQuery } from '@/store/services/church'
+import { useLazyGetAllTableChurchQuery } from '@/store/services/church'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
@@ -13,7 +13,7 @@ import MyBreadcrum from '@/components/my-breadcrum';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [lazy] = useLazyGetAllChurchQuery();
+  const [lazy] = useLazyGetAllTableChurchQuery();
   const fetch = async (query: string) => {
     try {
       const res = await lazy({ take: 5, page: 1, search: query }).unwrap();

@@ -99,6 +99,7 @@ export function DataTable() {
             const params = {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
+                region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
             }
             await fetchData(params, false)
@@ -110,7 +111,6 @@ export function DataTable() {
     React.useEffect(() => {
         const params = Object.fromEntries(searchParams.entries())
         fetchMember(params)
-        console.log({ params })
     }, [searchParams])
 
     const table = useReactTable({

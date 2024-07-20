@@ -65,8 +65,8 @@ const phoneRegex = new RegExp(
 );
 
 const RegionSchema = z.object({
-    label: z.string(),
-    value: z.any(),
+    label: z.string().optional(),
+    value: z.any().optional(),
 }).nullable().optional()
 
 const FormSchema = z
@@ -108,7 +108,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         try {
             const createUserBody: CreateMember = {
                 ...values,
-                region_id: values.region?.value.id,
+                region_id: values.region?.value?.id,
             }
             await createMember(createUserBody).unwrap();
 
@@ -138,7 +138,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                    Input New User
+                    Input New Member
                 </h2>
                 <div className="h-14 w-14">
                     <svg
