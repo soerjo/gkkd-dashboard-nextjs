@@ -4,23 +4,15 @@ import {
     ChevronRightIcon,
     DoubleArrowLeftIcon,
     DoubleArrowRightIcon,
-    DownloadIcon,
 } from "@radix-ui/react-icons";
 import {
     ColumnDef,
-    ColumnFiltersState,
-    SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
     getPaginationRowModel,
-    getSortedRowModel,
     useReactTable,
-    PaginationState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -42,29 +34,24 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
-import { IMarital } from "@/interfaces/marital.interface";
+import { useLazyGetAllQuery } from "@/store/services/fellowship";
+import { IFellowship } from "@/interfaces/fellowship.interface";
 
-export const columns: ColumnDef<IMarital>[] = [
+export const columns: ColumnDef<IFellowship>[] = [
     {
-        accessorKey: "unique_code",
-        header: "No Surat",
-        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("unique_code")}</div>,
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
     },
     {
-        accessorKey: "husband_name",
-        header: "Husband Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("husband_name")}</div>,
+        accessorKey: "region_name",
+        header: "Region",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
     },
     {
-        accessorKey: "wife_name",
-        header: "Wife Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("wife_name")}</div>,
-    },
-    {
-        accessorKey: "wedding_date",
-        header: "Wedding Date",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("wedding_date")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
+        accessorKey: "lead_name",
+        header: "Leader",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
     },
     {
         id: "actions",
@@ -96,7 +83,8 @@ export function DataTable() {
     const pageSizeOptions = [5, 10, 20, 30, 50];
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllMaritalQuery();
+    const [fetchData, { data, isLoading }] = useLazyGetAllQuery();
+
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {
@@ -105,7 +93,7 @@ export function DataTable() {
                 region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
             };
-            await fetchData(params, false);
+            const response = await fetchData(params).unwrap()
         } catch (error) {
             console.log({ error });
         }

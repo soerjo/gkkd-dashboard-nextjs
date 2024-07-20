@@ -42,30 +42,54 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
-import { IMarital } from "@/interfaces/marital.interface";
+import { IFellowshipReport } from "@/interfaces/fellowship-report.interface";
+import { useLazyGetAllQuery } from "@/store/services/fellowship-report";
 
-export const columns: ColumnDef<IMarital>[] = [
+export const columns: ColumnDef<IFellowshipReport>[] = [
     {
-        accessorKey: "unique_code",
-        header: "No Surat",
-        cell: ({ row }) => <div className="lowercase text-nowrap">{row.getValue("unique_code")}</div>,
+        accessorKey: "date",
+        header: "Date",
+        cell: ({ row }) => <div className="lowercase text-nowrap">{new Date(row.getValue("date")).toLocaleDateString('id', { month: 'long', day: "2-digit", year: 'numeric' })}</div>,
     },
     {
-        accessorKey: "husband_name",
-        header: "Husband Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("husband_name")}</div>,
+        accessorKey: "blesscomn_name",
+        header: "Community Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("blesscomn_name")}</div>,
     },
     {
-        accessorKey: "wife_name",
-        header: "Wife Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("wife_name")}</div>,
+        accessorKey: "total_male",
+        header: () => <div className="text-center">{"Male"}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_male")}</div>,
     },
+    // {
+    //     accessorKey: "total_new_male",
+    //     header: "New Male",
+    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_male")}</div>,
+    // },
     {
-        accessorKey: "wedding_date",
-        header: "Wedding Date",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("wedding_date")).toLocaleDateString('en', { month: 'long', day: "2-digit", year: "numeric" })}</div>,
+        accessorKey: "total_female",
+        header: () => <div className="text-center">{"Female"}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_female")}</div>,
     },
+    // {
+    //     accessorKey: "total_new_female",
+    //     header: "New Female",
+    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_female")}</div>,
+    // },
+    {
+        accessorKey: "total",
+        header: () => <div className="text-center">{"Total"}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total")}</div>,
+    },
+
+
+    {
+        accessorKey: "new",
+        header: () => <div className="text-center">{"Total New"}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("new")}</div>,
+
+    },
+
     {
         id: "actions",
         enableHiding: true,
@@ -80,6 +104,7 @@ export type FetchMemberProps = {
     take?: string;
     search?: string;
     church?: string;
+    community?: string;
     dateFrom?: string;
     dateTo?: string;
 };
@@ -96,14 +121,18 @@ export function DataTable() {
     const pageSizeOptions = [5, 10, 20, 30, 50];
     const searchParams = useSearchParams();
 
-    const [fetchData, { data, isLoading }] = useLazyGetAllMaritalQuery();
+    const [fetchData, { data, isLoading }] = useLazyGetAllQuery();
+
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {
+                ...props,
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
+                blesscomn_id: props.community ? Number(props.community) : undefined,
                 search: props.search,
+
             };
             await fetchData(params, false);
         } catch (error) {

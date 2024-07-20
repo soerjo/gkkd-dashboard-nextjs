@@ -1,23 +1,35 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { DataTable } from './_components/table'
 import { useLazyGetAllChurchQuery } from '@/store/services/church'
+import { useLazyGetAllQuery } from '@/store/services/fellowship'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
-import { DownloadIcon, PlusIcon } from 'lucide-react';
+import { DownloadIcon, PlusIcon, UploadIcon } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [lazy] = useLazyGetAllChurchQuery();
-  const fetch = async (query: string) => {
+  const [lazyFetchChurch] = useLazyGetAllChurchQuery();
+  const [lazyFetchCommunity] = useLazyGetAllQuery();
+
+  const fetchChurch = async (query: string) => {
     try {
-      const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyFetchChurch({ take: 5, page: 1, search: query }).unwrap();
+      return res.data.entities.map(data => ({ label: data.name, value: data }))
+    } catch (error) {
+      return []
+    }
+  }
+
+  const fetchCommunity = async (query: string) => {
+    try {
+      const res = await lazyFetchCommunity({ take: 5, page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
@@ -27,7 +39,7 @@ export default function Dashboard() {
     <>
       <div className='flex flex-col '>
         <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-          Baptism
+          Fellowship Reports
         </h1>
         <MyBreadcrum currentPath='data' />
       </div>
@@ -36,7 +48,7 @@ export default function Dashboard() {
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New User"}
+            {isDesktop && "New Report"}
           </Button>
         </MyDrawer>
 
@@ -44,11 +56,18 @@ export default function Dashboard() {
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>
+
+        <Button variant="outline" size="sm" className="flex gap-2">
+          <UploadIcon className="size-4" aria-hidden="true" />
+          {isDesktop && "Import"}
+        </Button>
+
       </div>
+      <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>
-        <CustomSearchInput />
-        <CustomSelect compName={'church'} fetchQuery={fetch} />
-        {/* <DateRangePicker /> */}
+        <CustomSelect compName={'church'} fetchQuery={fetchChurch} />
+        <CustomSelect compName={'community'} fetchQuery={fetchCommunity} />
+        <DateRangePicker />
       </div>
       <DataTable />
 

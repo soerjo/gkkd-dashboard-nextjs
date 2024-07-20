@@ -28,18 +28,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
-import useQueryParams from "@/hooks/user-query-params";
+import { useDeleteMutation } from "@/store/services/fellowship";
 import { toast } from "react-toastify";
-import { IMarital } from "@/interfaces/marital.interface";
+import { IFellowship } from "@/interfaces/fellowship.interface";
 
-export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
+export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
-
-    const [detailUserNij, setDetailUserNij] = React.useState<string | null>('');
-    useQueryParams({ key: 'nij', value: detailUserNij })
-
 
     const router = useRouter();
     const pathname = usePathname();
@@ -49,12 +44,10 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
     const take = parseInt(searchParams.get("take") || "10");
     const search = searchParams.get("search") || "";
 
-    const [getAllData] = useLazyGetAllMemberQuery();
-    const [deleteData] = useDeleteMemberMutation();
+    const [deleteData] = useDeleteMutation();
 
     const setParams = async () => {
         try {
-            setDetailUserNij(row.original.unique_code)
             setOpen(true);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -64,8 +57,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ nij: row.original.unique_code }).unwrap();
-            await getAllData({ page, take, search }).unwrap();
+            await deleteData({ id: row.original.id }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -113,7 +105,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
-                                                Are you sure delete user: {row.original.unique_code}?
+                                                Are you sure delete: {row.original.id}?
                                             </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 This action cannot be undone. This will permanently
@@ -132,7 +124,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -169,7 +161,7 @@ export const DropdownAction = ({ row }: { row: Row<IMarital> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

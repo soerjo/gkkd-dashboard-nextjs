@@ -12,6 +12,8 @@ import { baptismApi } from "./services/baptism";
 import { childDedicationApi } from "./services/child-dedication";
 import { cermonApi } from "./services/cermon";
 import { cermonReportApi } from "./services/cermon-report";
+import { fellowshipApi } from "./services/fellowship";
+import { fellowshipReportApi } from "./services/fellowship-report";
 
 export const makeStore = configureStore({
   reducer: {
@@ -26,6 +28,8 @@ export const makeStore = configureStore({
     [childDedicationApi.reducerPath]: childDedicationApi.reducer,
     [cermonApi.reducerPath]: cermonApi.reducer,
     [cermonReportApi.reducerPath]: cermonReportApi.reducer,
+    [fellowshipApi.reducerPath]: fellowshipApi.reducer,
+    [fellowshipReportApi.reducerPath]: fellowshipReportApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -40,6 +44,8 @@ export const makeStore = configureStore({
       childDedicationApi.middleware,
       cermonApi.middleware,
       cermonReportApi.middleware,
+      fellowshipApi.middleware,
+      fellowshipReportApi.middleware,
     ]),
 });
 
