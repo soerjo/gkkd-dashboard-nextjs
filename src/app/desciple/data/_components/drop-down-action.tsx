@@ -28,11 +28,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMutation } from "@/store/services/fellowship";
+import { useDeleteMutation } from "@/store/services/disciples";
 import { toast } from "react-toastify";
-import { IFellowship } from "@/interfaces/fellowship.interface";
+import { IDisciples } from "@/interfaces/disciples.interface";
 
-export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
+export const DropdownAction = ({ row }: { row: Row<IDisciples> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -57,7 +57,7 @@ export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
 
     const handleDeleteData = async () => {
         try {
-            await deleteData({ id: row.original.id }).unwrap();
+            await deleteData({ nim: row.original.nim }).unwrap();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -105,7 +105,7 @@ export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
-                                                Are you sure delete: {row.original.id}?
+                                                Are you sure delete: {row.original.nim}?
                                             </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 This action cannot be undone. This will permanently
@@ -124,7 +124,7 @@ export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <SheetContent className="">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.nim} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -161,7 +161,7 @@ export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
                 </DropdownMenu>
                 <DrawerContent>
                     <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
+                        <UpdateFormInput onOpenChange={setOpen} data={row.original.nim} />
                     </div>
                 </DrawerContent>
                 <AlertDialogContent>

@@ -34,24 +34,36 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllQuery } from "@/store/services/fellowship";
-import { IFellowship } from "@/interfaces/fellowship.interface";
+import { useLazyGetAllQuery } from "@/store/services/disciples";
+import { IDisciples } from "@/interfaces/disciples.interface";
 
-export const columns: ColumnDef<IFellowship>[] = [
+export const columns: ColumnDef<IDisciples>[] = [
     {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap capitalize">{row.original.name}</div>,
+    },
+    {
+        accessorKey: "nim",
+        header: "Nim",
+        cell: ({ row }) => <div className="text-nowrap">{row.original.nim}</div>,
     },
     {
         accessorKey: "region_name",
         header: "Region",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.original.region.name}</div>,
     },
     {
-        accessorKey: "lead_name",
-        header: "Leader",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
+        accessorKey: "jemaat_nij",
+        header: "Nij",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("jemaat_nij")}</div>,
+    },
+    {
+        accessorKey: "pembimbing_nim",
+        header: "Pembimbing",
+        cell: ({ row }) => <div className="text-nowrap capitalize"> {
+            row.original.parent?.id ? row.original.parent?.name : '-'
+        } </div>,
     },
     {
         id: "actions",
@@ -66,7 +78,9 @@ export type FetchMemberProps = {
     page?: string;
     take?: string;
     search?: string;
-    church?: string;
+    church?: number;
+    pembimbing?: number;
+    group?: number;
     dateFrom?: string;
     dateTo?: string;
 };
@@ -91,9 +105,11 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
+                parent_id: props.pembimbing ? Number(props.pembimbing) : undefined,
+                group_id: props.group ? Number(props.group) : undefined,
                 search: props.search,
             };
-            const response = await fetchData(params).unwrap()
+            await fetchData(params).unwrap()
         } catch (error) {
             console.log({ error });
         }

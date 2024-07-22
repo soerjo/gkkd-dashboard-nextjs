@@ -28,11 +28,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMutation } from "@/store/services/fellowship";
+import { useDeleteMutation } from "@/store/services/disciples-group";
 import { toast } from "react-toastify";
-import { IFellowship } from "@/interfaces/fellowship.interface";
+import { IGroup } from "@/interfaces/disciples-group.interface";
 
-export const DropdownAction = ({ row }: { row: Row<IFellowship> }) => {
+export const DropdownAction = ({ row }: { row: Row<IGroup> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 

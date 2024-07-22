@@ -13,10 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
-import { CalendarComponent } from "@/components/ui/date-picker";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
@@ -24,25 +20,45 @@ import { toast } from "react-toastify";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
-import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/fellowship";
-import { CreateFellowship, weekDays } from "@/interfaces/fellowship.interface";
-import { formatTime } from "@/lib/format-time";
-import { TimePicker } from "@/components/custom/time-picker";
-import { Textarea } from "@/components/ui/textarea";
+import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation, useLazyGetAllListQuery } from "@/store/services/disciples";
+import { CreateDisciples } from "@/interfaces/disciples.interface";
+import { useLazyGetAllQuery as useLazyGetAllGroupQuery } from "../../../../store/services/disciples-group";
+import { useLazyGetAllMemberQuery } from "../../../../store/services/member";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
 
 type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateFellowship, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
+type CreateInputForm = Omit<CreateDisciples, "region_id" | "pembimbing_id" | "group_id" | "jemaat_nij"> & { region?: dropDown, pembimbing?: dropDown, group?: dropDown, jemaat?: dropDown }
 
 const defaultCreateForm: CreateInputForm = {
     name: "",
-    time: new Date(`2024-07-07`),
-    segment: "",
-    location: "",
+    book_level: "",
+    pembimbing: {
+        label: "",
+        value: "",
+    },
     region: {
         label: "",
         value: "",
     },
+    group: {
+        label: "",
+        value: "",
+    },
+    jemaat: {
+        label: "",
+        value: "",
+    },
 };
+
+const bookLevel = [
+    "4MT",
+    "SOM",
+    "SOD1",
+    "SOD2",
+    "SOD3",
+    "DLL"
+]
+
 
 const dropDownSchema = z.object({
     label: z.string(),
@@ -51,15 +67,16 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: 'required' }).max(100),
-    time: z.coerce.date(),
-    segment: z.string().min(1, { message: 'required' }).max(100),
-    location: z.string().max(200),
-    region: dropDownSchema.nullable().optional(),
-});
+    book_level: z.string().min(1, { message: 'required' }).max(100),
 
+    region: dropDownSchema.nullable().optional(),
+    pembimbing: dropDownSchema.nullable().optional(),
+    group: dropDownSchema.nullable().optional(),
+    jemaat: dropDownSchema.nullable().optional(),
+});
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: number;
+    data: string;
 };
 
 export const UpdateFormInput = ({
@@ -69,16 +86,12 @@ export const UpdateFormInput = ({
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
-    const [fetchById] = useLazyGetByIdQuery()
-    const { isLoading, data: payload } = useGetByIdQuery(
-        { id: id },
-        { refetchOnMountOrArgChange: true }
-    );
+    const fetchDetail = useGetByIdQuery({ nim: id });
+    const { isLoading, data: payload } = fetchDetail
 
     const form = useForm<CreateInputForm>({
         resolver: zodResolver(FormSchema),
-        defaultValues: defaultCreateForm,
+        defaultValues: defaultCreateForm
     });
 
     const {
@@ -89,11 +102,12 @@ export const UpdateFormInput = ({
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await updateData({
-                id: id,
                 ...values,
-                time: formatTime(values.time),
-                day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
-                region_id: values?.region?.value || null
+                nim: id,
+                region_id: values?.region?.value || null,
+                pembimbing_id: values?.pembimbing?.value || null,
+                group_id: values?.group?.value || null,
+                jemaat_nij: values?.jemaat?.value || null,
             }).unwrap();
             onOpenChange(val => !val);
         } catch (error) {
@@ -102,7 +116,9 @@ export const UpdateFormInput = ({
         }
     };
 
-    const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
+
+    const [fetchChurch] = useLazyGetAllChurchQuery();
+    const loadOptionsChurch = debounce(async (query: string, callback: (...arg: any) => any) => {
         try {
             const res = await fetchChurch({
                 take: 100,
@@ -117,37 +133,75 @@ export const UpdateFormInput = ({
         } catch (error) {
             return [];
         }
-    };
-    const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
+    }, 300);
+
+    const [fetchDisciples] = useLazyGetAllListQuery();
+    const loadOptionsPembimbing = debounce(async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchDisciples({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    }, 300);
+
+    const [fetchGroup] = useLazyGetAllGroupQuery();
+    const loadOptionsGroup = debounce(async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchGroup({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    }, 300);
+
+    const [fetchMember] = useLazyGetAllMemberQuery();
+    const loadOptionsJemaat = debounce(async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchMember({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.nij,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    }, 300);
+
 
     React.useEffect(() => {
-        if (!payload) return
-        const fetch = async () => {
-            const res = await fetchById({ id: id }).unwrap()
 
-            let date = new Date(`2024-07-07`)
-            if (res.data.day) {
-                const val = weekDays.filter(day => day.name === res.data.day)[0]?.value
-                date = new Date(new Date().setDate(date.getDate() + Number(val)))
+        reset({
+            name: payload?.data.name ?? "",
+            book_level: payload?.data.book_level ?? "",
+            region: { label: payload?.data?.region?.name ?? "", value: payload?.data?.region?.id ?? "" },
+            jemaat: { label: payload?.data?.jemaat_nij ?? "", value: payload?.data?.jemaat_nij ?? "" },
+            group: { label: payload?.data?.group?.name ?? "", value: payload?.data?.group?.id ?? "" },
+            pembimbing: { label: payload?.data?.parent?.name ?? "", value: payload?.data?.parent?.id ?? "" },
+        });
 
-                const lastTime = res.data.time.split(":")
-                const hour = Number(lastTime[0])
-                const minute = Number(lastTime[1])
 
-                date = new Date(new Date(date).setHours(hour))
-                date = new Date(new Date(date).setMinutes(minute))
-            }
-
-            reset({
-                name: res.data.name || "",
-                time: date,
-                segment: res.data.segment || "",
-                location: res.data.location || "",
-                region: { label: res.data.region_name, value: res.data.region_id },
-            });
-        }
-
-        fetch()
     }, [payload]);
 
     if (isLoading)
@@ -220,13 +274,26 @@ export const UpdateFormInput = ({
                                     )}
                                 />
 
+
                                 <FormField
                                     control={form.control}
-                                    name={"time"}
+                                    name={"book_level"}
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"time".replaceAll("_", " ")}</FormLabel>
-                                            <TimePicker date={field.value} setDate={field.onChange} />
+                                        <FormItem>
+                                            <FormLabel className="capitalize">{"book_level".replaceAll("_", " ")}</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={payload?.data.book_level}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder={"book_level"} />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {bookLevel.map(book => <SelectItem key={book} value={book}>{book}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -234,18 +301,21 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name={"segment"}
+                                    name="group"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"segment".replaceAll("_", " ")}
+                                                {"group".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"segment"}
-                                                    placeholder={"segment"}
-                                                    {...field}
+                                                <AsyncSelect
+                                                    id="group"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    isClearable
+                                                    loadOptions={loadOptionsGroup}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -255,21 +325,52 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name={"location"}
+                                    name="pembimbing"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="capitalize">{"location".replaceAll("_", " ")}</FormLabel>
+                                            <FormLabel className="capitalize">
+                                                {"pembimbing".replaceAll("_", " ")}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Textarea
-                                                    placeholder="Tell us a little bit about yourself"
-                                                    className="resize-none"
-                                                    {...field}
+                                                <AsyncSelect
+                                                    id="pembimbing"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    isClearable
+                                                    loadOptions={loadOptionsPembimbing}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormField
+                                    control={form.control}
+                                    name="jemaat"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"jemaat".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <AsyncSelect
+                                                    id="jemaat"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    isClearable
+                                                    loadOptions={loadOptionsJemaat}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
                                 <FormField
                                     control={form.control}
                                     name="region"
@@ -283,6 +384,7 @@ export const UpdateFormInput = ({
                                                     id="region"
                                                     cacheOptions
                                                     defaultOptions
+                                                    isClearable
                                                     loadOptions={loadOptionsChurch}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}

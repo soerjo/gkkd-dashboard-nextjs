@@ -311,7 +311,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                             <FormLabel className="capitalize">{"gender".replaceAll("_", " ")}</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
-                                                defaultValue={field.value}
+                                                defaultValue={payload?.data.gender}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>

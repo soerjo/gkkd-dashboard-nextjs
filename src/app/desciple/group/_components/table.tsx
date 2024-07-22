@@ -34,24 +34,24 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllQuery } from "@/store/services/fellowship";
-import { IFellowship } from "@/interfaces/fellowship.interface";
+import { useLazyGetAllQuery } from "@/store/services/disciples-group";
+import { IGroup } from "@/interfaces/disciples-group.interface";
 
-export const columns: ColumnDef<IFellowship>[] = [
+export const columns: ColumnDef<IGroup>[] = [
     {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
     },
     {
+        accessorKey: "lead_name",
+        header: "Parent",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
+    },
+    {
         accessorKey: "region_name",
         header: "Region",
         cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    },
-    {
-        accessorKey: "lead_name",
-        header: "Leader",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
     },
     {
         id: "actions",
@@ -67,6 +67,7 @@ export type FetchMemberProps = {
     take?: string;
     search?: string;
     church?: string;
+    pembimbing?: string;
     dateFrom?: string;
     dateTo?: string;
 };
@@ -91,9 +92,10 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
+                parent_id: props.pembimbing ? Number(props.pembimbing) : undefined,
                 search: props.search,
             };
-            const response = await fetchData(params).unwrap()
+            await fetchData(params).unwrap()
         } catch (error) {
             console.log({ error });
         }

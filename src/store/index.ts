@@ -14,6 +14,9 @@ import { cermonApi } from "./services/cermon";
 import { cermonReportApi } from "./services/cermon-report";
 import { fellowshipApi } from "./services/fellowship";
 import { fellowshipReportApi } from "./services/fellowship-report";
+import { disciplesApi } from "./services/disciples";
+import { disciplesGroupApi } from "./services/disciples-group";
+import { disciplesReportApi } from "./services/disciples-report";
 
 export const makeStore = configureStore({
   reducer: {
@@ -30,6 +33,9 @@ export const makeStore = configureStore({
     [cermonReportApi.reducerPath]: cermonReportApi.reducer,
     [fellowshipApi.reducerPath]: fellowshipApi.reducer,
     [fellowshipReportApi.reducerPath]: fellowshipReportApi.reducer,
+    [disciplesApi.reducerPath]: disciplesApi.reducer,
+    [disciplesGroupApi.reducerPath]: disciplesGroupApi.reducer,
+    [disciplesReportApi.reducerPath]: disciplesReportApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -46,6 +52,9 @@ export const makeStore = configureStore({
       cermonReportApi.middleware,
       fellowshipApi.middleware,
       fellowshipReportApi.middleware,
+      disciplesApi.middleware,
+      disciplesGroupApi.middleware,
+      disciplesReportApi.middleware,
     ]),
 });
 
