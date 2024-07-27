@@ -87,7 +87,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
+          {/* <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
             <Card className='col-span-1 lg:col-span-5'>
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
@@ -107,7 +107,7 @@ export default function Dashboard() {
                 <RecentSales />
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </TabsContent>
       </Tabs>
     </>
