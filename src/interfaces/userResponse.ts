@@ -1,4 +1,5 @@
 import { GetChurchResponse } from "./churchResponse";
+import { IFellowshipById } from "./fellowship.interface";
 
 export type GetUserResponse = {
   id: number;
@@ -8,13 +9,23 @@ export type GetUserResponse = {
   role: string;
   status: boolean;
   region: GetChurchResponse;
+  blesscomn: AdminBlessComn[];
+};
+
+export type AdminBlessComn = {
+  id: number;
+  admin_id: number;
+  blesscomn_id: number;
+  blesscomn: IFellowshipById;
 };
 
 export type GetUserFilter = {
   take?: number;
   page?: number;
   search?: string;
+  role?: string;
   region_id?: number;
+  blesscomn: AdminBlessComn[];
 };
 
 export type CreateUser = {
@@ -22,7 +33,8 @@ export type CreateUser = {
   email: string;
   phone: string;
   role: string;
-  regions_id?: number;
+  region_id?: number;
+  blesscomn_ids?: number[];
 };
 
 export type CreateUserForm = {

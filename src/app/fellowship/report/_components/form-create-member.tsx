@@ -77,7 +77,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     } = form;
 
     const [createData] = useCreateMutation();
-    const [fetchCermon] = useLazyGetAllQuery();
 
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
@@ -94,9 +93,10 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         }
     };
 
-    const _loadSuggestionsCermon = async (query: string, callback: (...arg: any) => any) => {
+    const [fetchCommunity] = useLazyGetAllQuery();
+    const _loadSuggestionsCommunity = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const res = await fetchCermon({
+            const res = await fetchCommunity({
                 take: 100,
                 page: 1,
                 search: query,
@@ -110,7 +110,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return [];
         }
     };
-    const loadOptionsCermon = debounce(_loadSuggestionsCermon, 300);
+    const loadOptionsCommunity = debounce(_loadSuggestionsCommunity, 300);
 
 
     return (
@@ -165,7 +165,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     id="community"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptionsCermon}
+                                                    loadOptions={loadOptionsCommunity}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />

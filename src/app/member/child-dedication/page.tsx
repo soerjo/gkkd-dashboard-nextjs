@@ -17,7 +17,7 @@ export default function Dashboard() {
   // const [lazy] = useLazyGetAllChurchQuery();
   // const fetch = async (query: string) => {
   //   try {
-  //     const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+  //     const res = await lazy({  page: 1, search: query }).unwrap();
   //     return res.data.entities.map(data => ({ label: data.name, value: data }))
   //   } catch (error) {
   //     return []

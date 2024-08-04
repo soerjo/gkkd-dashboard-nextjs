@@ -11,7 +11,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const fellowshipReportApi = createApi({
   reducerPath: "fellowshipReportApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/blesscomn/report",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/blesscomn-report",
     prepareHeaders: (headers) => {
       const token = getAuthCookie(AUTH_TOKEN);
       if (token) headers.set("authorization", `Bearer ${token}`);

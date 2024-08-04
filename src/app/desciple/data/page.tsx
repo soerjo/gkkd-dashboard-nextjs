@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [lazyRegion] = useLazyGetAllTableChurchQuery();
   const fetchRegion = async (query: string) => {
     try {
-      const res = await lazyRegion({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyRegion({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
@@ -29,7 +29,7 @@ export default function Dashboard() {
   const [lazyParent] = useLazyGetAllListQuery();
   const fetchParent = async (query: string) => {
     try {
-      const res = await lazyParent({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyParent({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [lazyGroup] = useLazyGetAllListQuery();
   const fetchGroup = async (query: string) => {
     try {
-      const res = await lazyGroup({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyGroup({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []

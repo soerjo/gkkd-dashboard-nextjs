@@ -94,10 +94,7 @@ export const UpdateFormInput = ({
         defaultValues: defaultCreateForm
     });
 
-    const {
-        formState: { isSubmitting, isDirty },
-        reset,
-    } = form;
+    const { formState: { isSubmitting, isDirty }, reset } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {

@@ -132,7 +132,6 @@ export function DataTable() {
                 region_id: props.church ? Number(props.church) : undefined,
                 blesscomn_id: props.community ? Number(props.community) : undefined,
                 search: props.search,
-
             };
             await fetchData(params, false);
         } catch (error) {

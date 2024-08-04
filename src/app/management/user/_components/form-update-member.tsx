@@ -15,11 +15,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CreateUserForm, GetUserResponse } from "@/interfaces/userResponse";
-import {
-    useUpdateUserMutation,
-    useLazyGetAllUserQuery,
-} from "@/store/services/user";
+import { CreateUser, GetUserResponse } from "@/interfaces/userResponse";
+import { useUpdateUserMutation, useGetUserByIdQuery } from "@/store/services/user";
 import { useLazyGetParamsQuery } from "@/store/services/params";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
@@ -27,31 +24,47 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import debounce from "lodash.debounce";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { toast } from "react-toastify";
+import { Spinner } from "../../../../components/ui/spinner";
+import { useLazyGetAllQuery } from "@/store/services/fellowship";
+import { UserRole } from "../../../../interfaces/auth.interface";
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
 
+type dropDown = { label: string, value: string | number }
+type CreateInputForm = Omit<CreateUser, "region_id" | "role"> & { region: dropDown, role: dropDown, blesscomn?: dropDown[], }
+
+const defaultCreateForm: CreateInputForm = {
+    name: "",
+    email: "",
+    phone: "",
+    region: {
+        label: "",
+        value: "",
+    },
+    role: {
+        label: "",
+        value: "",
+    },
+    blesscomn: [{
+        label: "",
+        value: "",
+    }],
+};
+
+const dropDownSchema = z.object({
+    label: z.string(),
+    value: z.any(),
+});
+
 const FormSchema = z.object({
     name: z.string().min(1, { message: "required" }).max(25),
     email: z.string().min(1, { message: "required" }).max(25).email(),
     phone: z.string().regex(phoneRegex, "invalid number"),
-    role: z.object(
-        {
-            label: z.string(),
-            value: z.any(),
-        },
-        { message: "required" }
-    ),
-    region: z
-        .object(
-            {
-                label: z.string(),
-                value: z.any(),
-            },
-            { message: "required" }
-        )
-        .optional(),
+    role: dropDownSchema,
+    region: dropDownSchema,
+    blesscomn: z.array(dropDownSchema.nullable()).optional()
 });
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
@@ -66,20 +79,15 @@ export const UpdateFormInput = ({
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateUserMutation();
-    const [getListChurch] = useLazyGetAllChurchQuery();
     const [getParams] = useLazyGetParamsQuery();
 
-    const form = useForm<CreateUserForm>({
+    const form = useForm<CreateInputForm>({
         resolver: zodResolver(FormSchema),
-        defaultValues: {
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            region: { label: data.region.name, value: data.region },
-            role: { label: data.role, value: data.role },
-        },
+        defaultValues: defaultCreateForm,
     });
-    const { formState: { isDirty, isSubmitting } } = form;
+
+    const { isLoading, data: payload } = useGetUserByIdQuery({ id: data.id });
+    const { formState: { isSubmitting, isDirty }, reset, watch } = form;
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
@@ -92,7 +100,8 @@ export const UpdateFormInput = ({
                 ...values,
                 id: oldData.id,
                 role: values.role.value,
-                regions_id: values.region?.value.id ?? userPayload.region.id,
+                region_id: values.region?.value.id ?? userPayload.region?.id,
+                blesscomn_ids: values?.blesscomn?.map(com => com?.value)
             }).unwrap();
 
             onOpenChange(val => !val);
@@ -121,29 +130,76 @@ export const UpdateFormInput = ({
 
     const promiseRoleOptions = debounce(_loadRoleSuggestions, 300);
 
-    const _loadRegionSuggestions = async (
-        query: string,
-        callback: (...arg: any) => any
-    ) => {
+    const [fetchChurch] = useLazyGetAllChurchQuery();
+    const loadOptionsChurch = debounce(async (query: string, callback: (...arg: any) => any) => {
         try {
-            const response = await getListChurch({
-                take: 20,
+            const res = await fetchChurch({
+                take: 100,
                 page: 1,
                 search: query,
             }).unwrap();
-            const list = response.data.entities.map(val => ({
-                value: val,
-                label: val.name,
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
             }));
-            return callback(list);
+            return callback(resp);
         } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast.error(JSON.stringify(errorMessage));
+            return [];
+        }
+    }, 300);
+
+    const [fetchCommunity] = useLazyGetAllQuery();
+    const _loadSuggestionsCommunity = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchCommunity({
+                take: 100,
+                page: 1,
+                search: query,
+                region_id: watch('region')?.value as number
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
+            }));
+            return callback(resp);
+        } catch (error) {
             return [];
         }
     };
+    const loadOptionsCommunity = debounce(_loadSuggestionsCommunity, 300);
 
-    const promiseRegionOptions = debounce(_loadRegionSuggestions, 300);
+    React.useEffect(() => {
+
+        reset({
+            name: payload?.data.name ?? "",
+            email: payload?.data.email ?? "",
+            phone: payload?.data.phone ?? "",
+            role: {
+                label: payload?.data.role ?? "",
+                value: payload?.data.role ?? "",
+            },
+            region: {
+                label: payload?.data.region.name ?? "",
+                value: payload?.data.region.id ?? "",
+            },
+            blesscomn: payload?.data.blesscomn.map(bc => ({
+                label: bc?.blesscomn.name,
+                value: bc?.blesscomn.id
+            }))
+        });
+
+
+    }, [payload]);
+
+    if (isLoading)
+        return (
+            <div className="flex items-center justify-center h-full gap-3">
+                <Spinner size="large">
+                    <span>Loading page...</span>
+                </Spinner>
+            </div>
+        );
+
 
     return (
         <div
@@ -261,7 +317,7 @@ export const UpdateFormInput = ({
                                                     cacheOptions
                                                     defaultOptions
                                                     loadOptions={promiseRoleOptions}
-                                                    defaultValue={field.value}
+                                                    value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
@@ -269,6 +325,7 @@ export const UpdateFormInput = ({
                                         </FormItem>
                                     )}
                                 />
+
 
                                 <FormField
                                     control={form.control}
@@ -283,8 +340,9 @@ export const UpdateFormInput = ({
                                                     id="region"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={promiseRegionOptions}
-                                                    defaultValue={field.value}
+                                                    isClearable
+                                                    loadOptions={loadOptionsChurch}
+                                                    value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
@@ -292,6 +350,36 @@ export const UpdateFormInput = ({
                                         </FormItem>
                                     )}
                                 />
+
+                                {
+                                    payload?.data.role === UserRole.LEADER && (
+
+                                        <FormField
+                                            control={form.control}
+                                            name="blesscomn"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="capitalize">
+                                                        {"blesscomn".replaceAll("_", " ")}
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <AsyncSelect
+                                                            key={watch('region')?.value}
+                                                            id="blesscomn"
+                                                            isMulti
+                                                            cacheOptions
+                                                            defaultOptions
+                                                            loadOptions={loadOptionsCommunity}
+                                                            value={field.value}
+                                                            onChange={(e: any) => field.onChange(e)}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )
+                                }
                             </div>
                         </ScrollArea>
 

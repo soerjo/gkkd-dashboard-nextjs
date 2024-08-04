@@ -10,7 +10,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const disciplesReportApi = createApi({
   reducerPath: "disciplesReportApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/pemuridan/report",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/pemuridan-report",
     prepareHeaders: (headers) => {
       const token = getAuthCookie(AUTH_TOKEN);
       if (token) headers.set("authorization", `Bearer ${token}`);

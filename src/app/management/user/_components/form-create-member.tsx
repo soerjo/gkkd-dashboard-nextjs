@@ -9,67 +9,65 @@ import { z } from "zod";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useLazyGetParamsQuery } from "@/store/services/params";
-import { useCreateUserMutation, useLazyGetAllUserQuery, } from "@/store/services/user";
-import { CreateUserForm } from "@/interfaces/userResponse";
+import { useCreateUserMutation, useGetUserByIdQuery } from "@/store/services/user";
+import { CreateUserForm, CreateUser } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { toast } from 'react-toastify';
-
-
-
-const defaultValue: CreateUserForm = {
-    name: "",
-    email: "",
-    phone: "",
-    role: {
-        label: "",
-        value: ""
-    },
-    region: {
-        label: "",
-        value: ""
-    }
-}
+import { useLazyGetAllQuery } from "@/store/services/fellowship";
+import debounce from "lodash.debounce";
 
 const phoneRegex = new RegExp(
     /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
 );
 
-const FormSchema = z
-    .object({
-        name: z.string().min(1, { message: "required" }).max(25),
-        email: z.string().min(1, { message: "required" }).max(25).email(),
-        phone: z.string().regex(phoneRegex, 'invalid number'),
-        role: z.object(
-            {
-                label: z.string().min(1, { message: "required" }),
-                value: z.any(),
-            },
-            { message: "required" }
-        ),
-        region: z.object(
-            {
-                label: z.string().min(1, { message: "required" }),
-                value: z.any(),
-            },
-            { message: "required" }
-        ).optional(),
-    })
+type dropDown = { label: string, value: string | number }
+type CreateInputForm = Omit<CreateUser, "region_id" | "role"> & { region: dropDown, role: dropDown, blesscomn?: dropDown[], }
 
+const defaultCreateForm: CreateInputForm = {
+    name: "",
+    email: "",
+    phone: "",
+    region: {
+        label: "",
+        value: "",
+    },
+    role: {
+        label: "",
+        value: "",
+    },
+    // blesscomn: [{
+    //     label: "",
+    //     value: "",
+    // }],
+};
 
+const dropDownSchema = z.object({
+    label: z.string(),
+    value: z.any(),
+});
+
+const FormSchema = z.object({
+    name: z.string().min(1, { message: "required" }).max(75),
+    email: z.string().min(1, { message: "required" }).max(75).email(),
+    phone: z.string().regex(phoneRegex, "invalid number"),
+    role: dropDownSchema,
+    region: dropDownSchema,
+    // blesscomn: z.array(dropDownSchema.nullable()).optional()
+});
 
 export type CreateFormProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>> }
 
 export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const form = useForm<CreateUserForm>({
+    const form = useForm<CreateInputForm>({
         resolver: zodResolver(FormSchema),
-        defaultValues: defaultValue,
+        defaultValues: defaultCreateForm,
     });
-    const { formState: { isSubmitting } } = form;
+    const { formState: { isSubmitting, isDirty }, reset, watch } = form;
 
 
     const [createUser] = useCreateUserMutation();
@@ -83,7 +81,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             const createUserBody = {
                 ...values,
                 role: values.role.value,
-                regions_id: values.region?.value.id ?? userPayload.region.id,
+                region_id: values.region?.value.id ?? userPayload.region.id,
             }
             await createUser(createUserBody).unwrap();
             onOpenChange(val => !val);
@@ -120,6 +118,27 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return [];
         }
     };
+
+    const [fetchCommunity] = useLazyGetAllQuery();
+    const _loadSuggestionsCommunity = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchCommunity({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.id,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    };
+    const loadOptionsCommunity = debounce(_loadSuggestionsCommunity, 300);
+
+
 
     return (
         <div
@@ -258,6 +277,29 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                         </FormItem>
                                     )}
                                 />
+
+                                {/* <FormField
+                                    control={form.control}
+                                    name="blesscomn"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"blesscomn".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <AsyncSelect
+                                                    id="blesscomn"
+                                                    isMulti
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptionsCommunity}
+                                                    onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
 
                             </div>
 

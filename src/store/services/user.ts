@@ -1,9 +1,5 @@
 import { IApiResponse, TPaginationResponse } from "@/interfaces/apiResponse";
-import {
-  CreateUser,
-  GetUserFilter,
-  GetUserResponse,
-} from "@/interfaces/userResponse";
+import { CreateUser, GetUserFilter, GetUserResponse } from "@/interfaces/userResponse";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -11,26 +7,23 @@ export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL + "/admin",
-    prepareHeaders: headers => {
+    prepareHeaders: (headers) => {
       const token = getAuthCookie(AUTH_TOKEN);
       if (token) headers.set("authorization", `Bearer ${token}`);
       return headers;
     },
   }),
   tagTypes: ["User"],
-  endpoints: builder => ({
+  endpoints: (builder) => ({
     createUser: builder.mutation<IApiResponse<GetUserFilter>, CreateUser>({
-      query: payload => ({
+      query: (payload) => ({
         url: "/",
         method: "POST",
         body: payload,
       }),
       invalidatesTags: ["User"],
     }),
-    updateUser: builder.mutation<
-      IApiResponse<GetUserFilter>,
-      CreateUser & { id: number }
-    >({
+    updateUser: builder.mutation<IApiResponse<GetUserFilter>, CreateUser & { id: number }>({
       query: ({ id, ...payload }) => ({
         url: `/${id}`,
         method: "PATCH",
@@ -38,21 +31,15 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    resetUserPassword: builder.mutation<
-      IApiResponse<undefined>,
-      { id: number }
-    >({
+    resetUserPassword: builder.mutation<IApiResponse<undefined>, { id: number }>({
       query: ({ id }) => ({
         url: `${id}/reset-password`,
         method: "PATCH",
       }),
       invalidatesTags: ["User"],
     }),
-    updateUserPassword: builder.mutation<
-      IApiResponse<undefined>,
-      { new_password: string }
-    >({
-      query: payload => ({
+    updateUserPassword: builder.mutation<IApiResponse<undefined>, { new_password: string }>({
+      query: (payload) => ({
         url: `/update-password`,
         method: "PATCH",
         body: payload,
@@ -73,11 +60,8 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    GetAllUser: builder.query<
-      IApiResponse<TPaginationResponse<GetUserResponse[]>>,
-      GetUserFilter
-    >({
-      query: payload => {
+    getAllUser: builder.query<IApiResponse<TPaginationResponse<GetUserResponse[]>>, GetUserFilter>({
+      query: (payload) => {
         return {
           url: "/",
           method: "GET",
@@ -86,11 +70,12 @@ export const userApi = createApi({
       },
       providesTags: ["User"],
     }),
-    GetUserById: builder.query<IApiResponse<GetUserResponse>, { id: number }>({
+    getUserById: builder.query<IApiResponse<GetUserResponse>, { id: number }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "GET",
       }),
+      providesTags: ["User"],
     }),
   }),
 });

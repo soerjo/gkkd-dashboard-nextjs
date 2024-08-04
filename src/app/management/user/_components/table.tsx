@@ -93,6 +93,7 @@ export type FetchTable = {
     church?: string,
     dateFrom?: string,
     dateTo?: string
+    role?: string,
 }
 
 export function DataTable() {
@@ -114,6 +115,7 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
+                role: props.role,
                 search: props.search,
             }
             await fetchData(params, false)

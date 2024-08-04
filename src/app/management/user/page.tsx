@@ -10,6 +10,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
+import { UserRole } from '../../../interfaces/auth.interface';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -18,6 +19,20 @@ export default function Dashboard() {
   const fetch = async (query: string) => {
     try {
       const res = await fetchChurch({ take: 100, page: 1, search: query }).unwrap();
+      return res.data.entities.map(data => ({ label: data.name, value: data }))
+    } catch (error) {
+      return []
+    }
+  }
+
+
+  const fetchRole = async (query: string) => {
+    try {
+      const res = {
+        data: {
+          entities: Object.entries(UserRole).map(data => ({ name: data[1], id: data[1] }))
+        }
+      }
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
@@ -45,9 +60,10 @@ export default function Dashboard() {
           {isDesktop && "Export"}
         </Button>
       </div>
-      <div className='flex lg:flex-row flex-col gap-4 md:w-1/3'>
+      <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
         <CustomSelect compName={'church'} fetchQuery={fetch} />
+        <CustomSelect compName={'role'} fetchQuery={fetchRole} />
         {/* <DateRangePicker /> */}
       </div>
       <DataTable />

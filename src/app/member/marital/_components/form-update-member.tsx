@@ -113,7 +113,7 @@ export const UpdateFormInput = ({
 
     const fetch = async (query: string) => {
         const res = await fetchChurch({
-            take: 5,
+
             page: 1,
             search: query,
         }).unwrap();

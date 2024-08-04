@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   const fetchChurch = async (query: string) => {
     try {
-      const res = await lazyFetchChurch({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyFetchChurch({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   const fetchCommunity = async (query: string) => {
     try {
-      const res = await lazyFetchCommunity({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyFetchCommunity({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []

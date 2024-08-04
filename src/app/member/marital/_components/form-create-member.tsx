@@ -105,7 +105,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     ) => {
         try {
             const res = await fetchChurch({
-                take: 5,
+
                 page: 1,
                 search: query,
             }).unwrap();

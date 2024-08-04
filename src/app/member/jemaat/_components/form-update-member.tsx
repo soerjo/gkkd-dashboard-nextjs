@@ -135,7 +135,7 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
     const [lazy] = useLazyGetAllChurchQuery();
     const _loadSuggestions = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const res = await lazy({ take: 5, page: 1, search: query }).unwrap();
+            const res = await lazy({ page: 1, search: query }).unwrap();
             const resp = res.data.entities.map(data => ({ label: data.name, value: data }))
             console.log({ resp })
             return callback(resp)

@@ -37,21 +37,21 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Fellowship',
     label: '',
-    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.LEADER],
     href: '/fellowship',
     icon: <IconUsersGroup size={18} />,
     sub: [
       {
         title: 'Fellowship',
         label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.LEADER],
         href: '/fellowship/data',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Report',
         label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.LEADER],
         href: '/fellowship/report',
         icon: <IconDatabaseExport size={18} />,
       },
