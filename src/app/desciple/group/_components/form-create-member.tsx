@@ -28,25 +28,22 @@ import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { CreateMarital } from "@/interfaces/marital.interface";
-import { useCreateMaritalMutation } from "@/store/services/marital";
-import { CreateFellowship, weekDays } from "@/interfaces/fellowship.interface";
-import { useCreateMutation } from "@/store/services/fellowship";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
-import { Member } from "@/interfaces/memberResponse";
-import { TimePickerInput } from "@/components/time-picker-input";
+import { useLazyGetAllListQuery } from "@/store/services/disciples";
+import { CreateGroup } from "@/interfaces/disciples-group.interface";
+import { useCreateMutation } from "@/store/services/disciples-group";
 import { TimePicker } from "@/components/custom/time-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/format-time";
 
 type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateFellowship, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
+type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim"> & { region?: dropDown, pembimbing?: dropDown }
 
 const defaultCreateForm: CreateInputForm = {
     name: "",
-    time: new Date(`2024-07-07`),
-    segment: "",
-    location: "",
+    pembimbing: {
+        label: "",
+        value: "",
+    },
     region: {
         label: "",
         value: "",
@@ -60,10 +57,8 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: 'required' }).max(100),
-    time: z.coerce.date(),
-    segment: z.string().min(1, { message: 'required' }).max(100),
-    location: z.string().max(200),
     region: dropDownSchema.nullable().optional(),
+    pembimbing: dropDownSchema.nullable().optional(),
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
@@ -72,7 +67,6 @@ export type CreateFormProps = React.ComponentProps<"form"> & {
 
 export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
-    const [time, setTime] = React.useState<Date | undefined>(undefined);
 
     const form = useForm<CreateInputForm>({
         resolver: zodResolver(FormSchema),
@@ -82,13 +76,13 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
     const [createData] = useCreateMutation();
     const [fetchChurch] = useLazyGetAllChurchQuery();
+    const [fetchDisciple] = useLazyGetAllListQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await createData({
                 ...values,
-                time: formatTime(values.time),
-                day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
+                pembimbing_nim: values?.pembimbing?.value,
                 region_id: values?.region?.value || null
             }).unwrap()
 
@@ -98,6 +92,25 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             toast.error(JSON.stringify(errorMessage));
         }
     };
+
+    const _loadSuggestionsDisciple = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchDisciple({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.nim,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    };
+    const loadOptionsDisciples = debounce(_loadSuggestionsDisciple, 300);
+
 
     const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
         try {
@@ -178,32 +191,23 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"time"}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"time".replaceAll("_", " ")}</FormLabel>
-                                            <TimePicker date={field.value} setDate={field.onChange} />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
                                 <FormField
                                     control={form.control}
-                                    name={"segment"}
+                                    name="pembimbing"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"segment".replaceAll("_", " ")}
+                                                {"pembimbing".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"segment"}
-                                                    placeholder={"segment"}
-                                                    {...field}
+                                                <AsyncSelect
+                                                    id="pembimbing"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptionsDisciples}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -211,23 +215,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"location"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">{"location".replaceAll("_", " ")}</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Tell us a little bit about yourself"
-                                                    className="resize-none"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                                 <FormField
                                     control={form.control}
                                     name="region"

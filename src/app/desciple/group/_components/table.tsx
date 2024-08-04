@@ -41,18 +41,18 @@ export const columns: ColumnDef<IGroup>[] = [
     {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.original.name}</div>,
     },
     {
-        accessorKey: "lead_name",
-        header: "Parent",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
+        accessorKey: "pembimbing_nim",
+        header: "Pembimbing",
+        cell: ({ row }) => <div className="text-nowrap">{`${row.original.pembimbing.name} - ${row.original.pembimbing_nim}`}</div>,
     },
-    {
-        accessorKey: "region_name",
-        header: "Region",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    },
+    // {
+    //     accessorKey: "region_name",
+    //     header: "Region",
+    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
+    // },
     {
         id: "actions",
         enableHiding: true,
@@ -92,7 +92,7 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
-                parent_id: props.pembimbing ? Number(props.pembimbing) : undefined,
+                pembimbing_nim: props.pembimbing ? props.pembimbing : undefined,
                 search: props.search,
             };
             await fetchData(params).unwrap()

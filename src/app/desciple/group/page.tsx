@@ -10,7 +10,7 @@ import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { useLazyGetAllTableChurchQuery } from '@/store/services/church'
-import { useLazyGetAllQuery } from '@/store/services/disciples';
+import { useLazyGetAllListQuery } from '@/store/services/disciples';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -25,11 +25,11 @@ export default function Dashboard() {
     }
   }
 
-  const [lazyParent] = useLazyGetAllQuery();
+  const [lazyParent] = useLazyGetAllListQuery();
   const fetchParent = async (query: string) => {
     try {
       const res = await lazyParent({ take: 5, page: 1, search: query }).unwrap();
-      return res.data.entities.map(data => ({ label: data.name, value: data }))
+      return res.data.entities.map(data => ({ label: data.name, value: data.nim }))
     } catch (error) {
       return []
     }

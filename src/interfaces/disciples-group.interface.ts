@@ -1,9 +1,13 @@
+import { GetChurchResponse } from "./churchResponse";
+import { IDisciples } from "./disciples.interface";
+
 export interface IGroup {
   id: number;
   name: string;
   pembimbing_nim: string;
-  pembimbing_id: number;
   region_id: number;
+  pembimbing: IDisciples;
+  region: GetChurchResponse;
 }
 
 export interface CreateGroup {
@@ -16,5 +20,6 @@ export interface GroupFilter {
   take?: number;
   page?: number;
   search?: string;
+  pembimbing_nim?: string;
   region_id?: number;
 }

@@ -22,22 +22,24 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import { useLazyGetAllListQuery } from "@/store/services/disciples";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
-import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/fellowship";
-import { CreateFellowship, weekDays } from "@/interfaces/fellowship.interface";
+import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/disciples-group";
+import { CreateGroup } from "@/interfaces/disciples-group.interface";
 import { formatTime } from "@/lib/format-time";
 import { TimePicker } from "@/components/custom/time-picker";
 import { Textarea } from "@/components/ui/textarea";
 
 type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateFellowship, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
+type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim"> & { region?: dropDown, pembimbing?: dropDown }
 
 const defaultCreateForm: CreateInputForm = {
     name: "",
-    time: new Date(`2024-07-07`),
-    segment: "",
-    location: "",
+    pembimbing: {
+        label: "",
+        value: "",
+    },
     region: {
         label: "",
         value: "",
@@ -51,10 +53,8 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: 'required' }).max(100),
-    time: z.coerce.date(),
-    segment: z.string().min(1, { message: 'required' }).max(100),
-    location: z.string().max(200),
     region: dropDownSchema.nullable().optional(),
+    pembimbing: dropDownSchema.nullable().optional(),
 });
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
@@ -70,6 +70,7 @@ export const UpdateFormInput = ({
 
     const [updateData] = useUpdateMutation();
     const [fetchChurch] = useLazyGetAllChurchQuery();
+    const [fetchDisciple] = useLazyGetAllListQuery();
     const [fetchById] = useLazyGetByIdQuery()
     const { isLoading, data: payload } = useGetByIdQuery(
         { id: id },
@@ -91,8 +92,7 @@ export const UpdateFormInput = ({
             await updateData({
                 id: id,
                 ...values,
-                time: formatTime(values.time),
-                day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
+                pembimbing_nim: values?.pembimbing?.value || null,
                 region_id: values?.region?.value || null
             }).unwrap();
             onOpenChange(val => !val);
@@ -101,6 +101,25 @@ export const UpdateFormInput = ({
             toast.error(JSON.stringify(errorMessage));
         }
     };
+
+    const _loadSuggestionsDisciple = async (query: string, callback: (...arg: any) => any) => {
+        try {
+            const res = await fetchDisciple({
+                take: 100,
+                page: 1,
+                search: query,
+            }).unwrap();
+            const resp = res.data.entities.map(data => ({
+                label: data.name,
+                value: data.nim,
+            }));
+            return callback(resp);
+        } catch (error) {
+            return [];
+        }
+    };
+    const loadOptionsDisciples = debounce(_loadSuggestionsDisciple, 300);
+
 
     const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
         try {
@@ -125,25 +144,10 @@ export const UpdateFormInput = ({
         const fetch = async () => {
             const res = await fetchById({ id: id }).unwrap()
 
-            let date = new Date(`2024-07-07`)
-            if (res.data.day) {
-                const val = weekDays.filter(day => day.name === res.data.day)[0]?.value
-                date = new Date(new Date().setDate(date.getDate() + Number(val)))
-
-                const lastTime = res.data.time.split(":")
-                const hour = Number(lastTime[0])
-                const minute = Number(lastTime[1])
-
-                date = new Date(new Date(date).setHours(hour))
-                date = new Date(new Date(date).setMinutes(minute))
-            }
-
             reset({
                 name: res.data.name || "",
-                time: date,
-                segment: res.data.segment || "",
-                location: res.data.location || "",
-                region: { label: res.data.region_name, value: res.data.region_id },
+                pembimbing: { label: res.data?.pembimbing?.name, value: res.data?.pembimbing?.nim },
+                region: { label: res.data?.region?.name, value: res.data?.region?.id },
             });
         }
 
@@ -220,32 +224,23 @@ export const UpdateFormInput = ({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"time"}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"time".replaceAll("_", " ")}</FormLabel>
-                                            <TimePicker date={field.value} setDate={field.onChange} />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
 
                                 <FormField
                                     control={form.control}
-                                    name={"segment"}
+                                    name="pembimbing"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"segment".replaceAll("_", " ")}
+                                                {"pembimbing".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"segment"}
-                                                    placeholder={"segment"}
-                                                    {...field}
+                                                <AsyncSelect
+                                                    id="pembimbing"
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptionsDisciples}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -253,23 +248,6 @@ export const UpdateFormInput = ({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name={"location"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">{"location".replaceAll("_", " ")}</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Tell us a little bit about yourself"
-                                                    className="resize-none"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                                 <FormField
                                     control={form.control}
                                     name="region"
