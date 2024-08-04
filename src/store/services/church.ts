@@ -57,7 +57,10 @@ export const churchApi = createApi({
       query: (payload) => ({
         url: "/",
         method: "GET",
-        params: payload,
+        params: {
+          ...payload,
+          take: payload.take || 100,
+        },
       }),
       providesTags: ["Church"],
     }),
@@ -68,7 +71,10 @@ export const churchApi = createApi({
       query: (payload) => ({
         url: "/table",
         method: "GET",
-        params: payload,
+        params: {
+          ...payload,
+          take: payload.take || 100,
+        },
       }),
       providesTags: ["Church"],
     }),

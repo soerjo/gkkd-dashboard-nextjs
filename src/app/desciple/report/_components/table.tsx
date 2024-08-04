@@ -42,52 +42,24 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { IFellowshipReport } from "@/interfaces/fellowship-report.interface";
-import { useLazyGetAllQuery } from "@/store/services/fellowship-report";
+import { IDisciplesReport } from "@/interfaces/disciples-report.interface";
+import { useLazyGetAllQuery } from "@/store/services/disciples-report";
 
-export const columns: ColumnDef<IFellowshipReport>[] = [
+export const columns: ColumnDef<IDisciplesReport>[] = [
     {
         accessorKey: "date",
         header: "Date",
         cell: ({ row }) => <div className="lowercase text-nowrap">{new Date(row.getValue("date")).toLocaleDateString('id', { month: 'long', day: "2-digit", year: 'numeric' })}</div>,
     },
     {
-        accessorKey: "blesscomn_name",
-        header: "Community Name",
-        cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("blesscomn_name")}</div>,
+        accessorKey: "group",
+        header: "Group Name",
+        cell: ({ row }) => <div className="capitalize text-nowrap">{row.original.disciple_group?.name}</div>,
     },
     {
-        accessorKey: "total_male",
-        header: () => <div className="text-center">{"Male"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_male")}</div>,
-    },
-    // {
-    //     accessorKey: "total_new_male",
-    //     header: "New Male",
-    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_male")}</div>,
-    // },
-    {
-        accessorKey: "total_female",
-        header: () => <div className="text-center">{"Female"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_female")}</div>,
-    },
-    // {
-    //     accessorKey: "total_new_female",
-    //     header: "New Female",
-    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_female")}</div>,
-    // },
-    {
-        accessorKey: "total",
-        header: () => <div className="text-center">{"Total"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total")}</div>,
-    },
-
-
-    {
-        accessorKey: "new",
-        header: () => <div className="text-center">{"Total New"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("new")}</div>,
-
+        accessorKey: "pembimbing",
+        header: "Pembimbing",
+        cell: ({ row }) => <div className="text-nowrap">{`${row.original.disciple_group.pembimbing.name} - ${row.original.disciple_group.pembimbing_nim}`}</div>,
     },
 
     {
@@ -104,9 +76,9 @@ export type FetchMemberProps = {
     take?: string;
     search?: string;
     church?: string;
-    community?: string;
-    dateFrom?: string;
-    dateTo?: string;
+    pembimbing?: string;
+    date_from?: string;
+    date_to?: string;
 };
 
 export function DataTable() {
@@ -130,9 +102,10 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
-                blesscomn_id: props.community ? Number(props.community) : undefined,
+                pembimbing_nim: props.pembimbing ? props.pembimbing : undefined,
                 search: props.search,
-
+                date_from: props.date_from ? props.date_from : undefined,
+                date_to: props.date_to ? props.date_to : undefined,
             };
             await fetchData(params, false);
         } catch (error) {

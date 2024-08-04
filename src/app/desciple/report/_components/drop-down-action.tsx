@@ -29,11 +29,11 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { UpdateFormInput } from "./form-update-member";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { toast } from "react-toastify";
-import { IFellowshipReport } from "@/interfaces/fellowship-report.interface";
+import { IDisciplesReport } from "@/interfaces/disciples-report.interface";
 import { useDeleteMutation } from "@/store/services/fellowship-report";
 
 
-export const DropdownAction = ({ row }: { row: Row<IFellowshipReport> }) => {
+export const DropdownAction = ({ row }: { row: Row<IDisciplesReport> }) => {
     const [open, setOpen] = React.useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
 

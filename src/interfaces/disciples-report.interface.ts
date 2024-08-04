@@ -1,9 +1,16 @@
+import { GetChurchResponse } from "./churchResponse";
+import { IGroup } from "./disciples-group.interface";
+import { IDisciples } from "./disciples.interface";
+
 export interface IDisciplesReport {
   id: number;
-  name: string;
+  disciple_group_id: number;
+  date: Date;
+  material: string;
   pembimbing_nim: string;
-  pembimbing_id: number;
   region_id: number;
+  disciple_group: IGroup;
+  region: GetChurchResponse;
 }
 
 export interface CreateDisciplesReport {
@@ -19,4 +26,6 @@ export interface DisciplesReportFilter {
   region_id?: number;
   pembimbing_nim?: string;
   disciple_group_id?: number;
+  date_from?: string;
+  date_to?: string;
 }

@@ -1,8 +1,6 @@
 'use client'
 
 import { DataTable } from './_components/table'
-import { useLazyGetAllChurchQuery } from '@/store/services/church'
-import { useLazyGetAllQuery } from '@/store/services/fellowship'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
@@ -12,29 +10,33 @@ import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { useLazyGetAllTableChurchQuery } from '@/store/services/church'
+import { useLazyGetAllListQuery } from '@/store/services/disciples';
+
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [lazyFetchChurch] = useLazyGetAllChurchQuery();
-  const [lazyFetchCommunity] = useLazyGetAllQuery();
 
-  const fetchChurch = async (query: string) => {
+  const [lazyRegion] = useLazyGetAllTableChurchQuery();
+  const fetchRegion = async (query: string) => {
     try {
-      const res = await lazyFetchChurch({ take: 5, page: 1, search: query }).unwrap();
+      const res = await lazyRegion({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data }))
     } catch (error) {
       return []
     }
   }
 
-  const fetchCommunity = async (query: string) => {
+  const [lazyParent] = useLazyGetAllListQuery();
+  const fetchParent = async (query: string) => {
     try {
-      const res = await lazyFetchCommunity({ take: 5, page: 1, search: query }).unwrap();
-      return res.data.entities.map(data => ({ label: data.name, value: data }))
+      const res = await lazyParent({ page: 1, search: query }).unwrap();
+      return res.data.entities.map(data => ({ label: data.name, value: data.nim }))
     } catch (error) {
       return []
     }
   }
+
   return (
     <>
       <div className='flex flex-col '>
@@ -65,8 +67,8 @@ export default function Dashboard() {
       </div>
       <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>
-        <CustomSelect compName={'church'} fetchQuery={fetchChurch} />
-        <CustomSelect compName={'community'} fetchQuery={fetchCommunity} />
+        <CustomSelect compName={'pembimbing'} fetchQuery={fetchParent} />
+        <CustomSelect compName={'church'} fetchQuery={fetchRegion} />
         <DateRangePicker />
       </div>
       <DataTable />

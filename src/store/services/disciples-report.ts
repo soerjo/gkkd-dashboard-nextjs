@@ -10,7 +10,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const disciplesReportApi = createApi({
   reducerPath: "disciplesReportApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/report/pemuridan",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL + "/pemuridan/report",
     prepareHeaders: (headers) => {
       const token = getAuthCookie(AUTH_TOKEN);
       if (token) headers.set("authorization", `Bearer ${token}`);
@@ -29,18 +29,18 @@ export const disciplesReportApi = createApi({
     }),
     update: builder.mutation<
       IApiResponse<undefined>,
-      Partial<CreateDisciplesReport> & { nim: string }
+      Partial<CreateDisciplesReport> & { id: number }
     >({
-      query: ({ nim, ...payload }) => ({
-        url: `/${nim}`,
+      query: ({ id, ...payload }) => ({
+        url: `/${id}`,
         method: "PATCH",
         body: payload,
       }),
       invalidatesTags: ["DisciplesReport"],
     }),
-    delete: builder.mutation<IApiResponse<undefined>, { nim: string }>({
-      query: ({ nim }) => ({
-        url: `/${nim}`,
+    delete: builder.mutation<IApiResponse<undefined>, { id: number }>({
+      query: ({ id }) => ({
+        url: `/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["DisciplesReport"],
@@ -56,9 +56,9 @@ export const disciplesReportApi = createApi({
       }),
       providesTags: ["DisciplesReport"],
     }),
-    GetById: builder.query<IApiResponse<IDisciplesReport>, { nim: string }>({
-      query: ({ nim }) => ({
-        url: `/${nim}`,
+    GetById: builder.query<IApiResponse<IDisciplesReport>, { id: number }>({
+      query: ({ id }) => ({
+        url: `/${id}`,
         method: "GET",
       }),
     }),

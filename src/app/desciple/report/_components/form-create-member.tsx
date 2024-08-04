@@ -27,20 +27,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
-import { useCreateMutation } from "@/store/services/fellowship-report";
-import { useLazyGetAllQuery } from "@/store/services/fellowship";
-import { CreateFellowshipReport } from "@/interfaces/fellowship-report.interface";
+import { useLazyGetAllQuery } from "@/store/services/disciples-group";
+import { useCreateMutation } from "@/store/services/disciples-report";
+import { CreateDisciplesReport } from "@/interfaces/disciples-report.interface";
 
 type dropDown = { label: string, value: string | number }
-type CreateBaptismForm = Omit<CreateFellowshipReport, "region_id" | "blesscomn_id"> & { community: dropDown }
+type CreateBaptismForm = Omit<CreateDisciplesReport, "disciple_group_id"> & { group: dropDown }
 
 const defaultCreateMemberForm: CreateBaptismForm = {
     date: new Date(),
-    total_male: 0,
-    total_female: 0,
-    new_male: 0,
-    new_female: 0,
-    community: {
+    material: '',
+    group: {
         label: "",
         value: "",
 
@@ -54,11 +51,8 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     date: z.coerce.date(),
-    total_male: z.coerce.number().min(0),
-    total_female: z.coerce.number().min(0),
-    new_male: z.coerce.number().min(0),
-    new_female: z.coerce.number().min(0),
-    community: dropDownSchema,
+    material: z.string().min(1, { message: 'required' }).max(100),
+    group: dropDownSchema,
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
@@ -77,14 +71,14 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     } = form;
 
     const [createData] = useCreateMutation();
-    const [fetchCermon] = useLazyGetAllQuery();
+    const [fetchGroup] = useLazyGetAllQuery();
 
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await createData({
                 ...values,
-                blesscomn_id: values.community.value,
+                disciple_group_id: values.group.value,
             }).unwrap();
 
             onOpenChange(val => !val);
@@ -94,9 +88,9 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         }
     };
 
-    const _loadSuggestionsCermon = async (query: string, callback: (...arg: any) => any) => {
+    const _loadSuggestionsGroup = async (query: string, callback: (...arg: any) => any) => {
         try {
-            const res = await fetchCermon({
+            const res = await fetchGroup({
                 take: 100,
                 page: 1,
                 search: query,
@@ -110,7 +104,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             return [];
         }
     };
-    const loadOptionsCermon = debounce(_loadSuggestionsCermon, 300);
+    const loadOptionsGroup = debounce(_loadSuggestionsGroup, 300);
 
 
     return (
@@ -152,22 +146,44 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
                         <ScrollArea>
                             <div className="flex flex-col gap-4">
+
                                 <FormField
                                     control={form.control}
-                                    name="community"
+                                    name="group"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"community".replaceAll("_", " ")}
+                                                {"group".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
-                                                    id="community"
+                                                    id="group"
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptionsCermon}
+                                                    loadOptions={loadOptionsGroup}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name={"material"}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"material".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    id={"material"}
+                                                    placeholder={"material"}
+                                                    {...field}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -194,89 +210,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"total_male"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"total_male".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    id={"total_male"}
-                                                    placeholder={"total_male"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-
-                                <FormField
-                                    control={form.control}
-                                    name={"new_male"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"new_male".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    id={"new_male"}
-                                                    placeholder={"new_male"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={"total_female"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"total_female".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    id={"total_female"}
-                                                    placeholder={"total_female"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={"new_female"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"new_female".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    id={"new_female"}
-                                                    placeholder={"new_female"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
