@@ -166,7 +166,7 @@ export const UpdateFormInput = ({
         >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                    Update Member
+                    Update Group
                 </h2>
                 <div className="h-14 w-14">
                     <svg

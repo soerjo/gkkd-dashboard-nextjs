@@ -83,28 +83,28 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Descipleship',
     label: '',
-    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN],
+    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.DISCIPLE],
     href: '/desciple',
     icon: <IconUsers size={18} />,
     sub: [
       {
         title: 'Disciples',
         label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN],
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.DISCIPLE],
         href: '/desciple/data',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Group',
         label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN],
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.DISCIPLE],
         href: '/desciple/group',
         icon: <IconReportSearch size={18} />,
       },
       {
         title: 'Report',
         label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN],
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.DISCIPLE],
         href: '/desciple/report',
         icon: <IconDatabaseExport size={18} />,
       },

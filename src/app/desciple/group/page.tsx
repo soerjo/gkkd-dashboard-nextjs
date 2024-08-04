@@ -48,7 +48,7 @@ export default function Dashboard() {
         <MyDrawer DrawerForm={CreateForm}>
           <Button variant="outline" size="sm" className="flex gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New Cermon"}
+            {isDesktop && "New Group"}
           </Button>
         </MyDrawer>
 
