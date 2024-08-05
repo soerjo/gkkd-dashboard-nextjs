@@ -160,9 +160,7 @@ export const DropdownAction = ({ row }: { row: Row<IBaptism> }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <DrawerContent>
-                    <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
-                    </div>
+                    <UpdateFormInput onOpenChange={setOpen} data={row.original.uniq_code} />
                 </DrawerContent>
                 <AlertDialogContent>
                     <AlertDialogHeader>

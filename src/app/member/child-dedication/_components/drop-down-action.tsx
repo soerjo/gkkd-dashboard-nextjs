@@ -166,9 +166,7 @@ export const DropdownAction = ({ row }: { row: Row<IChildDedication> }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <DrawerContent>
-                    <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.unique_code} />
-                    </div>
+                    <UpdateFormInput onOpenChange={setOpen} data={row.original.unique_code} />
                 </DrawerContent>
                 <AlertDialogContent>
                     <AlertDialogHeader>

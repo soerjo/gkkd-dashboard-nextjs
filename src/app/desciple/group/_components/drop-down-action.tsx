@@ -160,9 +160,7 @@ export const DropdownAction = ({ row }: { row: Row<IGroup> }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <DrawerContent>
-                    <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
-                    </div>
+                    <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
                 </DrawerContent>
                 <AlertDialogContent>
                     <AlertDialogHeader>

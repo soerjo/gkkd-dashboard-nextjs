@@ -94,7 +94,7 @@ export const UpdateFormInput = ({
 
     if (isLoading)
         return (
-            <div className="flex items-center justify-center h-full gap-3">
+            <div className={`flex justify-center items-center h-[85vh]`} >
                 <Spinner size="large">
                     <span>Loading page...</span>
                 </Spinner>
@@ -102,10 +102,7 @@ export const UpdateFormInput = ({
         );
 
     return (
-        <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
-                }`}
-        >
+        <div className={`flex flex-col h-[85vh] gap-4`} >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
                     Update Data
@@ -132,14 +129,14 @@ export const UpdateFormInput = ({
                     </svg>
                 </div>
             </div>
-            <div
-                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"
-                    }`}
-            >
+            <div className="z-50">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
-                        <ScrollArea>
-                            <div className="flex flex-col gap-4">
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="flex flex-col mb-6 gap-6"
+                    >
+                        <ScrollArea className="h-[60vh]">
+                            <div className="flex flex-col gap-4" >
                                 <FormField
                                     control={form.control}
                                     name={"full_name"}
@@ -384,10 +381,9 @@ export const UpdateFormInput = ({
                         {isDirty && (
                             <Button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                    }`}
                                 loading={isSubmitting}
+                                disabled={isSubmitting}
+                                className={`flex mx-4`}
                             >
                                 Save changes
                             </Button>

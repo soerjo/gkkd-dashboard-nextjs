@@ -160,9 +160,7 @@ export const DropdownAction = ({ row }: { row: Row<IDisciples> }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <DrawerContent>
-                    <div className="h-[70vh]">
-                        <UpdateFormInput onOpenChange={setOpen} data={row.original.nim} />
-                    </div>
+                    <UpdateFormInput onOpenChange={setOpen} data={row.original.nim} />
                 </DrawerContent>
                 <AlertDialogContent>
                     <AlertDialogHeader>

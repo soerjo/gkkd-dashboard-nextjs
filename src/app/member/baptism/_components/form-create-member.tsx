@@ -28,8 +28,6 @@ import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { CreateMarital } from "@/interfaces/marital.interface";
-import { useCreateMaritalMutation } from "@/store/services/marital";
 import { CreateBaptism } from "@/interfaces/baptism.interface";
 import { useCreateMutation } from "@/store/services/baptism";
 import { useLazyGetAllMemberQuery } from "@/store/services/member";
@@ -71,9 +69,6 @@ const FormSchema = z.object({
     witness_1: z.string().min(1, { message: 'required' }).max(100),
     witness_2: z.string().min(1, { message: 'required' }).max(100),
     date_baptism: z.coerce.date(),
-    // photo_url: z.string().max(100).optional(),
-    // document_url: z.string().max(100).optional(),
-    // photo_documentation_url: z.string().max(100).optional(),
     region: dropDownSchema.nullable().optional(),
 });
 
@@ -153,10 +148,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
 
     return (
-        <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
-                }`}
-        >
+        <div className={`flex flex-col h-[85vh] gap-4`} >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
                     Input New Baptism
@@ -183,14 +175,15 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                     </svg>
                 </div>
             </div>
-            <div
-                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"
-                    }`}
-            >
+            <div className="z-50">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="flex flex-col mb-6 gap-6"
+                    >
                         <ScrollArea>
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-6" >
+
                                 <FormField
                                     control={form.control}
                                     name="jemaat"
@@ -330,8 +323,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                             type="submit"
                             disabled={isSubmitting}
                             loading={isSubmitting}
-                            className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                }`}
+                            className={`flex mx-4 `}
                         >
                             Save changes
                         </Button>

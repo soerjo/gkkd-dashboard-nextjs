@@ -40,9 +40,9 @@ export function MyDrawer({ children, DrawerForm }: MyDrawerProps) {
                 {children}
             </DrawerTrigger>
             <DrawerContent>
-                <div className="h-[90vh]">
-                    <DrawerForm onOpenChange={setOpen} />
-                </div>
+                {/* <div className="h-[90vh]"> */}
+                <DrawerForm onOpenChange={setOpen} />
+                {/* </div> */}
             </DrawerContent>
         </Drawer>
     );

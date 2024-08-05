@@ -190,7 +190,7 @@ export const UpdateFormInput = ({
                     }`}
             >
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
                         <ScrollArea>
                             <div className="flex flex-col gap-4">
 
@@ -331,10 +331,9 @@ export const UpdateFormInput = ({
                         {isDirty && (
                             <Button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                    }`}
                                 loading={isSubmitting}
+                                disabled={isSubmitting}
+                                className={`flex mx-4`}
                             >
                                 Save changes
                             </Button>

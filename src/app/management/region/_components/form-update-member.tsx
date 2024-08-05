@@ -101,10 +101,7 @@ export const UpdateFormInput = ({
     const promiseRegionOptions = debounce(_loadRegionSuggestions, 300);
 
     return (
-        <div
-            className={`flex flex-col justify-center items-center gap-4 h-full ${isDesktop ? "" : "h-[70vh]"
-                }`}
-        >
+        <div className={`flex flex-col h-[85vh] gap-4`} >
             <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
                 <h2 className="text-xl font-semibold tracking-tight md:text-xl">
                     Detail/Update Region
@@ -131,14 +128,14 @@ export const UpdateFormInput = ({
                     </svg>
                 </div>
             </div>
-            <div
-                className={`w-full h-5/6 flex flex-col gap-4  ${isDesktop ? "px-0" : "px-2"
-                    }`}
-            >
+            <div className="z-50">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full">
-                        <ScrollArea>
-                            <div className="flex flex-col gap-4">
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="flex flex-col mb-6 gap-6"
+                    >
+                        <ScrollArea className="h-[60vh]">
+                            <div className="flex flex-col gap-4" >
                                 <FormField
                                     control={form.control}
                                     name={"name"}
@@ -230,10 +227,9 @@ export const UpdateFormInput = ({
                         {isDirty && (
                             <Button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
-                                    }`}
                                 loading={isSubmitting}
+                                disabled={isSubmitting}
+                                className={`flex mx-4 `}
                             >
                                 Save changes
                             </Button>
