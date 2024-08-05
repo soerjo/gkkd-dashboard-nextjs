@@ -7,34 +7,20 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
-import { CalendarComponent } from "@/components/ui/date-picker";
-import { format, min } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { CreateMarital } from "@/interfaces/marital.interface";
-import { useCreateMaritalMutation } from "@/store/services/marital";
 import { CreateFellowship, weekDays } from "@/interfaces/fellowship.interface";
 import { useCreateMutation } from "@/store/services/fellowship";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
-import { Member } from "@/interfaces/memberResponse";
-import { TimePickerInput } from "@/components/time-picker-input";
 import { TimePicker } from "@/components/custom/time-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/format-time";
@@ -255,6 +241,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         </ScrollArea>
                         <Button
                             type="submit"
+                            loading={isSubmitting}
                             disabled={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
                                 }`}

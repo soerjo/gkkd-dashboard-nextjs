@@ -22,7 +22,7 @@ import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format, min } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
@@ -329,6 +329,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         <Button
                             type="submit"
                             disabled={isSubmitting}
+                            loading={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"
                                 }`}
                         >

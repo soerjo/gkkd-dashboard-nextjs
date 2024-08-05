@@ -25,14 +25,13 @@ import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea"
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { CreateMember } from "@/interfaces/memberResponse";
-import { useCreateMemberMutation, useLazyGetAllMemberQuery } from "@/store/services/member";
+import { useCreateMemberMutation } from "@/store/services/member";
 import { CalendarIcon } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
@@ -510,6 +509,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         </ScrollArea>
                         <Button
                             type="submit"
+                            loading={isSubmitting}
                             disabled={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"}`}
                         >

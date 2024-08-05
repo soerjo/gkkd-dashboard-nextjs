@@ -8,15 +8,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateChurchMutation, useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useToast } from "@/components/ui/use-toast";
-import { useLazyGetParamsQuery } from "@/store/services/params";
-import { useCreateUserMutation, } from "@/store/services/user";
-import { CreateUserForm } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
-import { useLazyGetAllMemberQuery } from "@/store/services/member";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { CreateChurchForm } from "@/interfaces/churchResponse";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
@@ -216,6 +210,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         </ScrollArea>
                         <Button
                             type="submit"
+                            loading={isSubmitting}
                             disabled={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"}`}
                         >

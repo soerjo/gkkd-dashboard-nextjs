@@ -9,10 +9,10 @@ import { z } from "zod";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useLazyGetParamsQuery } from "@/store/services/params";
-import { useCreateUserMutation, useGetUserByIdQuery } from "@/store/services/user";
-import { CreateUserForm, CreateUser } from "@/interfaces/userResponse";
+import { useCreateUserMutation } from "@/store/services/user";
+import { CreateUser } from "@/interfaces/userResponse";
 import AsyncSelect from "@/components/react-select";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 import { toast } from 'react-toastify';
@@ -307,6 +307,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                         </ScrollArea>
                         <Button
                             type="submit"
+                            loading={isSubmitting}
                             disabled={isSubmitting}
                             className={`flex left-2 right-2 bottom-4 fixed gap-2 ${isDesktop && "absolute"}`}
                         >

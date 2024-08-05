@@ -7,22 +7,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
-import { CalendarComponent } from "@/components/ui/date-picker";
-import { format, min } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
@@ -31,9 +22,6 @@ import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { useLazyGetAllListQuery } from "@/store/services/disciples";
 import { CreateGroup } from "@/interfaces/disciples-group.interface";
 import { useCreateMutation } from "@/store/services/disciples-group";
-import { TimePicker } from "@/components/custom/time-picker";
-import { Textarea } from "@/components/ui/textarea";
-import { formatTime } from "@/lib/format-time";
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim"> & { region?: dropDown, pembimbing?: dropDown }
