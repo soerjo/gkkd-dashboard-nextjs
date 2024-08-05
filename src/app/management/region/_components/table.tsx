@@ -41,12 +41,12 @@ export const columns: ColumnDef<GetChurchResponse>[] = [
     {
         accessorKey: "name",
         header: "Username",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "alt_name",
         header: "Alt Name",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("alt_name")}</div>,
+        cell: ({ row }) => <div className="">{row.getValue("alt_name")}</div>,
     },
     {
         accessorKey: "status",

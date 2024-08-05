@@ -36,9 +36,9 @@ const phoneRegex = new RegExp(
 
 const FormSchema = z
     .object({
-        name: z.string().min(1, { message: "required" }).max(25),
-        alt_name: z.string().min(1, { message: "required" }).max(25),
-        location: z.string().min(1, { message: "required" }).max(125).optional(),
+        name: z.string().min(1, { message: "required" }).max(75),
+        alt_name: z.string().min(1, { message: "required" }).max(75),
+        location: z.string().min(1, { message: "required" }).max(250).optional(),
         region: z.any().nullable().optional(),
     })
 

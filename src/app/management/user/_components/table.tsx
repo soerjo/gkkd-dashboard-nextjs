@@ -41,12 +41,12 @@ export const columns: ColumnDef<GetUserResponse>[] = [
     {
         accessorKey: "name",
         header: "Username",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "email",
         header: "Email",
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        cell: ({ row }) => <div className="">{row.getValue("email")}</div>,
     },
     {
         accessorKey: "status",
