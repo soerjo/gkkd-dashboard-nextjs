@@ -15,12 +15,12 @@ import {
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
 import { useUpdateUserPasswordMutation } from "@/store/services/user";
 import { logout } from "@/store/slice/auth";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -53,7 +53,6 @@ const formSchema = z.object({
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [updatePassword, { isLoading }] = useUpdateUserPasswordMutation();
   const dispatch = useDispatch()
-  const { toast } = useToast();
   const { push } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,14 +71,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       dispatch(logout())
       push("/login");
     } catch (error) {
+      console.log({ error })
       const errorMessage = getErroMessage(error);
-      toast({
-        className:
-          "fixed top-5 z-[100] flex max-h-screen w-full flex-col-reverse p-4  sm:right-5 sm:flex-col w-fit",
-        variant: "destructive",
-        description: errorMessage,
-
-      });
+      toast.error(errorMessage)
     }
   }
 
