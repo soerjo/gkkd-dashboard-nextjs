@@ -25,7 +25,6 @@ export type GetUserFilter = {
   search?: string;
   role?: string;
   region_id?: number;
-  blesscomn: AdminBlessComn[];
 };
 
 export type CreateUser = {
