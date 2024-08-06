@@ -12,6 +12,10 @@ import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { useLazyGetAllTableChurchQuery } from '@/store/services/church'
 import { useLazyGetAllListQuery } from '@/store/services/disciples';
+import { useLazyGetExportQuery } from '../../../store/services/disciples-report';
+import React from 'react';
+import { toast } from "react-toastify";
+import { getErroMessage } from '../../../lib/rtk-error-validation';
 
 
 export default function Dashboard() {
@@ -27,13 +31,32 @@ export default function Dashboard() {
     }
   }
 
-  const [lazyParent] = useLazyGetAllListQuery();
+  const [lazyParent,] = useLazyGetAllListQuery();
   const fetchParent = async (query: string) => {
     try {
       const res = await lazyParent({ page: 1, search: query }).unwrap();
       return res.data.entities.map(data => ({ label: data.name, value: data.nim }))
     } catch (error) {
       return []
+    }
+  }
+
+  const [fetchExport] = useLazyGetExportQuery()
+  const handleExport = async () => {
+    try {
+      const data = await fetchExport({}).unwrap()
+      const url = window.URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'report.xlsx');  // Set the desired file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
     }
   }
 
@@ -54,7 +77,7 @@ export default function Dashboard() {
           </Button>
         </MyDrawer>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
+        <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>
