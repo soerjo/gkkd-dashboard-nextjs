@@ -13,10 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
-import { CalendarComponent } from "@/components/ui/date-picker";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/custom/button";
@@ -27,12 +23,9 @@ import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/disciples-group";
 import { CreateGroup } from "@/interfaces/disciples-group.interface";
-import { formatTime } from "@/lib/format-time";
-import { TimePicker } from "@/components/custom/time-picker";
-import { Textarea } from "@/components/ui/textarea";
 
 type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim"> & { region?: dropDown, pembimbing?: dropDown }
+type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim" | 'anggota_nims'> & { region?: dropDown, pembimbing?: dropDown, anggota?: dropDown[] }
 
 const defaultCreateForm: CreateInputForm = {
     name: "",
@@ -44,6 +37,8 @@ const defaultCreateForm: CreateInputForm = {
         label: "",
         value: "",
     },
+    anggota: [],
+
 };
 
 const dropDownSchema = z.object({
@@ -55,6 +50,7 @@ const FormSchema = z.object({
     name: z.string().min(1, { message: 'required' }).max(100),
     region: dropDownSchema.nullable().optional(),
     pembimbing: dropDownSchema.nullable().optional(),
+    anggota: z.array(dropDownSchema.nullable()).optional()
 });
 
 export type UpdateFormInputProps = React.ComponentProps<"form"> & {
@@ -69,8 +65,6 @@ export const UpdateFormInput = ({
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
-    const [fetchDisciple] = useLazyGetAllListQuery();
     const [fetchById] = useLazyGetByIdQuery()
     const { isLoading, data: payload } = useGetByIdQuery(
         { id: id },
@@ -93,8 +87,10 @@ export const UpdateFormInput = ({
                 id: id,
                 ...values,
                 pembimbing_nim: values?.pembimbing?.value || null,
-                region_id: values?.region?.value || null
+                region_id: values?.region?.value || null,
+                anggota_nims: values?.anggota?.map(com => com?.value)
             }).unwrap();
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -102,6 +98,7 @@ export const UpdateFormInput = ({
         }
     };
 
+    const [fetchDisciple] = useLazyGetAllListQuery();
     const _loadSuggestionsDisciple = async (query: string, callback: (...arg: any) => any) => {
         try {
             const res = await fetchDisciple({
@@ -119,8 +116,10 @@ export const UpdateFormInput = ({
         }
     };
     const loadOptionsDisciples = debounce(_loadSuggestionsDisciple, 300);
+    const loadOptionsAnggota = debounce(_loadSuggestionsDisciple, 300);
 
 
+    const [fetchChurch] = useLazyGetAllChurchQuery();
     const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
         try {
             const res = await fetchChurch({
@@ -139,6 +138,7 @@ export const UpdateFormInput = ({
     };
     const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
 
+
     React.useEffect(() => {
         if (!payload) return
         const fetch = async () => {
@@ -148,6 +148,10 @@ export const UpdateFormInput = ({
                 name: res.data.name || "",
                 pembimbing: { label: res.data?.pembimbing?.name, value: res.data?.pembimbing?.nim },
                 region: { label: res.data?.region?.name, value: res.data?.region?.id },
+                anggota: payload?.data.anggota.map(bc => ({
+                    label: bc?.name,
+                    value: bc?.nim
+                }))
             });
         }
 
@@ -269,19 +273,19 @@ export const UpdateFormInput = ({
 
                                 <FormField
                                     control={form.control}
-                                    name="region"
+                                    name="anggota"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="capitalize">
-                                                {"region".replaceAll("_", " ")}
+                                                {"anggota".replaceAll("_", " ")}
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
-                                                    id="region"
+                                                    id="anggota"
                                                     isMulti
                                                     cacheOptions
                                                     defaultOptions
-                                                    loadOptions={loadOptionsChurch}
+                                                    loadOptions={loadOptionsAnggota}
                                                     value={field.value}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />

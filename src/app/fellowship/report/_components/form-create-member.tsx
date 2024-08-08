@@ -86,6 +86,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 blesscomn_id: values.community.value,
             }).unwrap();
 
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

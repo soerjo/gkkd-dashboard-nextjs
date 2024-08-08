@@ -5,12 +5,13 @@ import { useLazyGetAllChurchQuery } from '@/store/services/church'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
-import { DownloadIcon, PlusIcon } from 'lucide-react';
+import { DownloadIcon, PlusIcon, UploadIcon } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { UploadWrapper } from './_components/upload';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -44,6 +45,13 @@ export default function Dashboard() {
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>
+
+        <UploadWrapper>
+          <Button variant="outline" size="sm" className="flex gap-2">
+            <UploadIcon className="size-4" aria-hidden="true" />
+            {isDesktop && "Import"}
+          </Button>
+        </UploadWrapper>
       </div>
       <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>

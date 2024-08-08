@@ -81,6 +81,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 disciple_group_id: values.group.value,
             }).unwrap();
 
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

@@ -95,6 +95,8 @@ export const UpdateFormInput = ({
                 ...values,
                 cermon_id: values.cermon.value,
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

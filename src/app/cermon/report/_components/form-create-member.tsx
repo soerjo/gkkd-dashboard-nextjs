@@ -87,6 +87,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 cermon_id: values.cermon.value,
             }).unwrap();
 
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

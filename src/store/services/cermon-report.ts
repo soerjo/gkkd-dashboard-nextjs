@@ -58,6 +58,13 @@ export const cermonReportApi = createApi({
         method: "GET",
       }),
     }),
+    upload: builder.mutation<void, { data: FormData }>({
+      query: ({ data }) => ({
+        url: "/upload",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -69,4 +76,5 @@ export const {
   useGetByIdQuery,
   useLazyGetByIdQuery,
   useDeleteMutation,
+  useUploadMutation,
 } = cermonReportApi;

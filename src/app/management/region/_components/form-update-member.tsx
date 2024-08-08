@@ -69,6 +69,8 @@ export const UpdateFormInput = ({
                 id: oldData.id,
                 parent_id: values.region?.value.id,
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

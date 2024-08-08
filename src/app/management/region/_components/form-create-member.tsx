@@ -60,6 +60,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 parent_id: values.region?.value.id
             }
             await createData(requestBody).unwrap();
+
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

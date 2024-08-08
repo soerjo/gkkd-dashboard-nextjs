@@ -80,6 +80,8 @@ export const UpdateFormInput = ({
                 ...values,
                 unique_code: unique_code,
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

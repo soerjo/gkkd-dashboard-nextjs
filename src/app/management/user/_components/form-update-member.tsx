@@ -104,6 +104,7 @@ export const UpdateFormInput = ({
                 blesscomn_ids: values?.blesscomn?.map(com => com?.value)
             }).unwrap();
 
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

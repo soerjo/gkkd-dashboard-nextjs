@@ -17,6 +17,7 @@ import React from 'react';
 import { toast } from "react-toastify";
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { saveAs } from 'file-saver'
+import { UploadWrapper } from './_components/upload';
 
 
 export default function Dashboard() {
@@ -80,10 +81,13 @@ export default function Dashboard() {
           {isDesktop && "Export"}
         </Button>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
-          <UploadIcon className="size-4" aria-hidden="true" />
-          {isDesktop && "Import"}
-        </Button>
+
+        <UploadWrapper>
+          <Button variant="outline" size="sm" className="flex gap-2">
+            <UploadIcon className="size-4" aria-hidden="true" />
+            {isDesktop && "Import"}
+          </Button>
+        </UploadWrapper>
 
       </div>
       <CustomSearchInput />

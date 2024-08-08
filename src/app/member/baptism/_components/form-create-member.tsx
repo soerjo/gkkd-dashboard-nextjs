@@ -103,6 +103,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 date_baptism: values.date_baptism,
             }).unwrap();
 
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

@@ -16,6 +16,7 @@ import { useLazyGetExportQuery } from '../../../store/services/fellowship-report
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
 import { saveAs } from 'file-saver'
+import { UploadWrapper } from './_components/upload';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -77,10 +78,12 @@ export default function Dashboard() {
           {isDesktop && "Export"}
         </Button>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
-          <UploadIcon className="size-4" aria-hidden="true" />
-          {isDesktop && "Import"}
-        </Button>
+        <UploadWrapper>
+          <Button variant="outline" size="sm" className="flex gap-2">
+            <UploadIcon className="size-4" aria-hidden="true" />
+            {isDesktop && "Import"}
+          </Button>
+        </UploadWrapper>
 
       </div>
       <CustomSearchInput />

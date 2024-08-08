@@ -9,12 +9,14 @@ export interface IGroup {
   region_id: number;
   pembimbing: IDisciples;
   region: GetChurchResponse;
+  anggota: IDisciples[];
 }
 
 export interface CreateGroup {
   name: string;
   pembimbing_nim: string;
   region_id: number;
+  anggota_nims?: string[];
 }
 
 export interface GroupFilter {

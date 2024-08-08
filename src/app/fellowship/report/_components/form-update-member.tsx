@@ -94,6 +94,8 @@ export const UpdateFormInput = ({
                 ...values,
                 blesscomn_id: values.community.value,
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

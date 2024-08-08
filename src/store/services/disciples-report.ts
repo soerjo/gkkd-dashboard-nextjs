@@ -70,6 +70,13 @@ export const disciplesReportApi = createApi({
         responseHandler: async (response) => response.blob(),
       }),
     }),
+    upload: builder.mutation<void, { data: FormData }>({
+      query: ({ data }) => ({
+        url: "/upload",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -82,4 +89,5 @@ export const {
   useLazyGetByIdQuery,
   useDeleteMutation,
   useLazyGetExportQuery,
+  useUploadMutation,
 } = disciplesReportApi;

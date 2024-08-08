@@ -75,6 +75,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
             await createData({ ...values }).unwrap();
+
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

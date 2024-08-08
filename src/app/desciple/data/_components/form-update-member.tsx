@@ -106,6 +106,8 @@ export const UpdateFormInput = ({
                 group_id: values?.group?.value || null,
                 jemaat_nij: values?.jemaat?.value || null,
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

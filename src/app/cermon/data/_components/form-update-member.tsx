@@ -96,6 +96,8 @@ export const UpdateFormInput = ({
                 day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
                 region_id: values?.region?.value || null
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

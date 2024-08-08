@@ -87,8 +87,10 @@ export const UpdateFormInput = ({
             await updateData({
                 id: id,
                 ...values,
+                date: new Date(values.date),
                 disciple_group_id: values.group.value,
             }).unwrap();
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

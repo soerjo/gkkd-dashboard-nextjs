@@ -112,6 +112,8 @@ export const UpdateFormInput = ({
                 witness_2: values.witness_2,
                 region_id: values.region.value
             }).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);

@@ -89,6 +89,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 jemaat_nij: values?.jemaat?.value || null,
             }).unwrap()
 
+            toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
@@ -266,6 +267,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="group"
+                                                    isClearable
                                                     cacheOptions
                                                     defaultOptions
                                                     loadOptions={loadOptionsGroup}
@@ -289,6 +291,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="pembimbing"
+                                                    isClearable
                                                     cacheOptions
                                                     defaultOptions
                                                     loadOptions={loadOptionsPembimbing}
@@ -312,6 +315,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="jemaat"
+                                                    isClearable
                                                     cacheOptions
                                                     defaultOptions
                                                     loadOptions={loadOptionsJemaat}
@@ -335,6 +339,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                             <FormControl>
                                                 <AsyncSelect
                                                     id="region"
+                                                    isClearable
                                                     cacheOptions
                                                     defaultOptions
                                                     loadOptions={loadOptionsChurch}

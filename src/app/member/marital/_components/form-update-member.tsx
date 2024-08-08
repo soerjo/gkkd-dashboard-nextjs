@@ -104,6 +104,8 @@ export const UpdateFormInput = ({
                 region_id: region?.value.id,
             };
             await updateData(bodyRequest).unwrap();
+
+            toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
             const errorMessage = getErroMessage(error);
