@@ -56,6 +56,7 @@ export const fellowshipApi = createApi({
         url: `/${id}`,
         method: "GET",
       }),
+      providesTags: ["Fellowship"],
     }),
   }),
 });

@@ -6,7 +6,6 @@ import {
 } from "@/interfaces/disciples-report.interface";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IconCloudSearch } from "@tabler/icons-react";
 
 export const disciplesReportApi = createApi({
   reducerPath: "disciplesReportApi",
@@ -17,20 +16,6 @@ export const disciplesReportApi = createApi({
       if (token) headers.set("authorization", `Bearer ${token}`);
       return headers;
     },
-    // responseHandler: async (response) => {
-    //   console.log({ response: response.headers.get("Content-Type") });
-    //   if (response.headers.get("Content-Type")?.includes("application/json")) {
-    //     return response;
-    //   }
-    //   if (
-    //     response.headers
-    //       .get("Content-Type")
-    //       ?.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    //   ) {
-    //     return response.blob();
-    //   }
-    //   return response;
-    // },
   }),
 
   tagTypes: ["DisciplesReport"],
@@ -82,7 +67,7 @@ export const disciplesReportApi = createApi({
       query: () => ({
         url: `/export`,
         responseType: "blob",
-        responseHandler: (res) => res.text(),
+        responseHandler: async (response) => response.blob(),
       }),
     }),
   }),

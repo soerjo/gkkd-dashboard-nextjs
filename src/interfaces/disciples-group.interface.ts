@@ -2,6 +2,7 @@ import { GetChurchResponse } from "./churchResponse";
 import { IDisciples } from "./disciples.interface";
 
 export interface IGroup {
+  unique_id: string;
   id: number;
   name: string;
   pembimbing_nim: string;

@@ -12,6 +12,9 @@ import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { AUTH_PAYLOAD, getAuthCookie } from '../../../lib/cookies';
 import { UserPayload, UserRole } from '../../../interfaces/auth.interface';
+import { useLazyGetExportQuery } from '../../../store/services/fellowship-report';
+import { getErroMessage } from '../../../lib/rtk-error-validation';
+import { toast } from 'react-toastify';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -28,7 +31,25 @@ export default function Dashboard() {
   const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
   const userPayload: UserPayload = JSON.parse(cookiesPayload ?? "")
 
-  console.log({ userPayload })
+  const [fetchExport] = useLazyGetExportQuery()
+  const handleExport = async () => {
+    console.log('run export!s')
+    try {
+      const data = await fetchExport({}).unwrap()
+      const url = window.URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'report.xlsx');  // Set the desired file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  }
 
   return (
     <>
@@ -49,7 +70,7 @@ export default function Dashboard() {
           </MyDrawer>
         }
 
-        <Button variant="outline" size="sm" className="flex gap-2">
+        <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>

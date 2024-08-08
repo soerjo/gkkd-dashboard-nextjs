@@ -39,6 +39,11 @@ import { IGroup } from "@/interfaces/disciples-group.interface";
 
 export const columns: ColumnDef<IGroup>[] = [
     {
+        accessorKey: "unique_id",
+        header: "ID",
+        cell: ({ row }) => <div className="text-nowrap">{row.original.unique_id}</div>,
+    },
+    {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => <div className="text-nowrap">{row.original.name}</div>,
@@ -48,11 +53,6 @@ export const columns: ColumnDef<IGroup>[] = [
         header: "Pembimbing",
         cell: ({ row }) => <div className="text-nowrap">{`${row.original.pembimbing.name} - ${row.original.pembimbing_nim}`}</div>,
     },
-    // {
-    //     accessorKey: "region_name",
-    //     header: "Region",
-    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    // },
     {
         id: "actions",
         enableHiding: true,

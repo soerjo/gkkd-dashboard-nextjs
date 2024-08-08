@@ -1,5 +1,8 @@
+import { GetChurchResponse } from "./churchResponse";
+
 export interface IFellowship {
   id: number;
+  unique_id: string;
   name: string;
   location: string;
   segment: string;
@@ -9,6 +12,7 @@ export interface IFellowship {
   lead_name: string;
   region_id: number;
   region_name: string;
+  region: GetChurchResponse;
 }
 
 export interface IFellowshipById {

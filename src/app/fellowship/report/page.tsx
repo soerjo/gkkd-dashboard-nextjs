@@ -12,6 +12,10 @@ import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { useLazyGetExportQuery } from '../../../store/services/fellowship-report';
+import { getErroMessage } from '../../../lib/rtk-error-validation';
+import { toast } from 'react-toastify';
+import { saveAs } from 'file-saver'
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -35,6 +39,22 @@ export default function Dashboard() {
       return []
     }
   }
+
+  const [fetchExport] = useLazyGetExportQuery()
+  const handleExport = async () => {
+    try {
+      const data = await fetchExport({}).unwrap()
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const fileName = 'report.xlsx';
+      saveAs(blob, fileName);
+
+    } catch (error) {
+      console.log({ error })
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  }
+
   return (
     <>
       <div className='flex flex-col '>
@@ -52,7 +72,7 @@ export default function Dashboard() {
           </Button>
         </MyDrawer>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
+        <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>

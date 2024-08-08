@@ -39,19 +39,24 @@ import { IFellowship } from "@/interfaces/fellowship.interface";
 
 export const columns: ColumnDef<IFellowship>[] = [
     {
+        accessorKey: "unique_id",
+        header: "ID",
+        cell: ({ row }) => <div className="text-nowrap">{row.original.unique_id}</div>,
+    },
+    {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.original.name}</div>,
     },
     {
         accessorKey: "region_name",
         header: "Region",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.original.region.name}</div>,
     },
     {
         accessorKey: "lead_name",
         header: "Leader",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("lead_name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.original.lead_name}</div>,
     },
     {
         id: "actions",
@@ -93,7 +98,7 @@ export function DataTable() {
                 region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
             };
-            const response = await fetchData(params).unwrap()
+            await fetchData(params).unwrap()
         } catch (error) {
             console.log({ error });
         }
@@ -114,6 +119,7 @@ export function DataTable() {
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
     });
+    console.log({ data })
 
     return (
         <div className="w-full">

@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "cookies-next": "^4.2.1",
     "date-fns": "^3.6.0",
+    "file-saver": "^2.0.5",
     "i": "^0.3.7",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.379.0",
@@ -58,6 +59,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^18",

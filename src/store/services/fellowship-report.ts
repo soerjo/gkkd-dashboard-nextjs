@@ -63,6 +63,13 @@ export const fellowshipReportApi = createApi({
         method: "GET",
       }),
     }),
+    getExport: builder.query({
+      query: () => ({
+        url: `/export`,
+        method: "GET",
+        responseHandler: async (response) => response.blob(),
+      }),
+    }),
   }),
 });
 
@@ -74,4 +81,5 @@ export const {
   useGetByIdQuery,
   useLazyGetByIdQuery,
   useDeleteMutation,
+  useLazyGetExportQuery,
 } = fellowshipReportApi;

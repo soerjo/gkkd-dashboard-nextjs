@@ -16,6 +16,7 @@ import { useLazyGetExportQuery } from '../../../store/services/disciples-report'
 import React from 'react';
 import { toast } from "react-toastify";
 import { getErroMessage } from '../../../lib/rtk-error-validation';
+import { saveAs } from 'file-saver'
 
 
 export default function Dashboard() {
@@ -41,20 +42,17 @@ export default function Dashboard() {
     }
   }
 
+
   const [fetchExport] = useLazyGetExportQuery()
   const handleExport = async () => {
     try {
       const data = await fetchExport({}).unwrap()
-      const url = window.URL.createObjectURL(new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'report.xlsx');  // Set the desired file name
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const fileName = 'report.xlsx';
+      saveAs(blob, fileName);
 
     } catch (error) {
+      console.log({ error })
       const errorMessage = getErroMessage(error);
       toast.error(JSON.stringify(errorMessage));
     }

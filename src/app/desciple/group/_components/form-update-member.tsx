@@ -267,6 +267,30 @@ export const UpdateFormInput = ({
                                     )}
                                 />
 
+                                <FormField
+                                    control={form.control}
+                                    name="region"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="capitalize">
+                                                {"region".replaceAll("_", " ")}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <AsyncSelect
+                                                    id="region"
+                                                    isMulti
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    loadOptions={loadOptionsChurch}
+                                                    value={field.value}
+                                                    onChange={(e: any) => field.onChange(e)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
                             </div>
                         </ScrollArea>
 
