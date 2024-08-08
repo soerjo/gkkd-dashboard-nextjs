@@ -75,6 +75,7 @@ export const disciplesReportApi = createApi({
         url: "/upload",
         method: "POST",
         body: data,
+        invalidatesTags: ["DisciplesReport"],
       }),
     }),
   }),

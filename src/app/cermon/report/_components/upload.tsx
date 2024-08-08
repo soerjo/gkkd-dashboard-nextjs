@@ -20,7 +20,7 @@ import {
 } from "@/components/extension/file-upload";
 import { Paperclip } from "lucide-react";
 import { DropzoneOptions } from "react-dropzone";
-import { useUploadMutation } from "../../../../store/services/fellowship-report";
+import { useUploadMutation } from "../../../../store/services/cermon-report";
 import { toast } from "react-toastify";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 

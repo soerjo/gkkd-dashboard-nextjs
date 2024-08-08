@@ -75,6 +75,7 @@ export const fellowshipReportApi = createApi({
         url: "/upload",
         method: "POST",
         body: data,
+        invalidatesTags: ["FellowshipReport"],
       }),
     }),
   }),
