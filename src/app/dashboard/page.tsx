@@ -11,8 +11,22 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { RecentSales } from './components/component.recen-data'
 import { LineChartComp } from './components/line-chart.component'
 import { IconBible, IconUserSquare, IconUsers, IconUsersGroup } from '@tabler/icons-react'
+import { getErroMessage } from '../../lib/rtk-error-validation'
+import { toast } from 'react-toastify'
+import { useGetDashboardQuery as useLazyDashboardCermon } from '../../store/services/cermon-report'
+import { useGetDashboardQuery as useLazyDashboardDisciples } from '../../store/services/disciples-report'
+import { useGetDashboardQuery as useLazyDashboardCommunity } from '../../store/services/fellowship-report'
 
 export default function Dashboard() {
+
+  const { data: dataCermontDashboardData } = useLazyDashboardCermon({})
+  const { data: dataDisciplesDashboardData } = useLazyDashboardDisciples({})
+  const { data: dataCommunityDashboardData } = useLazyDashboardCommunity({})
+
+  const cermontDashboardData = dataCermontDashboardData?.data
+  const disciplesDashboardData = dataDisciplesDashboardData?.data
+  const communityDashboardData = dataCommunityDashboardData?.data
+
   return (
     <>
       <div className='flex items-center justify-between space-y-2'>
@@ -38,9 +52,9 @@ export default function Dashboard() {
                 <IconUserSquare size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>45,231.89</div>
+                <div className='text-2xl font-bold'>3037</div>
                 <p className='text-xs text-muted-foreground'>
-                  +20.1% from last month
+                  +1.1% from last month
                 </p>
               </CardContent>
             </Card>
@@ -52,9 +66,9 @@ export default function Dashboard() {
                 <IconBible size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>2350</div>
+                <div className='text-2xl font-bold'>{cermontDashboardData?.total}</div>
                 <p className='text-xs text-muted-foreground'>
-                  +180.1% from last month
+                  {`${cermontDashboardData?.percentage}% from last month`}
                 </p>
               </CardContent>
             </Card>
@@ -66,9 +80,9 @@ export default function Dashboard() {
                 <IconUsersGroup size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>12,234</div>
+                <div className='text-2xl font-bold'>{communityDashboardData?.total}</div>
                 <p className='text-xs text-muted-foreground'>
-                  +19% from last month
+                  {`${communityDashboardData?.percentage}% from last month`}
                 </p>
               </CardContent>
             </Card>
@@ -80,15 +94,15 @@ export default function Dashboard() {
                 <IconUsers size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>573</div>
+                <div className='text-2xl font-bold'>{disciplesDashboardData?.total}</div>
                 <p className='text-xs text-muted-foreground'>
-                  +201 since last hour
+                  {`${disciplesDashboardData?.percentage}% from last month`}
                 </p>
               </CardContent>
             </Card>
           </div>
-          <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
-            <Card className='col-span-1 lg:col-span-5'>
+          <div className='grid grid-cols-1 gap-4'>
+            <Card className='col-span-1'>
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>

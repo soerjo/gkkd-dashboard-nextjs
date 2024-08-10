@@ -78,6 +78,13 @@ export const disciplesReportApi = createApi({
         invalidatesTags: ["DisciplesReport"],
       }),
     }),
+    getDashboard: builder.query({
+      query: () => ({
+        url: `/dashboard`,
+        method: "GET",
+      }),
+      providesTags: ["DisciplesReport"],
+    }),
   }),
 });
 
@@ -91,4 +98,5 @@ export const {
   useDeleteMutation,
   useLazyGetExportQuery,
   useUploadMutation,
+  useGetDashboardQuery,
 } = disciplesReportApi;

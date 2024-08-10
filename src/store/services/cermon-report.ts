@@ -57,6 +57,7 @@ export const cermonReportApi = createApi({
         url: `/${id}`,
         method: "GET",
       }),
+      providesTags: ["CermonReport"],
     }),
     upload: builder.mutation<void, { data: FormData }>({
       query: ({ data }) => ({
@@ -73,6 +74,13 @@ export const cermonReportApi = createApi({
         responseHandler: async (response) => response.blob(),
       }),
     }),
+    getDashboard: builder.query({
+      query: () => ({
+        url: `/dashboard`,
+        method: "GET",
+      }),
+      providesTags: ["CermonReport"],
+    }),
   }),
 });
 
@@ -86,4 +94,5 @@ export const {
   useDeleteMutation,
   useUploadMutation,
   useLazyGetExportQuery,
+  useGetDashboardQuery,
 } = cermonReportApi;

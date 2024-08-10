@@ -78,6 +78,13 @@ export const fellowshipReportApi = createApi({
         invalidatesTags: ["FellowshipReport"],
       }),
     }),
+    getDashboard: builder.query({
+      query: () => ({
+        url: `/dashboard`,
+        method: "GET",
+      }),
+      providesTags: ["FellowshipReport"],
+    }),
   }),
 });
 
@@ -91,4 +98,5 @@ export const {
   useDeleteMutation,
   useLazyGetExportQuery,
   useUploadMutation,
+  useGetDashboardQuery,
 } = fellowshipReportApi;
