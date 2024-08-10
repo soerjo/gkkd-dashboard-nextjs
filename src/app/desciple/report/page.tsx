@@ -75,7 +75,7 @@ export default function Dashboard() {
     <>
       <div className='flex flex-col '>
         <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-          Discipleship Reports
+          discipleship Reports
         </h1>
         <MyBreadcrum currentPath='data' />
       </div>

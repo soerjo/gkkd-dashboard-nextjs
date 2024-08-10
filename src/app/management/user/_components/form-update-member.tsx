@@ -98,7 +98,7 @@ export const UpdateFormInput = ({
                 ...values,
                 id: oldData.id,
                 role: values.role.value,
-                phone: values.phone ?? undefined,
+                phone: values.phone || undefined,
                 region_id: values.region?.value ?? userPayload.region?.id,
                 blesscomn_ids: values?.blesscomn?.map(com => com?.value)
             }).unwrap();

@@ -32,6 +32,7 @@ import {
     useLazyGetAllUserQuery,
     useLazyGetUserByIdQuery,
     useResetUserPasswordMutation,
+    useRestoreUserMutation,
 } from "@/store/services/user";
 import { GetUserResponse } from "@/interfaces/userResponse";
 import { getErroMessage } from "@/lib/rtk-error-validation";
@@ -45,17 +46,11 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const page = parseInt(searchParams.get("page") || "1");
-    const take = parseInt(searchParams.get("take") || "10");
-    const search = searchParams.get("search") || "";
-
-    const [deleteData] = useDeleteUserMutation();
-    const [resetPassword] = useResetUserPasswordMutation();
-
     const setParams = () => {
         setOpen(true);
     };
 
+    const [deleteData] = useDeleteUserMutation();
     const handleDeleteData = async () => {
         try {
             await deleteData({ id: row.original.id }).unwrap();
@@ -65,6 +60,7 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
         }
     };
 
+    const [resetPassword] = useResetUserPasswordMutation();
     const handleResetPassword = async () => {
         try {
             await resetPassword({ id: row.original.id }).unwrap();
@@ -73,6 +69,17 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
             toast.error(JSON.stringify(errorMessage));
         }
     };
+
+    const [restoreUser] = useRestoreUserMutation();
+    const handleRestoreUser = async () => {
+        try {
+            await restoreUser({ id: row.original.id }).unwrap();
+        } catch (error) {
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
+        }
+    };
+
 
     React.useEffect(() => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -156,6 +163,33 @@ export const DropdownAction = ({ row }: { row: Row<GetUserResponse> }) => {
                                     </AlertDialogContent>
                                 </AlertDialog>
                             </DropdownMenuItem>
+                            {!row.original.status && (
+                                <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger className="flex gap-2 w-full">
+                                            <IconRefresh size={18} />
+                                            Restore User
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Are you sure to restore user: {row.original.name}?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone.
+                                                    This will restore user to default password from servers.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleRestoreUser}>
+                                                    Continue
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
 

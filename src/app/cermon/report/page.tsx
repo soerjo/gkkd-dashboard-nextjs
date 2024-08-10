@@ -12,6 +12,11 @@ import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { UploadWrapper } from './_components/upload';
+import { useLazyGetAllQuery } from '../../../store/services/cermon';
+import { useLazyGetExportQuery } from '../../../store/services/cermon-report';
+import { saveAs } from 'file-saver'
+import { getErroMessage } from '../../../lib/rtk-error-validation';
+import { toast } from 'react-toastify';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -24,6 +29,32 @@ export default function Dashboard() {
       return []
     }
   }
+
+  const [fetchCermon] = useLazyGetAllQuery()
+  const fetchCermonList = async (query: string) => {
+    try {
+      const res = await fetchCermon({ page: 1, search: query }).unwrap();
+      return res.data.entities.map(data => ({ label: data.name, value: data }))
+    } catch (error) {
+      return []
+    }
+  }
+
+  const [fetchExport] = useLazyGetExportQuery()
+  const handleExport = async () => {
+    try {
+      const data = await fetchExport({}).unwrap()
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const fileName = 'report.xlsx';
+      saveAs(blob, fileName);
+
+    } catch (error) {
+      console.log({ error })
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  }
+
   return (
     <>
       <div className='flex flex-col '>
@@ -41,7 +72,7 @@ export default function Dashboard() {
           </Button>
         </MyDrawer>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
+        <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>
@@ -56,6 +87,7 @@ export default function Dashboard() {
       <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSelect compName={'church'} fetchQuery={fetch} />
+        <CustomSelect compName={'cermon'} fetchQuery={fetchCermonList} />
         <DateRangePicker />
       </div>
       <DataTable />

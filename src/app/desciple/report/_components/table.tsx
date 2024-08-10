@@ -61,7 +61,7 @@ export const columns: ColumnDef<IDisciplesReport>[] = [
     {
         accessorKey: "pembimbing",
         header: "Pembimbing",
-        cell: ({ row }) => <div className="text-nowrap">{`${row.original.disciple_group.pembimbing.name} - ${row.original.disciple_group.pembimbing_nim}`}</div>,
+        cell: ({ row }) => <div className="text-nowrap capitalize">{`${row.original.disciple_group.pembimbing.name} - ${row.original.disciple_group.pembimbing_nim}`}</div>,
     },
 
     {
@@ -79,6 +79,7 @@ export type FetchMemberProps = {
     search?: string;
     church?: string;
     pembimbing?: string;
+    group?: string;
     date_from?: string;
     date_to?: string;
 };
@@ -105,6 +106,7 @@ export function DataTable() {
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
                 pembimbing_nim: props.pembimbing ? props.pembimbing : undefined,
+                group_id: props.group ? Number(props.group) : undefined,
                 search: props.search,
                 date_from: props.date_from ? props.date_from : undefined,
                 date_to: props.date_to ? props.date_to : undefined,

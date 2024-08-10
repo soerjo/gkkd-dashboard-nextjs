@@ -70,18 +70,21 @@ export default function Dashboard() {
           </MyDrawer>
         }
 
-        <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
+        {/* <Button variant="outline" size="sm" className="flex gap-2" onClick={handleExport}>
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
         </Button>
         <Button variant="outline" size="sm" className="flex gap-2">
           <UploadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Import"}
-        </Button>
+        </Button> */}
       </div>
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
-        <CustomSelect compName={'church'} fetchQuery={fetch} />
+        {[UserRole.SYSTEMADMIN, UserRole.SUPERADMIN].includes(userPayload.role as UserRole) && (
+          <CustomSelect compName={'church'} fetchQuery={fetch} />
+        )}
+
         {/* <DateRangePicker /> */}
       </div>
       <DataTable />

@@ -81,13 +81,13 @@ export const columns: ColumnDef<ICermonReport>[] = [
     {
         accessorKey: "total",
         header: () => <div className="text-center">{"Total"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.original.total_male + row.original.total_female}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.original.total}</div>,
     },
 
     {
         accessorKey: "total-new",
         header: () => <div className="text-center">{"Total New"}</div>,
-        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.original.total_new_male + row.original.total_new_female}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.original.new}</div>,
     },
 
     {
@@ -104,6 +104,7 @@ export type FetchMemberProps = {
     take?: string;
     search?: string;
     church?: string;
+    cermon?: string;
     dateFrom?: string;
     dateTo?: string;
 };
@@ -129,6 +130,7 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
+                cermon_id: props.cermon ? Number(props.cermon) : undefined,
                 search: props.search,
 
             };

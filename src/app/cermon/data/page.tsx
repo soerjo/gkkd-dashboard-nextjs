@@ -28,7 +28,7 @@ export default function Dashboard() {
         <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
           Cermons
         </h1>
-        <MyBreadcrum currentPath='data' />
+        <MyBreadcrum currentPath='list' />
       </div>
 
       <div className="flex items-center gap-2 justify-end">
@@ -39,10 +39,10 @@ export default function Dashboard() {
           </Button>
         </MyDrawer>
 
-        <Button variant="outline" size="sm" className="flex gap-2">
+        {/* <Button variant="outline" size="sm" className="flex gap-2">
           <DownloadIcon className="size-4" aria-hidden="true" />
           {isDesktop && "Export"}
-        </Button>
+        </Button> */}
       </div>
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />

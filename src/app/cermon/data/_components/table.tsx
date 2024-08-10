@@ -41,6 +41,11 @@ import { toast } from "react-toastify";
 
 export const columns: ColumnDef<ICermon>[] = [
     {
+        accessorKey: "unique_id",
+        header: "ID",
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("unique_id")}</div>,
+    },
+    {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
@@ -55,11 +60,11 @@ export const columns: ColumnDef<ICermon>[] = [
         header: "Segment",
         cell: ({ row }) => <div className="text-nowrap">{row.getValue("segment")}</div>,
     },
-    {
-        accessorKey: "description",
-        header: "Description",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("description")}</div>,
-    },
+    // {
+    //     accessorKey: "description",
+    //     header: "Description",
+    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("description")}</div>,
+    // },
     {
         accessorKey: "region_name",
         header: "Region",

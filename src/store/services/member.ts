@@ -14,16 +14,16 @@ export const memberApi = createApi({
   reducerPath: "memberApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL + "/jemaat",
-    prepareHeaders: headers => {
+    prepareHeaders: (headers) => {
       const token = getAuthCookie(AUTH_TOKEN);
       if (token) headers.set("authorization", `Bearer ${token}`);
       return headers;
     },
   }),
   tagTypes: ["Member"],
-  endpoints: builder => ({
+  endpoints: (builder) => ({
     createMember: builder.mutation<IApiResponse<undefined>, CreateMember>({
-      query: payload => ({
+      query: (payload) => ({
         url: "/",
         method: "POST",
         body: payload,
@@ -49,7 +49,7 @@ export const memberApi = createApi({
       IApiResponse<TPaginationResponse<MemberResponse[]>>,
       GetMemberFilter
     >({
-      query: payload => ({
+      query: (payload) => ({
         url: "/",
         method: "GET",
         params: payload,
@@ -61,6 +61,7 @@ export const memberApi = createApi({
         url: `/${nij}`,
         method: "GET",
       }),
+      providesTags: ["Member"],
     }),
   }),
 });

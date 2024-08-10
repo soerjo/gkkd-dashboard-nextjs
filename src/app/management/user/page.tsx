@@ -11,6 +11,9 @@ import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { UserRole } from '../../../interfaces/auth.interface';
+import { useLazyGetParamsQuery } from '../../../store/services/params';
+import { getErroMessage } from '../../../lib/rtk-error-validation';
+import { toast } from 'react-toastify';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -38,6 +41,19 @@ export default function Dashboard() {
       return []
     }
   }
+
+  const [getParams] = useLazyGetParamsQuery();
+  const promiseRoleOptions = async (inputValue: string) => {
+    try {
+      const listRole = await getParams({ param: "role" }).unwrap();
+      return listRole.data.map(val => ({ value: val.name, label: val.name }));
+    } catch (error) {
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+      return [];
+    }
+  };
+
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex flex-col '>
@@ -63,7 +79,7 @@ export default function Dashboard() {
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
         <CustomSelect compName={'church'} fetchQuery={fetch} />
-        <CustomSelect compName={'role'} fetchQuery={fetchRole} />
+        <CustomSelect compName={'role'} fetchQuery={promiseRoleOptions} />
         {/* <DateRangePicker /> */}
       </div>
       <DataTable />

@@ -31,34 +31,32 @@ import { useCreateMutation } from "@/store/services/cermon-report";
 import { useLazyGetAllQuery } from "@/store/services/cermon";
 import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
 
-type dropDown = { label: string, value: string | number }
+type dropDown = { label: string, value: number }
 type CreateBaptismForm = Omit<CreateCermonReport, "region_id" | "cermon_id"> & { cermon: dropDown }
 
 const defaultCreateMemberForm: CreateBaptismForm = {
     date: new Date(),
-    total_male: 0,
-    total_female: 0,
-    total_new_male: 0,
-    total_new_female: 0,
+    total_male: undefined,
+    total_female: undefined,
+    total_new_male: undefined,
+    total_new_female: undefined,
     cermon: {
         label: "",
-        value: "",
+        value: 0,
 
     }
 };
 
-const dropDownSchema = z.object({
-    label: z.string(),
-    value: z.any(),
-});
-
 const FormSchema = z.object({
     date: z.coerce.date(),
-    total_male: z.coerce.number().min(0),
-    total_female: z.coerce.number().min(0),
-    total_new_male: z.coerce.number().min(0),
-    total_new_female: z.coerce.number().min(0),
-    cermon: dropDownSchema,
+    total_male: z.coerce.number().min(0).optional(),
+    total_female: z.coerce.number().min(0).optional(),
+    total_new_male: z.coerce.number().min(0).optional(),
+    total_new_female: z.coerce.number().min(0).optional(),
+    cermon: z.object({
+        label: z.string(),
+        value: z.number(),
+    }).refine(data => data.value, { message: 'cermon is required' }),
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
@@ -84,6 +82,10 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         try {
             await createData({
                 ...values,
+                total_male: values.total_male || 0,
+                total_female: values.total_female || 0,
+                total_new_male: values.total_new_male || 0,
+                total_new_female: values.total_new_female || 0,
                 cermon_id: values.cermon.value,
             }).unwrap();
 

@@ -17,11 +17,17 @@ import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
 import { saveAs } from 'file-saver'
 import { UploadWrapper } from './_components/upload';
+import { UserPayload, UserRole } from '../../../interfaces/auth.interface';
+import { AUTH_PAYLOAD, getAuthCookie } from '../../../lib/cookies';
 
 export default function Dashboard() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [lazyFetchChurch] = useLazyGetAllChurchQuery();
   const [lazyFetchCommunity] = useLazyGetAllQuery();
+
+  const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
+  const userPayload: UserPayload = JSON.parse(cookiesPayload ?? "")
+
 
   const fetchChurch = async (query: string) => {
     try {
@@ -88,7 +94,9 @@ export default function Dashboard() {
       </div>
       <CustomSearchInput />
       <div className='flex lg:flex-row flex-col gap-4'>
-        <CustomSelect compName={'church'} fetchQuery={fetchChurch} />
+        {[UserRole.SYSTEMADMIN, UserRole.SUPERADMIN].includes(userPayload.role as UserRole) && (
+          <CustomSelect compName={'church'} fetchQuery={fetchChurch} />
+        )}
         <CustomSelect compName={'community'} fetchQuery={fetchCommunity} />
         <DateRangePicker />
       </div>

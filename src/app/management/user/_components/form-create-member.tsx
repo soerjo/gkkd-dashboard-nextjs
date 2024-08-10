@@ -66,7 +66,6 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
 
     const [createUser] = useCreateUserMutation();
     const [getListChurch] = useLazyGetAllChurchQuery();
-    const [getParams] = useLazyGetParamsQuery();
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
         try {
@@ -107,6 +106,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         }
     };
 
+    const [getParams] = useLazyGetParamsQuery();
     const promiseRoleOptions = async (inputValue: string) => {
         try {
             const listRole = await getParams({ param: "role" }).unwrap();

@@ -24,10 +24,10 @@ export interface IFellowshipReportById {
 
 export interface CreateFellowshipReport {
   date: Date;
-  total_male: number;
-  total_female: number;
-  new_male: number;
-  new_female: number;
+  total_male?: number;
+  total_female?: number;
+  new_male?: number;
+  new_female?: number;
   blesscomn_id: number;
 }
 

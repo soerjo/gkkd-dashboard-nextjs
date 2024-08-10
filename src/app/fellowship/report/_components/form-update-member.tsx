@@ -50,10 +50,10 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     date: z.coerce.date(),
-    total_male: z.coerce.number().min(0),
-    total_female: z.coerce.number().min(0),
-    new_male: z.coerce.number().min(0),
-    new_female: z.coerce.number().min(0),
+    total_male: z.coerce.number().min(0).optional(),
+    total_female: z.coerce.number().min(0).optional(),
+    new_male: z.coerce.number().min(0).optional(),
+    new_female: z.coerce.number().min(0).optional(),
     community: dropDownSchema,
 });
 
@@ -201,6 +201,7 @@ export const UpdateFormInput = ({
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
+                                                    isDisabled
                                                     id="community"
                                                     cacheOptions
                                                     defaultOptions

@@ -5,16 +5,18 @@ export interface ICermonReport {
   total_female: number;
   total_new_male: number;
   total_new_female: number;
+  total: number;
+  new: number;
   cermon_id: number;
   cermon_name: string;
 }
 
 export interface CreateCermonReport {
   date: Date;
-  total_male: number;
-  total_female: number;
-  total_new_male: number;
-  total_new_female: number;
+  total_male?: number;
+  total_female?: number;
+  total_new_male?: number;
+  total_new_female?: number;
   cermon_id: number;
 }
 

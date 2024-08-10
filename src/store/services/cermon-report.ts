@@ -64,6 +64,14 @@ export const cermonReportApi = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["CermonReport"],
+    }),
+    getExport: builder.query({
+      query: () => ({
+        url: `/export`,
+        method: "GET",
+        responseHandler: async (response) => response.blob(),
+      }),
     }),
   }),
 });
@@ -77,4 +85,5 @@ export const {
   useLazyGetByIdQuery,
   useDeleteMutation,
   useUploadMutation,
+  useLazyGetExportQuery,
 } = cermonReportApi;

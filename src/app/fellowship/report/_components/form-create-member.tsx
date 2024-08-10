@@ -31,34 +31,33 @@ import { useCreateMutation } from "@/store/services/fellowship-report";
 import { useLazyGetAllQuery } from "@/store/services/fellowship";
 import { CreateFellowshipReport } from "@/interfaces/fellowship-report.interface";
 
-type dropDown = { label: string, value: string | number }
+type dropDown = { label: string, value: number }
 type CreateBaptismForm = Omit<CreateFellowshipReport, "region_id" | "blesscomn_id"> & { community: dropDown }
 
 const defaultCreateMemberForm: CreateBaptismForm = {
     date: new Date(),
-    total_male: 0,
-    total_female: 0,
-    new_male: 0,
-    new_female: 0,
+    total_male: undefined,
+    total_female: undefined,
+    new_male: undefined,
+    new_female: undefined,
     community: {
         label: "",
-        value: "",
+        value: 0,
 
     }
 };
 
-const dropDownSchema = z.object({
-    label: z.string(),
-    value: z.any(),
-});
-
 const FormSchema = z.object({
     date: z.coerce.date(),
-    total_male: z.coerce.number().min(0),
-    total_female: z.coerce.number().min(0),
-    new_male: z.coerce.number().min(0),
-    new_female: z.coerce.number().min(0),
-    community: dropDownSchema,
+    total_male: z.coerce.number().min(0).optional(),
+    total_female: z.coerce.number().min(0).optional(),
+    new_male: z.coerce.number().min(0).optional(),
+    new_female: z.coerce.number().min(0).optional(),
+    // community: dropDownSchema,
+    community: z.object({
+        label: z.string(),
+        value: z.number(),
+    }).refine(data => data.value, { message: 'community is required' }),
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
@@ -83,6 +82,10 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         try {
             await createData({
                 ...values,
+                total_male: values.total_male || 0,
+                total_female: values.total_female || 0,
+                new_male: values.new_male || 0,
+                new_female: values.new_female || 0,
                 blesscomn_id: values.community.value,
             }).unwrap();
 
@@ -210,6 +213,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     type="number"
                                                     id={"total_male"}
                                                     placeholder={"total_male"}
+                                                    pattern="[0-9]*"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -232,6 +236,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     type="number"
                                                     id={"new_male"}
                                                     placeholder={"new_male"}
+                                                    pattern="[0-9]*"
                                                     {...field}
                                                 />
                                             </FormControl>

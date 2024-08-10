@@ -51,7 +51,7 @@ export const columns: ColumnDef<IFellowshipReport>[] = [
     {
         accessorKey: "date",
         header: "Date",
-        cell: ({ row }) => <div className="lowercase text-nowrap">{new Date(row.getValue("date")).toLocaleDateString('id', { month: 'long', day: "2-digit", year: 'numeric' })}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap">{new Date(row.getValue("date")).toLocaleDateString('id', { month: 'long', day: "2-digit", year: 'numeric' })}</div>,
     },
     {
         accessorKey: "blesscomn_name",

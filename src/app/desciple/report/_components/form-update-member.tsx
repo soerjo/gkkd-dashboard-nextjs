@@ -194,6 +194,7 @@ export const UpdateFormInput = ({
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
+                                                    isDisabled
                                                     id="group"
                                                     cacheOptions
                                                     defaultOptions

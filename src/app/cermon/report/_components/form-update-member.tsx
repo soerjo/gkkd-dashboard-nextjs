@@ -33,10 +33,10 @@ type UpdateBaptismForm = Omit<CreateCermonReport, "region_id" | "cermon_id"> & {
 
 const defaultCreateMemberForm: UpdateBaptismForm = {
     date: new Date(),
-    total_male: 0,
-    total_female: 0,
-    total_new_male: 0,
-    total_new_female: 0,
+    total_male: undefined,
+    total_female: undefined,
+    total_new_male: undefined,
+    total_new_female: undefined,
     cermon: {
         label: "",
         value: "",
@@ -51,10 +51,10 @@ const dropDownSchema = z.object({
 
 const FormSchema = z.object({
     date: z.coerce.date(),
-    total_male: z.coerce.number().min(0),
-    total_female: z.coerce.number().min(0),
-    total_new_male: z.coerce.number().min(0),
-    total_new_female: z.coerce.number().min(0),
+    total_male: z.coerce.number().min(0).optional(),
+    total_female: z.coerce.number().min(0).optional(),
+    total_new_male: z.coerce.number().min(0).optional(),
+    total_new_female: z.coerce.number().min(0).optional(),
     cermon: dropDownSchema,
 });
 
@@ -93,6 +93,10 @@ export const UpdateFormInput = ({
             await updateData({
                 id: id,
                 ...values,
+                total_male: values.total_male || 0,
+                total_female: values.total_female || 0,
+                total_new_male: values.total_new_male || 0,
+                total_new_female: values.total_new_female || 0,
                 cermon_id: values.cermon.value,
             }).unwrap();
 
@@ -206,6 +210,7 @@ export const UpdateFormInput = ({
                                             </FormLabel>
                                             <FormControl>
                                                 <AsyncSelect
+                                                    isDisabled
                                                     id="cermon"
                                                     cacheOptions
                                                     defaultOptions
