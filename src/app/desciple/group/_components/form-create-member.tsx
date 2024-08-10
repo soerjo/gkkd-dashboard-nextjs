@@ -22,6 +22,7 @@ import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import { useLazyGetAllListQuery } from "@/store/services/disciples";
 import { CreateGroup } from "@/interfaces/disciples-group.interface";
 import { useCreateMutation } from "@/store/services/disciples-group";
+import { doSomeDelay } from "../../../../lib/delay";
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim"> & { region?: dropDown, pembimbing?: dropDown }
@@ -74,6 +75,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 region_id: values?.region?.value || null
             }).unwrap()
 
+            doSomeDelay(500)
             toast.success('create data success!')
             onOpenChange(val => !val);
         } catch (error) {

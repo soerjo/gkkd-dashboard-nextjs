@@ -105,7 +105,7 @@ export function DataTable() {
                 page: props.page ? Number(props.page) : undefined,
                 take: props.take ? Number(props.take) : undefined,
                 region_id: props.church ? Number(props.church) : undefined,
-                parent_id: props.pembimbing ? Number(props.pembimbing) : undefined,
+                pembimbing_id: props.pembimbing ? Number(props.pembimbing) : undefined,
                 group_id: props.group ? Number(props.group) : undefined,
                 search: props.search,
             };

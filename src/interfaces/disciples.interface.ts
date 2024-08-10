@@ -34,4 +34,5 @@ export interface DisciplesFilter {
   region_id?: number;
   group_id?: number;
   pembimbing_nim?: string;
+  pembimbing_id?: number;
 }

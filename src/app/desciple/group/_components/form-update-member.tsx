@@ -23,6 +23,7 @@ import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/disciples-group";
 import { CreateGroup } from "@/interfaces/disciples-group.interface";
+import { doSomeDelay } from "../../../../lib/delay";
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateGroup, "region_id" | "pembimbing_nim" | 'anggota_nims'> & { region?: dropDown, pembimbing?: dropDown, anggota?: dropDown[] }
@@ -90,6 +91,8 @@ export const UpdateFormInput = ({
                 region_id: values?.region?.value || null,
                 anggota_nims: values?.anggota?.map(com => com?.value)
             }).unwrap();
+
+            doSomeDelay(500)
             toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {

@@ -81,7 +81,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             const createUserBody = {
                 ...values,
                 role: values.role.value,
-                region_id: values.region?.value.id ?? userPayload.region.id,
+                region_id: values.region?.value?.id ?? userPayload.region?.id,
             }
             await createUser(createUserBody).unwrap();
 

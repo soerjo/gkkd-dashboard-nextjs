@@ -27,6 +27,7 @@ import AsyncSelect from "@/components/react-select";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/disciples-report";
 import { useLazyGetAllQuery } from "@/store/services/disciples-group";
 import { CreateDisciplesReport } from "@/interfaces/disciples-report.interface";
+import { doSomeDelay } from "../../../../lib/delay";
 
 type dropDown = { label: string, value: string | number }
 type CreateBaptismForm = Omit<CreateDisciplesReport, "disciple_group_id"> & { group: dropDown }
@@ -90,6 +91,8 @@ export const UpdateFormInput = ({
                 date: new Date(values.date),
                 disciple_group_id: values.group.value,
             }).unwrap();
+
+            doSomeDelay(500)
             toast.success('update data success!')
             onOpenChange(val => !val);
         } catch (error) {
