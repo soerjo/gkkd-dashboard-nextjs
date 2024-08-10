@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { logout, setInitialState } from '@/store/slice/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import LodingPage from './loading';
-import Head from 'next/head';
 import { UserPayload } from '@/interfaces/auth.interface';
 
 type Props = { children?: React.ReactNode };
@@ -40,9 +39,6 @@ export const AuthWrapper = ({ children }: Props) => {
         }
 
     }, [token, push, dispatch]);
-
-    useEffect(() => {
-    }, []);
 
 
     if (skipValidationPathName.includes(pathname)) return children

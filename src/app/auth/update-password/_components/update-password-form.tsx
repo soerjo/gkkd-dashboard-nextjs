@@ -69,7 +69,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     try {
       await updatePassword({ new_password: data.new_password }).unwrap();
       dispatch(logout())
-      push("/login");
+      push("/auth/login");
     } catch (error) {
       console.log({ error })
       const errorMessage = getErroMessage(error);

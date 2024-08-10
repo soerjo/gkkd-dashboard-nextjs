@@ -40,7 +40,7 @@ export const disciplesApi = createApi({
     }),
     GetAll: builder.query<IApiResponse<TPaginationResponse<IDisciples[]>>, DisciplesFilter>({
       query: (payload) => ({
-        url: "/",
+        url: "/list",
         method: "GET",
         params: payload,
       }),
@@ -48,7 +48,7 @@ export const disciplesApi = createApi({
     }),
     GetAllList: builder.query<IApiResponse<TPaginationResponse<IDisciples[]>>, DisciplesFilter>({
       query: (payload) => ({
-        url: "/list",
+        url: "/",
         method: "GET",
         params: payload,
       }),

@@ -28,9 +28,7 @@ import { Spinner } from "../../../../components/ui/spinner";
 import { useLazyGetAllQuery } from "@/store/services/fellowship";
 import { UserRole } from "../../../../interfaces/auth.interface";
 
-const phoneRegex = new RegExp(
-    /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
-);
+const phoneRegex = new RegExp(/^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])*$/);
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateUser, "region_id" | "role"> & { region: dropDown, role: dropDown, blesscomn?: dropDown[], }
@@ -61,7 +59,7 @@ const dropDownSchema = z.object({
 const FormSchema = z.object({
     name: z.string().min(1, { message: "required" }).max(25),
     email: z.string().min(1, { message: "required" }).max(25).email(),
-    phone: z.string().regex(phoneRegex, "invalid number"),
+    phone: z.union([z.string().regex(phoneRegex, 'Invalid phone number format'), z.undefined()]),
     role: dropDownSchema,
     region: dropDownSchema,
     blesscomn: z.array(dropDownSchema.nullable()).optional()
@@ -100,6 +98,7 @@ export const UpdateFormInput = ({
                 ...values,
                 id: oldData.id,
                 role: values.role.value,
+                phone: values.phone ?? undefined,
                 region_id: values.region?.value ?? userPayload.region?.id,
                 blesscomn_ids: values?.blesscomn?.map(com => com?.value)
             }).unwrap();

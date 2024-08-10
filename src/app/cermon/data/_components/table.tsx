@@ -36,6 +36,8 @@ import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { useLazyGetAllQuery } from "@/store/services/cermon";
 import { ICermon } from "@/interfaces/cermon.interface";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<ICermon>[] = [
     {
@@ -103,10 +105,10 @@ export function DataTable() {
                 region_id: props.church ? Number(props.church) : undefined,
                 search: props.search,
             };
-            const response = await fetchData(params).unwrap()
-            console.log({ response })
+            fetchData(params).unwrap()
         } catch (error) {
-            console.log({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

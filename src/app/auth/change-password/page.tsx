@@ -12,7 +12,7 @@ export default function SignIn() {
     const token = getAuthCookie(AUTH_TOKEN)
 
     useEffect(() => {
-        if (token) push('/');
+        if (token) push('/auth/login');
     }, [token, push]);
 
     return (

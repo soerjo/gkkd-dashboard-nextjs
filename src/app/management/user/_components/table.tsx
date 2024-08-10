@@ -36,12 +36,19 @@ import { useLazyGetAllUserQuery } from "@/store/services/user";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { GetUserResponse } from "@/interfaces/userResponse";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<GetUserResponse>[] = [
     {
-        accessorKey: "name",
+        accessorKey: "username",
         header: "Username",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap">{row.getValue("username")}</div>,
+    },
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => <div className="text-nowrap capitalize">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "email",
@@ -120,7 +127,8 @@ export function DataTable() {
             }
             await fetchData(params, false)
         } catch (error) {
-            console.log({ error })
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     }
 

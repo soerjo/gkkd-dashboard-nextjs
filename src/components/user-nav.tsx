@@ -15,6 +15,7 @@ import { logout } from '@/store/slice/auth'
 import { useRouter } from 'next/navigation'
 import { RootState } from '@/store'
 import Link from 'next/link'
+import { userShort } from '../lib/user-short'
 
 export function UserNav() {
   const { push } = useRouter()
@@ -31,7 +32,7 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             {/* <AvatarImage src='/avatars/01.png' alt='@shadcn' /> */}
-            <AvatarFallback>{authData?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{userShort(authData?.name)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -39,10 +40,10 @@ export function UserNav() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <Link href={'/profile'}>
-              <p className='text-sm font-medium leading-none hover:underline'>{authData?.username}</p>
+              <p className='text-sm font-medium leading-none hover:underline capitalize'>{authData?.name}</p>
             </Link>
             <p className='text-xs leading-none text-muted-foreground'>
-              {authData?.email}
+              {authData?.email ?? authData?.username}
             </p>
           </div>
         </DropdownMenuLabel>

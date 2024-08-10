@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { saveAs } from 'file-saver'
 import { UploadWrapper } from './_components/upload';
+import { useLazyGetAllQuery } from '../../../store/services/disciples-group';
 
 
 export default function Dashboard() {
@@ -59,6 +60,17 @@ export default function Dashboard() {
     }
   }
 
+
+  const [lazyGroup] = useLazyGetAllQuery();
+  const fetchGroup = async (query: string) => {
+    try {
+      const res = await lazyGroup({ page: 1, search: query }).unwrap();
+      return res.data.entities.map(data => ({ label: data.name, value: data }))
+    } catch (error) {
+      return []
+    }
+  }
+
   return (
     <>
       <div className='flex flex-col '>
@@ -94,6 +106,7 @@ export default function Dashboard() {
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSelect compName={'pembimbing'} fetchQuery={fetchParent} />
         <CustomSelect compName={'church'} fetchQuery={fetchRegion} />
+        <CustomSelect compName={'group'} fetchQuery={fetchGroup} />
         <DateRangePicker />
       </div>
       <DataTable />

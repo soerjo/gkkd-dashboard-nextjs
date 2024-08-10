@@ -19,9 +19,7 @@ import { toast } from 'react-toastify';
 import { useLazyGetAllQuery } from "@/store/services/fellowship";
 import debounce from "lodash.debounce";
 
-const phoneRegex = new RegExp(
-    /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
-);
+const phoneRegex = new RegExp(/^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])*$/);
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateUser, "region_id" | "role"> & { region: dropDown, role: dropDown, blesscomn?: dropDown[], }
@@ -38,24 +36,20 @@ const defaultCreateForm: CreateInputForm = {
         label: "",
         value: "",
     },
-    // blesscomn: [{
-    //     label: "",
-    //     value: "",
-    // }],
 };
-
-const dropDownSchema = z.object({
-    label: z.string(),
-    value: z.any(),
-});
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: "required" }).max(75),
     email: z.string().min(1, { message: "required" }).max(75).email(),
-    phone: z.string().regex(phoneRegex, "invalid number"),
-    role: dropDownSchema,
-    region: dropDownSchema,
-    // blesscomn: z.array(dropDownSchema.nullable()).optional()
+    phone: z.union([z.string().regex(phoneRegex, 'Invalid phone number format'), z.undefined()]),
+    role: z.object({
+        label: z.string(),
+        value: z.union([z.string().min(1, { message: "required" }), z.number()]),
+    }).refine(data => data.value !== '', { message: 'Role is required' }),
+    region: z.object({
+        label: z.string(),
+        value: z.union([z.string(), z.number()]),
+    })
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & { onOpenChange: React.Dispatch<React.SetStateAction<boolean>> }
@@ -67,7 +61,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         resolver: zodResolver(FormSchema),
         defaultValues: defaultCreateForm,
     });
-    const { formState: { isSubmitting, isDirty }, reset, watch } = form;
+    const { formState: { isSubmitting, isDirty, errors }, reset, watch } = form;
 
 
     const [createUser] = useCreateUserMutation();
@@ -78,11 +72,14 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
         try {
             const cookiesPayload = getAuthCookie(AUTH_PAYLOAD);
             const userPayload = JSON.parse(cookiesPayload ?? "")
-            const createUserBody = {
+
+            const createUserBody: CreateUser = {
                 ...values,
-                role: values.role.value,
-                region_id: values.region?.value?.id ?? userPayload.region?.id,
+                phone: values.phone || undefined,
+                role: String(values.role.value),
+                region_id: Number(values.region?.value || userPayload.region?.id),
             }
+            console.log({ createUserBody })
             await createUser(createUserBody).unwrap();
 
             toast.success('create data success!')
@@ -102,7 +99,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 search: inputValue,
             }
             const listChurch = await getListChurch(getChurchParams).unwrap();
-            return listChurch.data.entities.map(value => ({ value: value, label: value.name }));
+            return listChurch.data.entities.map(value => ({ value: value.id, label: value.name }));
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -140,7 +137,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
     };
     const loadOptionsCommunity = debounce(_loadSuggestionsCommunity, 300);
 
-
+    console.log({ errors })
 
     return (
         <div className={`flex flex-col h-[85vh] gap-4`} >
@@ -250,7 +247,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     loadOptions={promiseRoleOptions}
                                                     onChange={(e: any) => field.onChange(e)}
                                                 />
-                                            </FormControl>
+                                            </FormControl >
                                             <FormMessage />
                                         </FormItem>
                                     )}

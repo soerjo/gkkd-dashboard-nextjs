@@ -30,7 +30,7 @@ export type GetUserFilter = {
 export type CreateUser = {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   role: string;
   region_id?: number;
   blesscomn_ids?: number[];
@@ -39,7 +39,7 @@ export type CreateUser = {
 export type CreateUserForm = {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   role: {
     label: string;
     value: any;

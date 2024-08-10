@@ -36,6 +36,8 @@ import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { useLazyGetAllQuery } from "@/store/services/disciples";
 import { IDisciples } from "@/interfaces/disciples.interface";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<IDisciples>[] = [
     {
@@ -111,7 +113,8 @@ export function DataTable() {
             };
             await fetchData(params).unwrap()
         } catch (error) {
-            console.log({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

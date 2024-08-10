@@ -44,6 +44,8 @@ import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { useLazyGetAllMaritalQuery } from "@/store/services/marital";
 import { IMarital } from "@/interfaces/marital.interface";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<IMarital>[] = [
     {
@@ -107,7 +109,8 @@ export function DataTable() {
             };
             await fetchData(params, false);
         } catch (error) {
-            console.log({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

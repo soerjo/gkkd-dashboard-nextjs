@@ -44,6 +44,8 @@ import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { useLazyGetAllQuery } from "@/store/services/baptism";
 import { IBaptism } from "@/interfaces/baptism.interface";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<IBaptism>[] = [
     {
@@ -113,7 +115,8 @@ export function DataTable() {
             };
             await fetchData(params, false);
         } catch (error) {
-            console.log({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

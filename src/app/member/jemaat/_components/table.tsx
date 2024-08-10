@@ -44,6 +44,8 @@ import { Member } from "@/interfaces/memberResponse";
 import { Spinner } from "@/components/ui/spinner";
 import { useLazyGetAllMemberQuery } from "@/store/services/member";
 import useQueryParams from "@/hooks/user-query-params";
+import { getErroMessage } from "../../../../lib/rtk-error-validation";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<Member>[] = [
     {
@@ -118,7 +120,8 @@ export function DataTable() {
             };
             await fetchData(params, false);
         } catch (error) {
-            console.log({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
         }
     };
 

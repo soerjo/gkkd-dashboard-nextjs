@@ -7,7 +7,7 @@ import { useLazyGetAllQuery } from '@/store/services/disciples-group'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
-import { DownloadIcon, PlusIcon, UploadIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
@@ -36,7 +36,7 @@ export default function Dashboard() {
     }
   }
 
-  const [lazyGroup] = useLazyGetAllListQuery();
+  const [lazyGroup] = useLazyGetAllQuery();
   const fetchGroup = async (query: string) => {
     try {
       const res = await lazyGroup({ page: 1, search: query }).unwrap();
