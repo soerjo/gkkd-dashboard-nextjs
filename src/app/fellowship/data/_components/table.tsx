@@ -115,7 +115,7 @@ export function DataTable() {
     const table = useReactTable({
         data: data?.data?.entities || [],
         columns: columns,
-        pageCount: data?.data?.meta.pageCount ?? -1,
+        pageCount: data?.data?.meta?.pageCount ?? -1,
         onPaginationChange: setPagination,
         state: { pagination },
         getCoreRowModel: getCoreRowModel(),
