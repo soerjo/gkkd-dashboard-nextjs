@@ -59,6 +59,12 @@ export const cermonReportApi = createApi({
       }),
       providesTags: ["CermonReport"],
     }),
+    getReminder: builder.query<IApiResponse<ICermonReport>, {}>({
+      query: () => ({
+        url: `/reminder`,
+        method: "GET",
+      }),
+    }),
     upload: builder.mutation<void, { data: FormData }>({
       query: ({ data }) => ({
         url: "/upload",
@@ -95,4 +101,5 @@ export const {
   useUploadMutation,
   useLazyGetExportQuery,
   useGetDashboardQuery,
+  useLazyGetReminderQuery,
 } = cermonReportApi;
