@@ -52,9 +52,9 @@ export default function Dashboard() {
                 <IconUserSquare size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>
               <CardContent>
-                <div className='text-2xl font-bold'>3037</div>
+                <div className='text-2xl font-bold'>113</div>
                 <p className='text-xs text-muted-foreground'>
-                  +1.1% from last month
+                  0.1% from last month
                 </p>
               </CardContent>
             </Card>
