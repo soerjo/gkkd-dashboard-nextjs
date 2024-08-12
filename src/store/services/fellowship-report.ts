@@ -85,6 +85,12 @@ export const fellowshipReportApi = createApi({
       }),
       providesTags: ["FellowshipReport"],
     }),
+    getReminder: builder.query<IApiResponse<any>, {}>({
+      query: () => ({
+        url: `/reminder`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -99,4 +105,5 @@ export const {
   useLazyGetExportQuery,
   useUploadMutation,
   useGetDashboardQuery,
+  useLazyGetReminderQuery,
 } = fellowshipReportApi;
