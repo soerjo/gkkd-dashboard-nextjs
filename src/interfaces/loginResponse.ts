@@ -7,6 +7,7 @@ export type UserPayload = {
   username?: string;
   token?: string;
   tempPassword?: boolean;
+  isPhoneValidate?: boolean;
 };
 
 export type LoginResponse = {

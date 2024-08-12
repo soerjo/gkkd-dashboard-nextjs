@@ -7,6 +7,7 @@ export type UserPayload = {
   tempPassword: boolean;
   username: string;
   region: GetChurchResponse;
+  isPhoneValidated: boolean;
 };
 
 export enum UserRole {
