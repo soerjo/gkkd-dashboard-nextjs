@@ -61,7 +61,7 @@ export default function Dashboard() {
       </div>
 
       <div className="flex items-center gap-2 justify-end">
-        {[UserRole.SYSTEMADMIN, UserRole.SUPERADMIN].includes(userPayload.role as UserRole) &&
+        {[UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.LEADER].includes(userPayload.role as UserRole) &&
           <MyDrawer DrawerForm={CreateForm}>
             <Button variant="outline" size="sm" className="flex gap-2">
               <PlusIcon className="size-4" aria-hidden="true" />
