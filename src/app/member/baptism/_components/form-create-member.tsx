@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format, min } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ import { CreateBaptism } from "@/interfaces/baptism.interface";
 import { useCreateMutation } from "@/store/services/baptism";
 import { useLazyGetAllMemberQuery } from "@/store/services/member";
 import { Member } from "@/interfaces/memberResponse";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 
 type dropDown = { label: string, value: string | number }
@@ -224,6 +225,12 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>

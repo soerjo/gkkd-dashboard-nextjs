@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { Member, UpdateMember } from "@/interfaces/memberResponse";
 import { useGetMemberByIdQuery, useUpdateMemberMutation } from "@/store/services/member";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,7 @@ import { toast } from "react-toastify";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 const defaultCreateMemberForm: UpdateMember & { region: any } = {
     id: 0,
@@ -360,6 +361,12 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>
@@ -549,6 +556,12 @@ export const UpdateFormInput = ({ onOpenChange, data }: UpdateFormInputProps) =>
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>

@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ import AsyncSelect from "@/components/react-select";
 import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/cermon-report";
 import { useLazyGetAllQuery } from "@/store/services/cermon";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 type dropDown = { label: string, value: string | number }
 type UpdateBaptismForm = Omit<CreateCermonReport, "region_id" | "cermon_id"> & { cermon: dropDown }
@@ -240,6 +241,12 @@ export const UpdateFormInput = ({
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>

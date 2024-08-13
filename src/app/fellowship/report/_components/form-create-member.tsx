@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ShieldCloseIcon, X } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format, min } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ import debounce from "lodash.debounce";
 import { useCreateMutation } from "@/store/services/fellowship-report";
 import { useLazyGetAllQuery } from "@/store/services/fellowship";
 import { CreateFellowshipReport } from "@/interfaces/fellowship-report.interface";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 type dropDown = { label: string, value: number }
 type CreateBaptismForm = Omit<CreateFellowshipReport, "region_id" | "blesscomn_id"> & { community: dropDown }
@@ -192,7 +193,19 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
-                                                    <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
+                                                    <CalendarComponent
+                                                        initialFocus
+                                                        mode="single"
+                                                        selected={field.value ?? undefined}
+                                                        translate="en"
+                                                        onSelect={field.onChange}
+                                                    />
                                                 </PopoverContent>
                                             </Popover>
                                             <FormMessage />

@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { CreateMember } from "@/interfaces/memberResponse";
 import { useCreateMemberMutation } from "@/store/services/member";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { CalendarComponent } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,7 @@ import { toast } from "react-toastify";
 import AsyncSelect from "@/components/react-select";
 import debounce from "lodash.debounce";
 import { useLazyGetAllChurchQuery } from "@/store/services/church";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 
 
@@ -283,6 +284,12 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>
@@ -469,6 +476,12 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent align="start" className="w-auto p-2">
+                                                    <div className="flex m-1">
+                                                        <div className="flex-1"></div>
+                                                        <PopoverClose className="mb-2">
+                                                            <X size={24} className="text-primary/60 hover:text-destructive" />
+                                                        </PopoverClose>
+                                                    </div>
                                                     <CalendarComponent initialFocus mode="single" selected={field.value ?? undefined} translate="en" onSelect={field.onChange} />
                                                 </PopoverContent>
                                             </Popover>
