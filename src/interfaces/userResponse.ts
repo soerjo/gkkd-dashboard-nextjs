@@ -10,6 +10,7 @@ export type GetUserResponse = {
   status: boolean;
   region: GetChurchResponse;
   blesscomn: AdminBlessComn[];
+  isphonevalid: boolean;
 };
 
 export type AdminBlessComn = {

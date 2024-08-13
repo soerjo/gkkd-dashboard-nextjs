@@ -56,9 +56,9 @@ export const columns: ColumnDef<IFellowship>[] = [
         cell: ({ row }) => <div className="text-nowrap">{row.original.region_name}</div>,
     },
     {
-        accessorKey: "lead_name",
-        header: "Leader",
-        cell: ({ row }) => <div className="text-nowrap">{row.original.lead_name}</div>,
+        accessorKey: "segment",
+        header: "Segment",
+        cell: ({ row }) => <div className="text-nowrap uppercase">{row.original.segment}</div>,
     },
     {
         id: "actions",

@@ -55,11 +55,11 @@ export const columns: ColumnDef<IDisciples>[] = [
         header: "Region",
         cell: ({ row }) => <div className="text-nowrap">{row.original.region.name}</div>,
     },
-    {
-        accessorKey: "jemaat_nij",
-        header: "Nij",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("jemaat_nij")}</div>,
-    },
+    // {
+    //     accessorKey: "jemaat_nij",
+    //     header: "Nij",
+    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("jemaat_nij")}</div>,
+    // },
     {
         accessorKey: "pembimbing_nim",
         header: "Pembimbing",

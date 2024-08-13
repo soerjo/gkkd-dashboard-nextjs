@@ -30,15 +30,15 @@ const formSchema = z.object({
       message: "Please enter your password",
     })
     .min(7, {
-      message: "Password must be at least 7 characters long",
+      message: "Password must be at least 8 characters long",
     }),
   confirm_password: z
     .string()
     .min(1, {
       message: "Please enter your password",
     })
-    .min(7, {
-      message: "Password must be at least 7 characters long",
+    .min(8, {
+      message: "Password must be at least 8 characters long",
     }),
 }).superRefine(({ confirm_password, new_password }, ctx) => {
   if (confirm_password !== new_password) {

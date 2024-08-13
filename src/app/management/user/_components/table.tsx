@@ -38,6 +38,7 @@ import useQueryParams from "@/hooks/user-query-params";
 import { GetUserResponse } from "@/interfaces/userResponse";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
+import { CircleCheck, CircleMinus } from "lucide-react";
 
 export const columns: ColumnDef<GetUserResponse>[] = [
     {
@@ -65,8 +66,21 @@ export const columns: ColumnDef<GetUserResponse>[] = [
     {
         accessorKey: "phone",
         header: "Phone",
-        cell: ({ row }) => (
-            <div className="">{row.getValue("phone") ?? "-"}</div>
+        cell: ({ row }) => (<>
+            {row.getValue("phone") ?
+                (
+                    <div className="flex flex-row justify-start items-center">
+                        {row.original.isphonevalid ? <CircleCheck className="size-4 mr-1 text-green-800" /> : <CircleMinus className="size-4 mr-1 text-red-800" />}
+
+                        {row.getValue("phone")}
+                    </div>
+                ) : (
+                    <div className="flex flex-row justify-center items-center">
+                        {"-"}
+                    </div>
+                )}
+        </>
+
         ),
     },
 
