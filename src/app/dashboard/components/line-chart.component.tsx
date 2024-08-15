@@ -7,73 +7,73 @@ const data = [
     name: 'Jan',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Feb',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Mar',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Apr',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'May',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Jun',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Jul',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
   {
     name: 'Aug',
     sundah_service: randomIntFromInterval(80, 100),
     blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
+    disciple: randomIntFromInterval(80, 100),
   },
-  {
-    name: 'Sep',
-    sundah_service: randomIntFromInterval(80, 100),
-    blesscomn: randomIntFromInterval(80, 100),
-    desciple: randomIntFromInterval(80, 100),
-  },
+  // {
+  //   name: 'Sep',
+  //   sundah_service: randomIntFromInterval(80, 100),
+  //   blesscomn: randomIntFromInterval(80, 100),
+  //   disciple: randomIntFromInterval(80, 100),
+  // },
   // {
   //   name: 'Oct',
   //   sundah_service: randomIntFromInterval(80, 100),
   //   blesscomn: randomIntFromInterval(80, 100),
-  //   desciple: randomIntFromInterval(80, 100),
+  //   disciple: randomIntFromInterval(80, 100),
   // },
   // {
   //   name: 'Nov',
   //   sundah_service: randomIntFromInterval(80, 100),
   //   blesscomn: randomIntFromInterval(80, 100),
-  //   desciple: randomIntFromInterval(80, 100),
+  //   disciple: randomIntFromInterval(80, 100),
   // },
   // {
   //   name: 'Dec',
   //   sundah_service: randomIntFromInterval(80, 100),
   //   blesscomn: randomIntFromInterval(80, 100),
-  //   desciple: randomIntFromInterval(80, 100),
+  //   disciple: randomIntFromInterval(80, 100),
   // },
 ]
 
@@ -94,7 +94,7 @@ export function LineChartComp() {
     <ResponsiveContainer width='100%' height={350}>
       <AreaChart data={data} >
         <defs>
-          <linearGradient id="desciple" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="disciple" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#FB8500" stopOpacity={0.8} />
             <stop offset="95%" stopColor="#FB8500" stopOpacity={0} />
           </linearGradient>
@@ -125,7 +125,7 @@ export function LineChartComp() {
         <Tooltip />
         <Area type="linear" dataKey="sundah_service" stroke="#8884d8" fillOpacity={1} fill="url(#sundah_service)" />
         <Area type="linear" dataKey="blesscomn" stroke="#82ca9d" fillOpacity={1} fill="url(#blesscomn)" />
-        <Area type="linear" dataKey="desciple" stroke="#FB8500" fillOpacity={1} fill="url(#desciple)" />
+        <Area type="linear" dataKey="disciple" stroke="#FB8500" fillOpacity={1} fill="url(#disciple)" />
 
       </AreaChart>
     </ResponsiveContainer>

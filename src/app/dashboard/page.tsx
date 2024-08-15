@@ -89,7 +89,7 @@ export default function Dashboard() {
             <Card>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                 <CardTitle className='text-sm font-medium'>
-                  Desciple
+                  Disciple
                 </CardTitle>
                 <IconUsers size={18} color='currentColor' className='text-muted-foreground' />
               </CardHeader>

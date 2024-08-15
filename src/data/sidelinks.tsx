@@ -81,7 +81,7 @@ export const sidelinks: SideLink[] = [
     ],
   },
   {
-    title: 'Descipleship',
+    title: 'Discipleship',
     label: '',
     roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.DISCIPLE],
     href: '/desciple',
