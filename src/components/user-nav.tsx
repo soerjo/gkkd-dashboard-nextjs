@@ -39,7 +39,7 @@ export function UserNav() {
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <Link href={'/profile'}>
+            <Link href={'#'}>
               <p className='text-sm font-medium leading-none hover:underline capitalize'>{authData?.name}</p>
             </Link>
             <p className='text-xs leading-none text-muted-foreground'>
