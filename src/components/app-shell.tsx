@@ -33,7 +33,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
             </div>
           </LayoutHeader>
 
-          <LayoutBody className='space-y-4'>
+          <LayoutBody className='container space-y-4'>
 
             {
               !authData.isPhoneValidate && (
