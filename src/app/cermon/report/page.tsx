@@ -79,8 +79,6 @@ export default function Dashboard() {
     }
   }
 
-
-
   return (
     <>
       <div className='flex flex-col '>
@@ -119,7 +117,6 @@ export default function Dashboard() {
           <FolderSync className="size-4" aria-hidden="true" />
           {isDesktop && "Sync"}
         </Button>
-
 
       </div>
       <CustomSearchInput />

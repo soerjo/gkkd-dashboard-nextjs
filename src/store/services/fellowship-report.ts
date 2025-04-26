@@ -63,17 +63,19 @@ export const fellowshipReportApi = createApi({
         method: "GET",
       }),
     }),
-    GetSyncById: builder.query<IApiResponse<void>, { id: number }>({
+    GetSyncById: builder.mutation<IApiResponse<void>, { id: number }>({
       query: ({ id }) => ({
         url: `/sync/${id}`,
         method: "GET",
       }),
+      invalidatesTags: ["FellowshipReport"],
     }),
-    GetSyncAll: builder.query<IApiResponse<void>, { id: number }>({
-      query: ({ id }) => ({
+    GetSyncAll: builder.mutation<IApiResponse<void>, {}>({
+      query: () => ({
         url: `/sync/all`,
         method: "GET",
       }),
+      invalidatesTags: ["FellowshipReport"],
     }),
     getExport: builder.query({
       query: () => ({
@@ -118,4 +120,6 @@ export const {
   useUploadMutation,
   useGetDashboardQuery,
   useLazyGetReminderQuery,
+  useGetSyncByIdMutation,
+  useGetSyncAllMutation,
 } = fellowshipReportApi;

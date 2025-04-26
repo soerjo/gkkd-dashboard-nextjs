@@ -7,6 +7,7 @@ export interface IFellowshipReport {
   total: number;
   blesscomn_id: number;
   blesscomn_name: string;
+  is_sync: boolean;
 }
 
 export interface IFellowshipReportById {

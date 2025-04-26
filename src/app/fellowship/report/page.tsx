@@ -6,13 +6,13 @@ import { useLazyGetAllQuery } from '@/store/services/fellowship'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
-import { DownloadIcon, MessageCircleWarning, PlusIcon, UploadIcon } from 'lucide-react';
+import { DownloadIcon, FolderSync, MessageCircleWarning, PlusIcon, UploadIcon } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { useLazyGetExportQuery, useLazyGetReminderQuery } from '../../../store/services/fellowship-report';
+import { useLazyGetExportQuery, useLazyGetReminderQuery, useGetSyncAllMutation } from '../../../store/services/fellowship-report';
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
 import { saveAs } from 'file-saver'
@@ -74,7 +74,17 @@ export default function Dashboard() {
     }
   }
 
-
+  const [fetchSync, {isLoading: isSyncLoading}] = useGetSyncAllMutation();
+  const handleSync = async () => {
+    try {
+      await fetchSync({}).unwrap()
+      toast.success('reminder has been sended')
+    } catch (error) {
+      console.log({ error })
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  }
 
   return (
     <>
@@ -110,6 +120,10 @@ export default function Dashboard() {
           {isDesktop && "Reminder"}
         </Button>
 
+        <Button disabled={isSyncLoading} variant="outline" size="sm" className="flex gap-2" onClick={handleSync}>
+          <FolderSync className="size-4" aria-hidden="true" />
+          {isDesktop && "Sync"}
+        </Button>
 
       </div>
       <CustomSearchInput />
