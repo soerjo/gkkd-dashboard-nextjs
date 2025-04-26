@@ -43,7 +43,7 @@ import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { ICermonReport } from "@/interfaces/cermon-report.interface";
-import { useLazyGetAllQuery } from "@/store/services/cermon-report";
+import { useLazyGetAllQuery, useGetSyncByIdMutation } from "@/store/services/cermon-report";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
 
@@ -63,21 +63,11 @@ export const columns: ColumnDef<ICermonReport>[] = [
         header: () => <div className="text-center">{"Male"}</div>,
         cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_male")}</div>,
     },
-    // {
-    //     accessorKey: "total_new_male",
-    //     header: "New Male",
-    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_male")}</div>,
-    // },
     {
         accessorKey: "total_female",
         header: () => <div className="text-center">{"Female"}</div>,
         cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.getValue("total_female")}</div>,
     },
-    // {
-    //     accessorKey: "total_new_female",
-    //     header: "New Female",
-    //     cell: ({ row }) => <div className="capitalize text-nowrap">{row.getValue("total_new_female")}</div>,
-    // },
     {
         accessorKey: "total",
         header: () => <div className="text-center">{"Total"}</div>,
@@ -88,6 +78,35 @@ export const columns: ColumnDef<ICermonReport>[] = [
         accessorKey: "total-new",
         header: () => <div className="text-center">{"Total New"}</div>,
         cell: ({ row }) => <div className="capitalize text-nowrap text-center">{row.original.new}</div>,
+    },
+
+    {
+        id: "sync",
+        enableHiding: true,
+        accessorKey: "actions",
+        header: () => <div className="text-center">Sync Status</div>,
+        cell: ({ row }) => {
+            const [fetchSync, {isLoading}] = useGetSyncByIdMutation();
+            const handleSync = async (id: number) => {
+                try {
+                    await fetchSync({id}).unwrap()
+                    toast.success('reminder has been sended')
+                } catch (error) {
+                    console.log({ error })
+                    const errorMessage = getErroMessage(error);
+                    toast.error(JSON.stringify(errorMessage));
+                }
+            }
+            
+            return (
+                <div className="capitalize text-nowrap text-center">
+                {row.original.is_sync ? 
+                    <Button variant="outline" size="sm" className="bg-green-500 text-secondary hover:bg-green-500 hover:text-secondary hover:cursor-default">Sync</Button> :
+                    <Button disabled={isLoading} variant="outline" size="sm" className="bg-blue-500 text-secondary hover:bg-blue-700 hover:text-secondary" onClick={()=> handleSync(row.original.id)}>Sync</Button>
+                }
+                </div>
+            )
+        },
     },
 
     {

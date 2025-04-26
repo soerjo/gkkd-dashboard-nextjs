@@ -63,6 +63,18 @@ export const fellowshipReportApi = createApi({
         method: "GET",
       }),
     }),
+    GetSyncById: builder.query<IApiResponse<void>, { id: number }>({
+      query: ({ id }) => ({
+        url: `/sync/${id}`,
+        method: "GET",
+      }),
+    }),
+    GetSyncAll: builder.query<IApiResponse<void>, { id: number }>({
+      query: ({ id }) => ({
+        url: `/sync/all`,
+        method: "GET",
+      }),
+    }),
     getExport: builder.query({
       query: () => ({
         url: `/export`,

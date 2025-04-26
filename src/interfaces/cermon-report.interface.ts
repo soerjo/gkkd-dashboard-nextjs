@@ -9,6 +9,7 @@ export interface ICermonReport {
   new: number;
   cermon_id: number;
   cermon_name: string;
+  is_sync: boolean;
 }
 
 export interface CreateCermonReport {

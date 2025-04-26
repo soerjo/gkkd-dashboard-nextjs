@@ -5,7 +5,7 @@ import { useLazyGetAllChurchQuery } from '@/store/services/church'
 import CustomSelect from '@/components/select';
 import CustomSearchInput from '@/components/search';
 import { Button } from '@/components/custom/button';
-import { DownloadIcon, PlusIcon, UploadIcon, MessageCircleWarning } from 'lucide-react';
+import { DownloadIcon, PlusIcon, UploadIcon, MessageCircleWarning, FolderSync } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
@@ -13,7 +13,7 @@ import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { UploadWrapper } from './_components/upload';
 import { useLazyGetAllQuery } from '../../../store/services/cermon';
-import { useLazyGetExportQuery, useLazyGetReminderQuery } from '../../../store/services/cermon-report';
+import { useLazyGetExportQuery, useLazyGetReminderQuery, useGetSyncAllMutation } from '../../../store/services/cermon-report';
 import { saveAs } from 'file-saver'
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
@@ -67,6 +67,19 @@ export default function Dashboard() {
     }
   }
 
+  const [fetchSync, {isLoading: isSyncLoading}] = useGetSyncAllMutation();
+  const handleSync = async () => {
+    try {
+      await fetchSync({}).unwrap()
+      toast.success('reminder has been sended')
+    } catch (error) {
+      console.log({ error })
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  }
+
+
 
   return (
     <>
@@ -101,6 +114,12 @@ export default function Dashboard() {
           <MessageCircleWarning className="size-4" aria-hidden="true" />
           {isDesktop && "Reminder"}
         </Button>
+
+        <Button disabled={isSyncLoading} variant="outline" size="sm" className="flex gap-2" onClick={handleSync}>
+          <FolderSync className="size-4" aria-hidden="true" />
+          {isDesktop && "Sync"}
+        </Button>
+
 
       </div>
       <CustomSearchInput />
