@@ -39,15 +39,10 @@ export default function Dashboard() {
           </Button>
         </MyDrawer>
 
-        {/* <Button variant="outline" size="sm" className="flex gap-2">
-          <DownloadIcon className="size-4" aria-hidden="true" />
-          {isDesktop && "Export"}
-        </Button> */}
       </div>
       <div className='flex lg:flex-row flex-col gap-4'>
         <CustomSearchInput />
         <CustomSelect compName={'church'} fetchQuery={fetch} />
-        {/* <DateRangePicker /> */}
       </div>
       <DataTable />
 

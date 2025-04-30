@@ -1,8 +1,6 @@
 import { UserRole } from '@/interfaces/auth.interface'
 import {
   IconDatabaseExport,
-  IconLayoutDashboard,
-  IconSettings,
   IconUsers,
   IconBible,
   IconUserHexagon,
@@ -10,7 +8,9 @@ import {
   IconUserSquare,
   IconBuildingChurch,
   IconNotebook,
-  IconReportSearch
+  IconReportSearch,
+  IconClipboardHeart,
+  IconCheckupList,
 
 } from '@tabler/icons-react'
 
@@ -77,6 +77,36 @@ export const sidelinks: SideLink[] = [
         roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
         href: '/cermon/report',
         icon: <IconDatabaseExport size={18} />,
+      },
+    ],
+  },
+  {
+    title: 'Hospitality',
+    label: '',
+    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+    href: '/hospitality',
+    icon: <IconClipboardHeart size={18} />,
+    sub: [
+      {
+        title: 'Hospitality',
+        label: '',
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+        href: '/hospitality/data',
+        icon: <IconNotebook size={18} />,
+      },
+      {
+        title: 'Hospitality Report',
+        label: '',
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+        href: '/hospitality/report/view',
+        icon: <IconCheckupList size={18} />,
+      },
+      {
+        title: 'Hospitality Report List',
+        label: '',
+        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+        href: '/hospitality/report/list',
+        icon: <IconCheckupList size={18} />,
       },
     ],
   },

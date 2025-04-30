@@ -1,41 +1,23 @@
 'use client'
 
 import React from 'react'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SlashIcon } from "@radix-ui/react-icons";
-import { usePathname } from 'next/navigation';
+import {Breadcrumbs, BreadcrumbItem} from "@heroui/react";import { usePathname } from 'next/navigation';
 
-const MyBreadcrum = ({ currentPath }: { currentPath: string }) => {
+const MyBreadcrum = ({ currentPath }: { currentPath?: string }) => {
     const currentPage = usePathname();
     return (
-        <Breadcrumb>
-            <BreadcrumbList>
-                {
-                    currentPage.replace('/', '').split('/').map((path, index) => (
-                        <React.Fragment key={index}>
-                            <BreadcrumbItem className='capitalize'>
-                                {path}
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator>
-                                <SlashIcon />
-                            </BreadcrumbSeparator>
-                        </React.Fragment>
-                    ))
-                }
-                <BreadcrumbPage>
-                    <BreadcrumbItem className='capitalize'>
-                        {currentPath}
+        <Breadcrumbs underline="active">
+            {currentPage.replace('/','').split('/').map((path, index) => {
+                const href = `/${path}`;
+                return (
+                    <BreadcrumbItem key={index} isCurrent={currentPage == currentPath}>
+                        {path.charAt(0).toUpperCase() + path.slice(1)}
                     </BreadcrumbItem>
-                </BreadcrumbPage>
-            </BreadcrumbList>
-        </Breadcrumb>)
+                );
+            })}
+      </Breadcrumbs>
+    )
+    
 }
 
 export default MyBreadcrum
