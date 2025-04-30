@@ -59,14 +59,14 @@ export const cermonReportApi = createApi({
       }),
       providesTags: ["CermonReport"],
     }),
-    GetSyncById: builder.mutation<IApiResponse<void>, { id: number }>({
+    SyncById: builder.mutation<IApiResponse<void>, { id: number }>({
       query: ({ id }) => ({
         url: `/sync/${id}`,
         method: "GET",
       }),
       invalidatesTags: ["CermonReport"],
     }),
-    GetSyncAll: builder.mutation<IApiResponse<void>, {}>({
+    SyncAll: builder.mutation<IApiResponse<void>, {}>({
       query: () => ({
         url: `/sync/all`,
         method: "GET",
@@ -116,6 +116,6 @@ export const {
   useLazyGetExportQuery,
   useGetDashboardQuery,
   useLazyGetReminderQuery,
-  useGetSyncByIdMutation,
-  useGetSyncAllMutation,
+  useSyncByIdMutation,
+  useSyncAllMutation,
 } = cermonReportApi;

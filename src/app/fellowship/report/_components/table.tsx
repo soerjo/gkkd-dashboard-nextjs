@@ -43,9 +43,49 @@ import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { IFellowshipReport } from "@/interfaces/fellowship-report.interface";
-import { useLazyGetAllQuery, useGetSyncByIdMutation } from "@/store/services/fellowship-report";
+import { useLazyGetAllQuery, useSyncByIdMutation } from "@/store/services/fellowship-report";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
+
+
+export function SyncCell({ id, isSync }: { id: number; isSync: boolean }) {
+    const [fetchSync, { isLoading }] = useSyncByIdMutation();
+
+    const handleSync = async () => {
+        try {
+            await fetchSync({ id }).unwrap();
+            toast.success("Reminder has been sent");
+        } catch (error) {
+            console.error({ error });
+            const errorMessage = getErroMessage(error);
+            toast.error(JSON.stringify(errorMessage));
+        }
+    };
+
+    return (
+        <div className="capitalize text-nowrap text-center">
+            {isSync ? (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-green-500 text-secondary hover:bg-green-500 hover:text-secondary hover:cursor-default"
+                >
+                    Sync
+                </Button>
+            ) : (
+                <Button
+                    disabled={isLoading}
+                    variant="outline"
+                    size="sm"
+                    className="bg-blue-500 text-secondary hover:bg-blue-700 hover:text-secondary"
+                    onClick={handleSync}
+                >
+                    Sync
+                </Button>
+            )}
+        </div>
+    );
+}
 
 export const columns: ColumnDef<IFellowshipReport>[] = [
     {
@@ -97,28 +137,7 @@ export const columns: ColumnDef<IFellowshipReport>[] = [
         enableHiding: true,
         accessorKey: "actions",
         header: () => <div className="text-center">Sync Status</div>,
-        cell: ({ row }) => {
-            const [fetchSync, {isLoading}] = useGetSyncByIdMutation();
-            const handleSync = async (id: number) => {
-                try {
-                    await fetchSync({id}).unwrap()
-                    toast.success('reminder has been sended')
-                } catch (error) {
-                    console.log({ error })
-                    const errorMessage = getErroMessage(error);
-                    toast.error(JSON.stringify(errorMessage));
-                }
-            }
-            
-            return (
-                <div className="capitalize text-nowrap text-center">
-                {row.original.is_sync ? 
-                    <Button variant="outline" size="sm" className="bg-green-500 text-secondary hover:bg-green-500 hover:text-secondary hover:cursor-default">Sync</Button> :
-                    <Button disabled={isLoading} variant="outline" size="sm" className="bg-blue-500 text-secondary hover:bg-blue-700 hover:text-secondary" onClick={()=> handleSync(row.original.id)}>Sync</Button>
-                }
-                </div>
-            )
-        },
+        cell: ({ row }) => <SyncCell id={row.original.id} isSync={row.original.is_sync} />
     },
 
 

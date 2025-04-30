@@ -13,7 +13,7 @@ import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { UploadWrapper } from './_components/upload';
 import { useLazyGetAllQuery } from '../../../store/services/cermon';
-import { useLazyGetExportQuery, useLazyGetReminderQuery, useGetSyncAllMutation } from '../../../store/services/cermon-report';
+import { useLazyGetExportQuery, useLazyGetReminderQuery, useSyncAllMutation } from '../../../store/services/cermon-report';
 import { saveAs } from 'file-saver'
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
@@ -67,7 +67,7 @@ export default function Dashboard() {
     }
   }
 
-  const [fetchSync, {isLoading: isSyncLoading}] = useGetSyncAllMutation();
+  const [fetchSync, {isLoading: isSyncLoading}] = useSyncAllMutation();
   const handleSync = async () => {
     try {
       await fetchSync({}).unwrap()

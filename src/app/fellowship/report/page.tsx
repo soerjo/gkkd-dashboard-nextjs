@@ -12,7 +12,7 @@ import { MyDrawer } from '@/components/my-drawer';
 import { CreateForm } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { useLazyGetExportQuery, useLazyGetReminderQuery, useGetSyncAllMutation } from '../../../store/services/fellowship-report';
+import { useLazyGetExportQuery, useLazyGetReminderQuery, useSyncAllMutation } from '../../../store/services/fellowship-report';
 import { getErroMessage } from '../../../lib/rtk-error-validation';
 import { toast } from 'react-toastify';
 import { saveAs } from 'file-saver'
@@ -74,7 +74,7 @@ export default function Dashboard() {
     }
   }
 
-  const [fetchSync, {isLoading: isSyncLoading}] = useGetSyncAllMutation();
+  const [fetchSync, {isLoading: isSyncLoading}] = useSyncAllMutation();
   const handleSync = async () => {
     try {
       await fetchSync({}).unwrap()
