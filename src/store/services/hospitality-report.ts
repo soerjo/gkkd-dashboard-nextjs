@@ -29,7 +29,7 @@ export const hospitalityReport = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["HospitalityReport"],
+      invalidatesTags: ["MyHospitalityReport"],
     }),
     delete: builder.mutation<IApiResponse<undefined>, { id: number }>({
       query: ({ id }) => ({
@@ -63,8 +63,8 @@ export const hospitalityReport = createApi({
         url: `/sunday-service`,
         method: "GET",
         params: payload,
-        providesTags: ["MyHospitalityReport"],
       }),
+      providesTags: ["HospitalityReport","MyHospitalityReport"],
       transformResponse: (response: IApiResponse<IHospitalityReportSundayService[]>) => {
         return response.data
       }

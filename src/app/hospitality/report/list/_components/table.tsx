@@ -211,7 +211,7 @@ export function DataTable() {
         shadow="none"
         className="overflow-auto"
         selectionBehavior="replace"
-        selectionMode="multiple"
+        selectionMode="single"
       >
         <TableHeader>
           {table.getFlatHeaders().map((header) => (

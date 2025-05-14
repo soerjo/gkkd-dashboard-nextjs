@@ -38,8 +38,7 @@ export default function Dashboard() {
   });
 
   const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery(
-    { date: DateSs, sunday_service_id: searchSsId },
-    { skip: !searchSsId || !DateSs }
+    { date: DateSs, sunday_service_id: searchSsId }
   );
   return (
     <>
