@@ -29,7 +29,7 @@ import { getErroMessage } from "@/lib/rtk-error-validation";
 export const columns: ColumnDef<IResponseHospitalityReport>[] = [
   {
     accessorKey: "checkbox",
-    header: "Checkbox",
+    header: "",
     cell: ({row}) => <Checkbox isDisabled isSelected={row.original.is_present} size="lg" color="primary"></Checkbox>,
   },
   {
