@@ -49,13 +49,32 @@ export const fellowshipApi = createApi({
         method: "GET",
         params: payload,
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["Fellowship"],
+    }),
+    GetAllMap: builder.query<IFellowship[], FellowshipFilter>({
+      query: (payload) => ({
+        url: "/",
+        method: "GET",
+        params: {...payload, take: 1000},
+      }),
+      keepUnusedDataFor: 300,
+      providesTags: ["Fellowship"],
+      transformResponse: (response: IApiResponse<TPaginationResponse<IFellowship[]>>) => {
+        return response.data.entities.map((item) => ({
+          ...item,
+          id: item.id,
+          name: item.name,
+        }));
+      }
+
     }),
     GetById: builder.query<IApiResponse<IFellowshipById>, { id: number }>({
       query: ({ id }) => ({
         url: `/${id}`,
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["Fellowship"],
     }),
   }),
@@ -65,6 +84,7 @@ export const {
   useCreateMutation,
   useUpdateMutation,
   useGetAllQuery,
+  useGetAllMapQuery,
   useLazyGetAllQuery,
   useGetByIdQuery,
   useLazyGetByIdQuery,

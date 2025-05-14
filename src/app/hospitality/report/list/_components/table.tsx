@@ -1,179 +1,256 @@
 import * as React from "react";
 import {
-    ColumnDef,
-    flexRender,
-    getCoreRowModel,
-    getPaginationRowModel,
-    useReactTable,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableCell,
-    TableColumn,
-    Button,
-    Checkbox,
-    cn,
-  } from '@heroui/react';
-import { DropdownAction } from "./drop-down-action";
-import { useState } from "react";
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableColumn,
+  Checkbox,
+} from "@heroui/react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllQuery } from "@/store/services/cermon";
-import { ICermon } from "@/interfaces/cermon.interface";
-import { getErroMessage } from "../../../../../lib/rtk-error-validation";
+import { useLazyGetAllQuery, useCreateMutation, useDeleteMutation } from "@/store/services/hospitality-report";
+// import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
 import { PaginationFooter } from "@/components/pagination-footer";
+import { ICreateHospitalityReport, IResponseHospitalityReport } from "@/interfaces/hospitalityReport.interface";
+import { getErroMessage } from "@/lib/rtk-error-validation";
+// import { UpdateFormDrawer } from "./form-update-member";
 
-export const columns: ColumnDef<ICermon>[] = [
-    {
-      id: "actions",
-      enableHiding: true,
-      accessorKey: "actions",
-      header: () => <div className="text-center">Actions</div>,
-      cell: ({ row }) => 
-      <div className="flex justify-center items-center">
-        <Checkbox 
-          aria-label={row.getValue("name")}
-          size="lg"/>
-        </div>,
-    },
-    {
-        accessorKey: "name",
-        header: "Name",
-        cell: ({ row }) => (
-            <div>
-                <div className="text-nowrap text-base">{row.getValue("name")}</div>
-                <div className="text-nowrap text-primary-900 text-opacity-70">{row.getValue("name")}</div>
-            </div>
-        ),
-    },
-    {
-        accessorKey: "gender",
-        header: "Gender",
-        cell: () => <p>L</p>
-        // cell: ({ row }) => <div className="capitalize text-nowrap">{`${row.original.day}, ${row.original.time}`}</div>,
-    },
-    {
-        accessorKey: "segment",
-        header: "Segment",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("segment")}</div>,
-    },
-    {
-        accessorKey: "region_name",
-        header: "Blesscomn",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    },
+export const columns: ColumnDef<IResponseHospitalityReport>[] = [
+  {
+    accessorKey: "checkbox",
+    header: "Checkbox",
+    cell: ({row}) => <Checkbox isDisabled isSelected={row.original.is_present} size="lg" color="primary"></Checkbox>,
+  },
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => (
+      <div>
+        <div className="text-nowrap text-base capitalize">{row.getValue("name")}</div>
+        <div className="text-nowrap text-primary-900 text-opacity-70">
+          {row.original.alias || "-"}
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "gender",
+    header: "Gender",
+    cell: ({ row }) => <div className="capitalize text-nowrap">{`${row.original.gender}`}</div>,
+  },
+  {
+    accessorKey: "segment_name",
+    header: "Segment",
+    cell: ({ row }) => <div className="text-nowrap uppercase">{row.getValue("segment_name")}</div>,
+  },
+  {
+    accessorKey: "blesscomn_name",
+    header: "Blesscomn",
+    cell: ({ row }) => (
+      <div className="text-nowrap uppercase">{row.getValue("blesscomn_name")}</div>
+    ),
+  },
+  // {
+  //     accessorKey: "action",
+  //     header: "Action",
+  //     cell: ({ row }) => {
+  //       const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure({id: "update-data"});
+
+  //       return (
+  //       <>
+  //         <Button isIconOnly startContent={< EditIcon className="text-success-300" /> } variant="light" onPress={onOpenUpdate}/>
+  //         <UpdateFormDrawer
+  //           id={row.original.id}
+  //           data={row.original}
+  //           isOpen={isOpenUpdate}
+  //           onOpenChange={onOpenChangeUpdate}
+  //         />
+  //       </>
+  //       )
+  //     },
+  // },
 ];
 
 export type FetchMemberProps = {
-    page?: string;
-    take?: string;
-    search?: string;
-    church?: string;
-    dateFrom?: string;
-    dateTo?: string;
+  page?: string;
+  take?: string;
+  search?: string;
+  segment?: string;
+  blesscomn?: string;
+  date?: string;
+  sunday_service?: string;
 };
 
 export function DataTable() {
-    const [pagination, setPagination] = useState({
-        pageIndex: 0, //initial page index
-        pageSize: 10, //default page size
-    });
+  const [pageIndex, setPageIndex] = useQueryParams({ key: "page", value: 0 });
+  const [pageSize, setPageSize] = useQueryParams({ key: "take", value: 100 });
 
-    useQueryParams({ key: "page", value: pagination.pageIndex + 1 });
-    useQueryParams({ key: "take", value: pagination.pageSize });
+  const searchParams = useSearchParams();
 
-    const searchParams = useSearchParams();
+  const [createData] = useCreateMutation();
+  const [deleteData] = useDeleteMutation()
+  const [fetchData, { data, isFetching: isLoading }] = useLazyGetAllQuery();
+  const [localData, setLocalData] = React.useState<any[]>([]);
 
-    const [fetchData, { data, isFetching: isLoading }] = useLazyGetAllQuery();
+  // Sync API data to local state
+  React.useEffect(() => {
+    setLocalData(data?.data?.entities ?? []);
+  }, [data]);
 
-    const fetchMember = async (props: FetchMemberProps) => {
-        try {
-            const params = {
-                page: props.page ? Number(props.page) : undefined,
-                take: props.take ? Number(props.take) : undefined,
-                region_id: props.church ? Number(props.church) : undefined,
-                search: props.search,
-            };
-            fetchData(params).unwrap()
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast.error(JSON.stringify(errorMessage));
-        }
-    };
+  const createReport = async (props: ICreateHospitalityReport) => {
+    try {
+        await createData(props);
+        toast.success('update data success!')
+    } catch (error) {
+        const errorMessage = getErroMessage(error);
+        toast.error(JSON.stringify(errorMessage));
+    }
+  }
 
-    React.useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries());
-        fetchMember(params);
-    }, [searchParams]);
+  const deleteReport = async (id: number) => {
+    try {
+        await deleteData({id});
+        toast.success('update data success!')
+    } catch (error) {
+        const errorMessage = getErroMessage(error);
+        toast.error(JSON.stringify(errorMessage));
+    }
+  }
 
-    const table = useReactTable({
-        data: data?.data?.entities || [],
-        columns: columns,
-        pageCount: data?.data?.meta?.pageCount ?? -1,
-        onPaginationChange: setPagination,
-        state: { pagination },
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        manualPagination: true,
-    });
+  const updateReport = async (props: IResponseHospitalityReport) => {
+    const sunday_service = Number(searchParams.get("sunday_service"));
+    const date = searchParams.get("date");
+    if(!sunday_service || !date) return;
 
-    return (
-      <div className="flex-col flex gap-2">
-        <Table
-          isStriped
-          removeWrapper
-          aria-label="Example static collection table"
-          // selectionMode="multiple"
-          className="w-full overflow-auto"
+    try {
+      if(props.is_present) {
+        await deleteReport(props.report_id);
+      } else {
+        await createReport({
+          date: date,
+          sunday_service_id: sunday_service,
+          hospitality_data_id: props.id,
+        });
+      }
+
+      setLocalData((prevData) =>
+        prevData.map((item) =>
+          item.id === props.id ? { ...item, is_present: !item.is_present } : item
+        )
+      );
+    } catch (error) {
+        const errorMessage = getErroMessage(error);
+        toast.error(JSON.stringify(errorMessage));
+    }
+
+
+  }
+
+  const fetchMember = async (props: FetchMemberProps) => {
+    if(!props.sunday_service || !props.date) return;
+
+    try {
+      const params = {
+        page: props.page ? Number(props.page) + 1 : undefined,
+        take: props.take ? Number(props.take) : undefined,
+        date: props.date,
+        sunday_service_id: Number(props.sunday_service),
+        segment_id: props.segment ? Number(props.segment) : undefined,
+        blesscomn_id: props.blesscomn ? Number(props.blesscomn) : undefined,
+        name: props.search,
+      };
+      fetchData(params).unwrap();
+    } catch (error) {
+      const errorMessage = getErroMessage(error);
+      toast.error(JSON.stringify(errorMessage));
+    }
+  };
+
+  React.useEffect(() => {
+    const params = Object.fromEntries(searchParams.entries());
+    fetchMember(params);
+  }, [searchParams]);
+
+  const table = useReactTable({
+    data: localData,
+    columns: columns,
+    pageCount: data?.data?.meta?.pageCount,
+    onPaginationChange: (updater) => {
+      if (typeof updater != "function") return;
+      const newState = updater({ pageIndex: pageIndex, pageSize: pageSize });
+      setPageIndex(newState.pageIndex);
+      setPageSize(newState.pageSize);
+    },
+    state: {
+      pagination: {
+        pageIndex: Number(pageIndex ?? 0),
+        pageSize: Number(pageSize ?? 10),
+      },
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+  });
+
+  return (
+    <div className="flex-col flex gap-2">
+      <Table
+        removeWrapper
+        isHeaderSticky
+        shadow="none"
+        className="overflow-auto"
+        selectionBehavior="replace"
+        selectionMode="multiple"
+      >
+        <TableHeader>
+          {table.getFlatHeaders().map((header) => (
+            <TableColumn key={header.id}>
+              {header.isPlaceholder
+                ? null
+                : flexRender(header.column.columnDef.header, header.getContext())}{" "}
+            </TableColumn>
+          ))}
+        </TableHeader>
+
+        <TableBody
+          emptyContent={"No found."}
+          items={!isLoading ? table.getRowModel().rows : []}
+          isLoading={isLoading}
+          loadingContent={
+            <div className="w-full flex justify-center items-center">
+              <Spinner size="medium" className="m-auto">
+                <span>Loading ...</span>
+              </Spinner>
+            </div>
+          }
         >
-          <TableHeader>
-            {table.getFlatHeaders().map((header) => (
-              <TableColumn key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(header.column.columnDef.header, header.getContext())}{" "}
-              </TableColumn>
-            ))}
-          </TableHeader>
+          {(row) => (
+            <TableRow
+              key={row.original.id}
+              onDoubleClick={() => updateReport(row.original)}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
 
-          <TableBody
-            emptyContent={"No found."}
-            items={!isLoading ? table.getRowModel().rows : []}
-            isLoading={isLoading}
-            loadingContent={
-              <div className="w-full flex justify-center items-center">
-                <Spinner size="medium" className="m-auto">
-                  <span>Loading ...</span>
-                </Spinner>
-              </div>
-            }
-          >
-            {(row) => (
-              <TableRow 
-              key={row.id} 
-              className="cursor-pointer gap-1"
-              onClick={() => {console.log(row.id + "click bro...");}}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-
-        {/* <div className="flex justify-end w-full bg-slate-800"> */}
-          {/* <Button variant="solid" color="primary" className="min-w-md ml-auto">Submit</Button> */}
-        {/* </div> */}
-
-        {/* <PaginationFooter table={table} /> */}
-      </div>
-    );
+      <PaginationFooter table={table} />
+    </div>
+  );
 }

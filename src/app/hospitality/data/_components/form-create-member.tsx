@@ -1,252 +1,156 @@
-import React from "react";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { Input } from "@/components/ui/input";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { Button } from "@/components/custom/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-toastify";
-import AsyncSelect from "@/components/react-select";
+import { useCreateMutation } from "@/store/services/hospitality-data";
+import { Autocomplete, AutocompleteItem, Button, Input } from "@heroui/react";
+import { useGetAllMapQuery as useGetAllBCQuery } from "@/store/services/fellowship";
+import { useGetAllQuery as useGetAllSegQuery } from "@/store/services/segment";
+
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
+import { ICreateHospitalityData } from "@/interfaces/hospitalityData.interface";
 import debounce from "lodash.debounce";
-import { useLazyGetAllChurchQuery } from "@/store/services/church";
-import { CreateCermon, weekDays } from "@/interfaces/cermon.interface";
-import { useCreateMutation } from "@/store/services/cermon";
-import { TimePicker } from "@/components/custom/time-picker";
-import { Textarea } from "@/components/ui/textarea";
-import { formatTime } from "@/lib/format-time";
-
-type dropDown = { label: string, value: string | number }
-type CreateInputForm = Omit<CreateCermon, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
-
-const defaultCreateForm: CreateInputForm = {
-    name: "",
-    time: new Date(`2024-07-07`),
-    segment: "",
-    description: "",
-    region: {
-        label: "",
-        value: "",
-    },
-};
-
-const dropDownSchema = z.object({
-    label: z.string(),
-    value: z.any(),
-});
 
 const FormSchema = z.object({
-    name: z.string().min(1, { message: 'required' }).max(100),
-    time: z.coerce.date(),
-    segment: z.string().min(1, { message: 'required' }).max(100),
-    description: z.string().max(200),
-    region: dropDownSchema.nullable().optional(),
+  name: z.string().min(1, { message: "required" }).max(100),
+  alias: z.string({ message: "" }).optional(),
+  gender: z.string({ message: "is required" }).min(1, { message: "required" }).max(100),
+  segment_id: z
+    .number()
+    .min(1, { message: "required" })
+    .transform((val) => Number(val)),
+  blesscomn_id: z
+    .number()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined)),
 });
 
 export type CreateFormProps = React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
 };
 
-export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
-    const isDesktop = useMediaQuery("(min-width: 768px)");
-    const [time, setTime] = React.useState<Date | undefined>(undefined);
+export const CreateFormDrawer = ({ onOpenChange, isOpen }: CreateFormProps) => {
+  return (
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+      <DrawerContent>
+        {(onClose) => {
+          const [searchBlesscomn, setSearchBlesscomn] = useState<string>("");
+          const { data: dataBc = [], isFetching: isFetchingBc } = useGetAllBCQuery({
+            search: searchBlesscomn,
+          });
 
-    const form = useForm<CreateInputForm>({
-        resolver: zodResolver(FormSchema),
-        defaultValues: defaultCreateForm,
-    });
-    const { formState: { isSubmitting, errors }, getValues } = form;
+          const [searchSegment, setSearchSegment] = useState<string>("");
+          const { data: dataSeg = [], isFetching: isFetchingSeg } = useGetAllSegQuery({
+            name: searchSegment,
+          });
 
-    const [createData] = useCreateMutation();
-    const [fetchChurch] = useLazyGetAllChurchQuery();
+          const form = useForm<ICreateHospitalityData>({ resolver: zodResolver(FormSchema) });
+          const { formState: { isSubmitting, errors } } = form;
 
-    const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        try {
-            await createData({
-                ...values,
-                time: formatTime(values.time),
-                day: weekDays.filter(day => day.value === values.time.getDay())[0].name,
-                region_id: values?.region?.value || null
-            }).unwrap()
+          const [createData] = useCreateMutation();
 
-            toast.success('create data success!')
-            onOpenChange(val => !val);
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast.error(JSON.stringify(errorMessage));
-        }
-    };
+          const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+            try {
+              await createData(values).unwrap();
+              form.reset();
+              onClose();
 
-    const _loadSuggestionsChurch = async (query: string, callback: (...arg: any) => any) => {
-        try {
-            const res = await fetchChurch({
-                take: 100,
-                page: 1,
-                search: query,
-            }).unwrap();
-            const resp = res.data.entities.map(data => ({
-                label: data.name,
-                value: data.id,
-            }));
-            return callback(resp);
-        } catch (error) {
-            return [];
-        }
-    };
-    const loadOptionsChurch = debounce(_loadSuggestionsChurch, 300);
+              toast.success("create data success!");
+            } catch (error) {
+              const errorMessage = getErroMessage(error);
+              toast.error(JSON.stringify(errorMessage));
+            }
+          };
 
-    return (
-        <div className={`flex flex-col h-[85vh] gap-4`} >
-            <div className="flex flex-col w-full h-1/6 gap-3 justify-center items-center">
-                <h2 className="text-xl font-semibold tracking-tight md:text-xl">
-                    Input New Cermons
-                </h2>
-                <div className="h-14 w-14">
-                    <svg
-                        viewBox="0 0 177 180"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`transition-all w-auto`}
-                    >
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M75.7157 80.5704H49.4655L49.4685 80.5762L0 157.714H12.1155L54.9137 90.9774L63.5368 107.449L31.3026 157.713H43.4181L68.9819 117.85L77.1481 133.449L61.5877 157.713H73.7031L82.5932 143.851L89.8504 157.713H116.101L97.0456 121.314L99.2696 117.846L120.14 157.713H146.39L113.722 95.3103L115.946 91.8422L150.43 157.713H176.68L136.295 80.5704H123.175H111.059H110.045L110.501 81.4409L108.277 84.909L106.006 80.5704H92.8896H80.7741H79.7553L80.2132 81.445L77.9892 84.9131L75.7157 80.5704ZM85.6584 91.8463L93.8245 107.445L91.6004 110.913L83.4343 95.3143L85.6584 91.8463Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M109.043 0L109.043 35.604H157.507V73.1864H109.043V76.9236H96.8583V61.25H145.322V47.5403L96.8583 47.5403V11.9363H80.8436L80.8436 47.5403L30.3638 47.5403V61.25H80.8436V76.9236H68.6585V73.1864H18.1787V35.604L68.6585 35.604L68.6585 0H109.043ZM68.6585 161.375L68.6585 180H109.043V161.375H96.8583V168.064H80.8436V161.375H68.6585Z"
-                            fill="currentColor"
-                        />
-                    </svg>
-                </div>
-            </div>
-            <div className="z-50">
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="flex flex-col mb-6 gap-6"
-                    >
-                        <ScrollArea className="h-[60vh]">
-                            <div className="flex flex-col gap-4" >
-                                <FormField
-                                    control={form.control}
-                                    name={"name"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"name".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"name"}
-                                                    placeholder={"name"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"time"}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel className="capitalize">{"time".replaceAll("_", " ")}</FormLabel>
-                                            <TimePicker date={field.value} setDate={field.onChange} />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"segment"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"segment".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="text"
-                                                    id={"segment"}
-                                                    placeholder={"segment"}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={"description"}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">{"description".replaceAll("_", " ")}</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Tell us a little bit about yourself"
-                                                    className="resize-none"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="region"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="capitalize">
-                                                {"region".replaceAll("_", " ")}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <AsyncSelect
-                                                    id="region"
-                                                    cacheOptions
-                                                    defaultOptions
-                                                    loadOptions={loadOptionsChurch}
-                                                    value={field.value}
-                                                    onChange={(e: any) => field.onChange(e)}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                            </div>
-                        </ScrollArea>
-                        <Button
-                            type="submit"
-                            loading={isSubmitting}
-                            disabled={isSubmitting}
-                            className={`flex mx-4`}
-                        >
-                            Save changes
-                        </Button>
-                    </form>
-                </Form>
-            </div>
-        </div>
-    );
+          return (
+            <>
+              <DrawerHeader className="flex flex-col gap-1">Input New Data</DrawerHeader>
+              <DrawerBody>
+                <form
+                  id="new-hospital-data"
+                  className="flex flex-col gap-6"
+                  onSubmit={form.handleSubmit(onSubmit)}
+                >
+                  <Input
+                    isRequired
+                    variant="faded"
+                    label="Name"
+                    isInvalid={!!errors.name}
+                    errorMessage={errors.name?.message}
+                    {...form.register("name")}
+                  />
+                  <Input
+                    variant="faded"
+                    label="Alias"
+                    isInvalid={!!errors.alias}
+                    errorMessage={errors.alias?.message}
+                    {...form.register("alias")}
+                  />
+                  <Autocomplete
+                    isRequired
+                    label="Gender"
+                    variant="faded"
+                    inputMode="search"
+                    isInvalid={!!errors.gender}
+                    errorMessage={errors.gender?.message}
+                    onSelectionChange={(value) => {
+                      form.setValue("gender", value as any, { shouldValidate: true });
+                    }}
+                  >
+                    <AutocompleteItem key={"laki-laki"}>{"Laki-laki"}</AutocompleteItem>
+                    <AutocompleteItem key={"perempuan"}>{"Perempuan"}</AutocompleteItem>
+                  </Autocomplete>
+                  <Autocomplete
+                    isRequired
+                    label="Segment"
+                    variant="faded"
+                    inputMode="search"
+                    isLoading={isFetchingSeg}
+                    defaultItems={dataSeg}
+                    isInvalid={!!errors.segment_id}
+                    errorMessage={errors.segment_id?.message}
+                    onInputChange={debounce(setSearchSegment, 500)}
+                    onSelectionChange={(value) => {
+                      form.setValue("segment_id", Number(value), { shouldValidate: true });
+                    }}
+                  >
+                    {(item) => <AutocompleteItem key={item?.id}>{item?.label}</AutocompleteItem>}
+                  </Autocomplete>
+                  <Autocomplete
+                    label="Blesscomn"
+                    variant="faded"
+                    inputMode="search"
+                    isLoading={isFetchingBc}
+                    defaultItems={dataBc}
+                    isInvalid={!!errors.blesscomn_id}
+                    errorMessage={errors.blesscomn_id?.message}
+                    onInputChange={debounce(setSearchBlesscomn, 500)}
+                    onSelectionChange={(value) => {
+                      form.setValue("blesscomn_id", Number(value), { shouldValidate: true });
+                    }}
+                  >
+                    {(item) => <AutocompleteItem key={item?.id}>{item?.name}</AutocompleteItem>}
+                  </Autocomplete>
+                </form>
+              </DrawerBody>
+              <DrawerFooter className="flex flex-col gap-2 w-full">
+                <Button
+                  color="primary"
+                  isLoading={isSubmitting}
+                  variant="solid"
+                  type="submit"
+                  form="new-hospital-data"
+                >
+                  Submit
+                </Button>
+              </DrawerFooter>
+            </>
+          );
+        }}
+      </DrawerContent>
+    </Drawer>
+  );
 };

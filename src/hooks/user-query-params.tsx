@@ -4,29 +4,32 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 export type UseQueryParamProps = { key: string, value: any }
 
 const useQueryParams = ({ key, value }: UseQueryParamProps) => {
-    const [paramsValue, setParamsValue] = React.useState(value)
+    const [paramsValue, setParamsValue] = React.useState(value);
+    
     const router = useRouter();
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
-
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    
     React.useEffect(() => {
         const newSearchParams = new URLSearchParams(searchParams?.toString())
-        for (const [newKey, newValue] of Object.entries({ [key]: value ?? null })) {
-            if (newValue === null) {
-                newSearchParams.delete(newKey)
+        const setValue = paramsValue ?? value;
+        for (const [newKey, newValue] of Object.entries({ [key]: setValue ?? null })) {
+            if (!newValue) {
+                newSearchParams.delete(newKey);
             } else {
-                newSearchParams.set(newKey, String(newValue))
+                key != "page" && newSearchParams.delete("page");
+                newSearchParams.set(newKey, String(newValue));
             }
         }
-
+    
         router.push(pathname + "?" + newSearchParams.toString())
-    }, [value])
+    }, [paramsValue])
 
     React.useEffect(() => {
         setParamsValue(searchParams.get(key))
-    }, [searchParams])
+    }, [])
 
-    return paramsValue
+    return [paramsValue, setParamsValue]
 }
 
 export default useQueryParams

@@ -13,71 +13,78 @@ import {
     TableRow,
     TableCell,
     TableColumn,
+    Button,
+    useDisclosure,
   } from '@heroui/react';
-import { DropdownAction } from "./drop-down-action";
-import { useState } from "react";
+import {EditIcon} from 'lucide-react'
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
-import { useLazyGetAllQuery } from "@/store/services/cermon";
-import { ICermon } from "@/interfaces/cermon.interface";
+import { useLazyGetAllQuery } from "@/store/services/hospitality-data";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
 import { PaginationFooter } from "@/components/pagination-footer";
+import { IResponseHospitalityData } from "@/interfaces/hospitalityData.interface";
+import { UpdateFormDrawer } from "./form-update-member";
 
-export const columns: ColumnDef<ICermon>[] = [
+export const columns: ColumnDef<IResponseHospitalityData>[] = [
     {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
             <div>
-                <div className="text-nowrap text-base">{row.getValue("name")}</div>
-                <div className="text-nowrap text-primary-900 text-opacity-70">{row.getValue("name")}</div>
+                <div className="text-nowrap text-base capitalize">{row.getValue("name")}</div>
+                <div className="text-nowrap text-primary-900 text-opacity-70">{row.original.alias || "-"}</div>
             </div>
         ),
     },
     {
         accessorKey: "gender",
         header: "Gender",
-        cell: () => <p>L</p>
-        // cell: ({ row }) => <div className="capitalize text-nowrap">{`${row.original.day}, ${row.original.time}`}</div>,
+        cell: ({ row }) => <div className="capitalize text-nowrap">{`${row.original.gender}`}</div>,
     },
     {
-        accessorKey: "segment",
+        accessorKey: "segment_name",
         header: "Segment",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("segment")}</div>,
+        cell: ({ row }) => <div className="text-nowrap uppercase">{row.getValue("segment_name")}</div>,
     },
     {
-        accessorKey: "region_name",
+        accessorKey: "blesscomn_name",
         header: "Blesscomn",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
+        cell: ({ row }) => <div className="text-nowrap uppercase">{row.getValue("blesscomn_name")}</div>,
     },
-    // {
-    //     id: "actions",
-    //     enableHiding: true,
-    //     accessorKey: "actions",
-    //     header: () => <div className="text-center">Actions</div>,
-    //     cell: ({ row }) => <DropdownAction row={row} />,
-    // },
+    {
+        accessorKey: "action",
+        header: "Action",
+        cell: ({ row }) => {
+          const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure({id: "update-data"});
+ 
+          return (
+          <>
+            <Button isIconOnly startContent={< EditIcon className="text-success-300" /> } variant="light" onPress={onOpenUpdate}/>
+            <UpdateFormDrawer
+              id={row.original.id}
+              data={row.original}
+              isOpen={isOpenUpdate}
+              onOpenChange={onOpenChangeUpdate}
+            />
+          </>
+          )
+        },
+    },
 ];
 
 export type FetchMemberProps = {
     page?: string;
     take?: string;
     search?: string;
-    church?: string;
-    dateFrom?: string;
-    dateTo?: string;
+    segment?: string;
+    blesscomn?: string;
 };
 
 export function DataTable() {
-    const [pagination, setPagination] = useState({
-        pageIndex: 0, //initial page index
-        pageSize: 10, //default page size
-    });
-
-    useQueryParams({ key: "page", value: pagination.pageIndex + 1 });
-    useQueryParams({ key: "take", value: pagination.pageSize });
+    const [pageIndex, setPageIndex] = useQueryParams({ key: "page", value: 0 });
+    const [pageSize, setPageSize] = useQueryParams({ key: "take", value: 10 });
 
     const searchParams = useSearchParams();
 
@@ -86,10 +93,11 @@ export function DataTable() {
     const fetchMember = async (props: FetchMemberProps) => {
         try {
             const params = {
-                page: props.page ? Number(props.page) : undefined,
+                page: props.page ? Number(props.page) + 1 : undefined,
                 take: props.take ? Number(props.take) : undefined,
-                region_id: props.church ? Number(props.church) : undefined,
-                search: props.search,
+                segment_id: props.segment ? Number(props.segment) : undefined,
+                blesscomn_id: props.blesscomn ? Number(props.blesscomn) : undefined,
+                name: props.search,
             };
             fetchData(params).unwrap()
         } catch (error) {
@@ -106,9 +114,17 @@ export function DataTable() {
     const table = useReactTable({
         data: data?.data?.entities || [],
         columns: columns,
-        pageCount: data?.data?.meta?.pageCount ?? -1,
-        onPaginationChange: setPagination,
-        state: { pagination },
+        pageCount: data?.data?.meta?.pageCount,
+        onPaginationChange: (updater) => {
+          if(typeof updater != "function") return; 
+            const newState = updater({pageIndex: pageIndex, pageSize: pageSize});
+            setPageIndex(newState.pageIndex);
+            setPageSize(newState.pageSize);
+        },
+        state: { pagination: {
+            pageIndex: Number(pageIndex ?? 0),
+            pageSize: Number(pageSize ?? 10),
+        } },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
@@ -118,9 +134,11 @@ export function DataTable() {
       <div className="flex-col flex gap-2">
         <Table
           removeWrapper
-          aria-label="Example static collection table"
-          selectionMode="multiple"
+          isHeaderSticky
+          shadow="none"
           className="overflow-auto"
+          selectionBehavior="replace"
+          selectionMode="multiple"
         >
           <TableHeader>
             {table.getFlatHeaders().map((header) => (

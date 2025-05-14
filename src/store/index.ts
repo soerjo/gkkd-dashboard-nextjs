@@ -17,6 +17,9 @@ import { fellowshipReportApi } from "./services/fellowship-report";
 import { disciplesApi } from "./services/disciples";
 import { disciplesGroupApi } from "./services/disciples-group";
 import { disciplesReportApi } from "./services/disciples-report";
+import { segmentApi } from "./services/segment";
+import { hospitalityData } from "./services/hospitality-data";
+import { hospitalityReport } from "./services/hospitality-report";
 
 export const makeStore = configureStore({
   reducer: {
@@ -36,6 +39,9 @@ export const makeStore = configureStore({
     [disciplesApi.reducerPath]: disciplesApi.reducer,
     [disciplesGroupApi.reducerPath]: disciplesGroupApi.reducer,
     [disciplesReportApi.reducerPath]: disciplesReportApi.reducer,
+    [segmentApi.reducerPath]: segmentApi.reducer,
+    [hospitalityData.reducerPath]: hospitalityData.reducer,
+    [hospitalityReport.reducerPath]: hospitalityReport.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -55,6 +61,9 @@ export const makeStore = configureStore({
       disciplesApi.middleware,
       disciplesGroupApi.middleware,
       disciplesReportApi.middleware,
+      segmentApi.middleware,
+      hospitalityData.middleware,
+      hospitalityReport.middleware,
     ]),
 });
 

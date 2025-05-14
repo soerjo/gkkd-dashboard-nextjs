@@ -18,6 +18,7 @@
     "@heroui/drawer": "^2.2.16",
     "@heroui/react": "^2.7.8",
     "@heroui/select": "^2.4.19",
+    "@heroui/skeleton": "^2.2.12",
     "@heroui/system": "2.4.15",
     "@heroui/table": "^2.2.18",
     "@heroui/theme": "2.4.15",

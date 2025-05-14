@@ -19,7 +19,7 @@ export type MyDrawerProps = {
 
 export function HeroMyDrawer({ DrawerForm, title }: MyDrawerProps) {
   // const [open, setOpen] = React.useState(false);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure({ id: "drawer-hero" });
+  const { isOpen, onOpen, onOpenChange , } = useDisclosure({ id: "drawer-hero" });
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {

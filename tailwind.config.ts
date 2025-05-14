@@ -9,7 +9,7 @@ const config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "./node_modules/react-tailwindcss-select/dist/index.esm.js",
-    "./node_modules/@heroui/theme/dist/components/(autocomplete|breadcrumbs|button|card|checkbox|date-picker|drawer|select|table|ripple|spinner|form|input|listbox|divider|popover|scroll-shadow|calendar|date-input|modal|spacer).js"
+    "./node_modules/@heroui/theme/dist/components/(autocomplete|breadcrumbs|button|card|checkbox|date-picker|drawer|select|skeleton|table|ripple|spinner|form|input|listbox|divider|popover|scroll-shadow|calendar|date-input|modal|spacer).js"
   ],
   prefix: "",
   theme: {

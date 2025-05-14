@@ -6,7 +6,7 @@ import React from 'react'
 const CustomSearchInput = () => {
     const [searchTerm, setSearchTerm] = React.useState<string | null>('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
-    const queryParams = useQueryParams({ key: 'search', value: debouncedSearchTerm })
+    const [queryParams] = useQueryParams({ key: 'search', value: debouncedSearchTerm })
     return (
         <Input
             placeholder="Search..."
