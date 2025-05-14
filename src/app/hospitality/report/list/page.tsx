@@ -14,6 +14,7 @@ import { useGetAllMapQuery as useGetAllSsQuery } from "@/store/services/cermon";
 import { useGetReportQuery } from "@/store/services/hospitality-report";
 import { useSearchParams } from "next/navigation";
 import debounce from "lodash.debounce";
+import { Accordion, AccordionItem } from "@heroui/react";
 
 export default function Dashboard() {
   const [searchSegmentId, setSearchSegmentId] = useQueryParams({ key: "segment", value: null });
@@ -37,9 +38,10 @@ export default function Dashboard() {
     value: today(getLocalTimeZone()).toString(),
   });
 
-  const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery(
-    { date: DateSs, sunday_service_id: searchSsId }
-  );
+  const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery({
+    date: DateSs ?? today(getLocalTimeZone()).toString(),
+    sunday_service_id: searchSsId,
+  });
   return (
     <>
       <div className="flex flex-col">
@@ -47,20 +49,6 @@ export default function Dashboard() {
         <MyBreadcrum />
       </div>
 
-      <Card>
-        <Skeleton className="" isLoaded={!isFetchingReport}>
-          {/* <div className="h-24 rounded-lg bg-secondary" /> */}
-          <CardBody className="flex flex-row gap-4 justify-between items-center p-4 px-16 h-20">
-            {dataReport &&
-              dataReport.map((item) => (
-                <div key={item.id} className="flex flex-col gap-2w-fit justify-center items-center">
-                  <p className="font-bold uppercase">{item.alias}</p>
-                  <p>{item.count}</p>
-                </div>
-              ))}
-          </CardBody>
-        </Skeleton>
-      </Card>
       <div className="flex items-center justify-end gap-4">
         <Autocomplete
           selectedKey={searchSsId}
@@ -93,7 +81,7 @@ export default function Dashboard() {
               onValueChange={debounce(setSearchName, 500)}
               placeholder="search..."
             />
-            <Autocomplete
+            {/* <Autocomplete
               selectedKey={searchSegmentId}
               isLoading={isFetching}
               defaultItems={data}
@@ -116,11 +104,29 @@ export default function Dashboard() {
               onSelectionChange={setSearchBcId}
             >
               {(item) => <AutocompleteItem key={item?.id}>{item?.name}</AutocompleteItem>}
-            </Autocomplete>
+            </Autocomplete> */}
           </div>
           <DataTable />
         </CardBody>
       </Card>
+      <Accordion selectionMode="multiple" isCompact variant="shadow">
+        <AccordionItem key={1} aria-label="segment" title={"Details"}>
+          <div className="flex flex-col gap-2">
+            {dataReport &&
+              dataReport.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full"
+                >
+                  <p className=" uppercase text-small">
+                    {item.alias} : {item.count}
+                  </p>
+                  {/* <p>{item.count}</p> */}
+                </div>
+              ))}
+          </div>
+        </AccordionItem>
+      </Accordion>
     </>
   );
 }

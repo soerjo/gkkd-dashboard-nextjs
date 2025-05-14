@@ -94,13 +94,13 @@ export const sidelinks: SideLink[] = [
         href: '/hospitality/data',
         icon: <IconNotebook size={18} />,
       },
-      {
-        title: 'Hospitality Report',
-        label: '',
-        roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-        href: '/hospitality/report/view',
-        icon: <IconCheckupList size={18} />,
-      },
+      // {
+      //   title: 'Hospitality Report',
+      //   label: '',
+      //   roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+      //   href: '/hospitality/report/view',
+      //   icon: <IconCheckupList size={18} />,
+      // },
       {
         title: 'Hospitality Report List',
         label: '',

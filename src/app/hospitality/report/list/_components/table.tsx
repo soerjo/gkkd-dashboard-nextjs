@@ -111,7 +111,7 @@ export function DataTable() {
   const createReport = async (props: ICreateHospitalityReport) => {
     try {
         await createData(props);
-        toast.success('update data success!')
+        // toast.success('update data success!', {autoClose: 500})
     } catch (error) {
         const errorMessage = getErroMessage(error);
         toast.error(JSON.stringify(errorMessage));
@@ -121,7 +121,7 @@ export function DataTable() {
   const deleteReport = async (id: number) => {
     try {
         await deleteData({id});
-        toast.success('update data success!')
+        // toast.success('update data success!', {autoClose: 500})
     } catch (error) {
         const errorMessage = getErroMessage(error);
         toast.error(JSON.stringify(errorMessage));
@@ -132,6 +132,12 @@ export function DataTable() {
     const sunday_service = Number(searchParams.get("sunday_service"));
     const date = searchParams.get("date");
     if(!sunday_service || !date) return;
+
+    setLocalData((prevData) =>
+      prevData.map((item) =>
+        item.id === props.id ? { ...item, is_present: !item.is_present } : item
+      )
+    );
 
     try {
       if(props.is_present) {
@@ -144,11 +150,6 @@ export function DataTable() {
         });
       }
 
-      setLocalData((prevData) =>
-        prevData.map((item) =>
-          item.id === props.id ? { ...item, is_present: !item.is_present } : item
-        )
-      );
     } catch (error) {
         const errorMessage = getErroMessage(error);
         toast.error(JSON.stringify(errorMessage));
@@ -205,11 +206,12 @@ export function DataTable() {
 
   return (
     <div className="flex-col flex gap-2">
+    <div className="max-h-[500px] overflow-auto">
       <Table
         removeWrapper
+        // isVirtualized
         isHeaderSticky
         shadow="none"
-        className="overflow-auto"
         selectionBehavior="replace"
         selectionMode="single"
       >
@@ -249,6 +251,7 @@ export function DataTable() {
           )}
         </TableBody>
       </Table>
+    </div>
 
       <PaginationFooter table={table} />
     </div>
