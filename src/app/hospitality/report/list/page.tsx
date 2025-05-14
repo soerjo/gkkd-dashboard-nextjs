@@ -9,9 +9,9 @@ import { getLocalTimeZone, today, parseDate } from "@internationalized/date";
 import useQueryParams from "@/hooks/user-query-params";
 import { useState } from "react";
 import { useGetAllQuery } from "@/store/services/segment";
-import { useGetAllMapQuery as useGetAllBCQuery} from "@/store/services/fellowship";
-import { useGetAllMapQuery as useGetAllSsQuery} from "@/store/services/cermon";
-import { useGetReportQuery} from "@/store/services/hospitality-report";
+import { useGetAllMapQuery as useGetAllBCQuery } from "@/store/services/fellowship";
+import { useGetAllMapQuery as useGetAllSsQuery } from "@/store/services/cermon";
+import { useGetReportQuery } from "@/store/services/hospitality-report";
 import { useSearchParams } from "next/navigation";
 import debounce from "lodash.debounce";
 
@@ -19,21 +19,28 @@ export default function Dashboard() {
   const [searchSegmentId, setSearchSegmentId] = useQueryParams({ key: "segment", value: null });
   const [searchSegment, setSearchSegment] = useState<string>("");
   const { data = [], isFetching } = useGetAllQuery({ name: searchSegment });
-  
+
   const [searchBcId, setSearchBcId] = useQueryParams({ key: "blesscomn", value: null });
   const [searchBlesscomn, setSearchBlesscomn] = useState<string>("");
-  const { data: dataBc = [], isFetching: isFetchingBc } = useGetAllBCQuery({ search: searchBlesscomn });
+  const { data: dataBc = [], isFetching: isFetchingBc } = useGetAllBCQuery({
+    search: searchBlesscomn,
+  });
 
   const [searchSsId, setSearchSsId] = useQueryParams({ key: "sunday_service", value: null });
   const [searchSs] = useState<string>("");
   const { data: dataSs = [], isFetching: isFetchingSs } = useGetAllSsQuery({ search: searchSs });
 
-  
   const searchParams = useSearchParams();
   const [_, setSearchName] = useQueryParams({ key: "search", value: null });
-  const [DateSs, setDateSs] = useQueryParams({ key: "date", value: today(getLocalTimeZone()).toString() });
-  
-  const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery({ date: DateSs, sunday_service_id: searchSsId }, {skip: !searchSsId || !DateSs});
+  const [DateSs, setDateSs] = useQueryParams({
+    key: "date",
+    value: today(getLocalTimeZone()).toString(),
+  });
+
+  const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery(
+    { date: DateSs, sunday_service_id: searchSsId },
+    { skip: !searchSsId || !DateSs }
+  );
   return (
     <>
       <div className="flex flex-col">
@@ -41,19 +48,20 @@ export default function Dashboard() {
         <MyBreadcrum />
       </div>
 
-        <Card>
-        <Skeleton className="" isLoaded={!isFetchingReport} >
+      <Card>
+        <Skeleton className="" isLoaded={!isFetchingReport}>
           {/* <div className="h-24 rounded-lg bg-secondary" /> */}
           <CardBody className="flex flex-row gap-4 justify-between items-center p-4 px-16 h-20">
-            {dataReport && dataReport.map(item => (
-              <div className="flex flex-col gap-2w-fit justify-center items-center">
-                <p className="font-bold uppercase">{item.alias}</p>
-                <p>{item.count}</p>
-              </div>
-            ))}
+            {dataReport &&
+              dataReport.map((item) => (
+                <div key={item.id} className="flex flex-col gap-2w-fit justify-center items-center">
+                  <p className="font-bold uppercase">{item.alias}</p>
+                  <p>{item.count}</p>
+                </div>
+              ))}
           </CardBody>
         </Skeleton>
-        </Card>
+      </Card>
       <div className="flex items-center justify-end gap-4">
         <Autocomplete
           selectedKey={searchSsId}
@@ -70,7 +78,7 @@ export default function Dashboard() {
         <DatePicker
           hideTimeZone
           value={DateSs ? parseDate(DateSs) : today(getLocalTimeZone())}
-          onChange={(date) => date && setDateSs(date.toString()) }
+          onChange={(date) => date && setDateSs(date.toString())}
           className="sm:max-w-xs w-full"
         />
       </div>
@@ -79,7 +87,9 @@ export default function Dashboard() {
           <div className="flex lg:flex-row flex-col-reverse justify-end items-end gap-4">
             <Input
               isClearable
-              startContent={ <Search className="text-2xl text-default-400 pointer-events-none flex-shrink-0" /> }
+              startContent={
+                <Search className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+              }
               defaultValue={searchParams.get("search") ?? ""}
               onValueChange={debounce(setSearchName, 500)}
               placeholder="search..."
