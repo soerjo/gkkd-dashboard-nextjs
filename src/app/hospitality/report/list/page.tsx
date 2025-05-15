@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "./_components/table";
-import { Card, CardBody, DatePicker, Skeleton } from "@heroui/react";
+import { Card, CardBody, DatePicker, Divider, Accordion, AccordionItem, Button } from "@heroui/react";
 import { Search } from "lucide-react";
 import MyBreadcrum from "@/components/my-breadcrum";
 import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
@@ -11,10 +11,10 @@ import { useState } from "react";
 import { useGetAllQuery } from "@/store/services/segment";
 import { useGetAllMapQuery as useGetAllBCQuery } from "@/store/services/fellowship";
 import { useGetAllMapQuery as useGetAllSsQuery } from "@/store/services/cermon";
-import { useGetReportQuery } from "@/store/services/hospitality-report";
+import { useGetReportQuery, useRegenerateMutation } from "@/store/services/hospitality-report";
 import { useSearchParams } from "next/navigation";
 import debounce from "lodash.debounce";
-import { Accordion, AccordionItem } from "@heroui/react";
+
 
 export default function Dashboard() {
   const [searchSegmentId, setSearchSegmentId] = useQueryParams({ key: "segment", value: null });
@@ -38,10 +38,24 @@ export default function Dashboard() {
     value: today(getLocalTimeZone()).toString(),
   });
 
-  const { data: dataReport = [], isFetching: isFetchingReport } = useGetReportQuery({
+  const { data: dataReport, isFetching: isFetchingReport } = useGetReportQuery({
     date: DateSs ?? today(getLocalTimeZone()).toString(),
     sunday_service_id: searchSsId,
   });
+
+  const [regenerate, {isLoading: isLoadingRegenereate}] = useRegenerateMutation();
+  const handleRegenerate = async () => {
+    const sunday_service = Number(searchParams.get("sunday_service"));
+    const date = searchParams.get("date");
+
+    if(!sunday_service || !date) return;
+
+    await regenerate({
+      date: date,
+      cermon_id: sunday_service,
+    });
+  }
+
   return (
     <>
       <div className="flex flex-col">
@@ -109,24 +123,52 @@ export default function Dashboard() {
           <DataTable />
         </CardBody>
       </Card>
-      <Accordion selectionMode="multiple" isCompact variant="shadow">
-        <AccordionItem key={1} aria-label="segment" title={"Details"}>
-          <div className="flex flex-col gap-2">
-            {dataReport &&
-              dataReport.map((item) => (
+      <Button 
+        isLoading={isLoadingRegenereate}
+        onPress={handleRegenerate}
+        fullWidth variant="flat" 
+        color="primary"
+      >
+        Generate Report
+      </Button>
+      {
+        dataReport?.sum && dataReport?.count && (
+          <Accordion selectionMode="multiple" variant="shadow" isCompact>
+            <AccordionItem key={1} aria-label="segment" title={"Details Segment"}>
+              <div className="flex flex-col gap-2">
                 <div
-                  key={item.id}
+                  
                   className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full"
                 >
-                  <p className=" uppercase text-small">
-                    {item.alias} : {item.count}
-                  </p>
-                  {/* <p>{item.count}</p> */}
-                </div>
-              ))}
-          </div>
-        </AccordionItem>
-      </Accordion>
+                {dataReport?.sum &&
+                  dataReport.sum.map((item) => (
+                      <p key={item.id} className=" uppercase text-small">
+                        {item.alias} : {item.count}
+                      </p>
+                  ))}
+                  </div>
+              </div>
+            </AccordionItem>
+
+            <AccordionItem key={2} aria-label="segment" title={"Details Total"}>
+              <div className="flex flex-col gap-2">
+                {dataReport?.count &&
+                  (
+                    <div className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full">
+                      <p className="text-small"> Total Laki-laki : {dataReport.count.total_male} </p>
+                      <p className="text-small"> Total Laki-laki Baru : {dataReport.count.total_new_male} </p>
+                      <p className="text-small"> Total Perempuan : {dataReport.count.total_female} </p>
+                      <p className="text-small mb-1"> Total Perempuan Baru: {dataReport.count.total_new_female} </p>
+                      <Divider />
+                      <p className="text-small mt-1"> Total : {dataReport.count.total} </p>
+                    </div>
+                  )
+                }
+              </div>
+            </AccordionItem>
+          </Accordion>
+        )
+      } 
     </>
   );
 }

@@ -78,15 +78,6 @@ export const sidelinks: SideLink[] = [
         href: '/cermon/report',
         icon: <IconDatabaseExport size={18} />,
       },
-    ],
-  },
-  {
-    title: 'Hospitality',
-    label: '',
-    roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-    href: '/hospitality',
-    icon: <IconClipboardHeart size={18} />,
-    sub: [
       {
         title: 'Hospitality',
         label: '',
@@ -94,13 +85,6 @@ export const sidelinks: SideLink[] = [
         href: '/hospitality/data',
         icon: <IconNotebook size={18} />,
       },
-      // {
-      //   title: 'Hospitality Report',
-      //   label: '',
-      //   roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
-      //   href: '/hospitality/report/view',
-      //   icon: <IconCheckupList size={18} />,
-      // },
       {
         title: 'Hospitality Report List',
         label: '',
@@ -110,6 +94,36 @@ export const sidelinks: SideLink[] = [
       },
     ],
   },
+  // {
+  //   title: 'Hospitality',
+  //   label: '',
+  //   roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+  //   href: '/hospitality',
+  //   icon: <IconClipboardHeart size={18} />,
+  //   sub: [
+  //     {
+  //       title: 'Hospitality',
+  //       label: '',
+  //       roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+  //       href: '/hospitality/data',
+  //       icon: <IconNotebook size={18} />,
+  //     },
+  //     // {
+  //     //   title: 'Hospitality Report',
+  //     //   label: '',
+  //     //   roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+  //     //   href: '/hospitality/report/view',
+  //     //   icon: <IconCheckupList size={18} />,
+  //     // },
+  //     {
+  //       title: 'Hospitality Report List',
+  //       label: '',
+  //       roles: [UserRole.SYSTEMADMIN, UserRole.SUPERADMIN, UserRole.ADMIN],
+  //       href: '/hospitality/report/list',
+  //       icon: <IconCheckupList size={18} />,
+  //     },
+  //   ],
+  // },
   {
     title: 'Discipleship',
     label: '',

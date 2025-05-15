@@ -4,6 +4,11 @@ export interface ICreateHospitalityReport {
   sunday_service_id: number;
 }
 
+export interface IHospitalRegenerateReport {
+  date: string;
+  cermon_id: number;
+}
+
 export interface IFilterHospitalityReport {
   take?: number;
   page?: number;
@@ -34,13 +39,19 @@ export interface IResponseHospitalityReport {
   blesscomn_id: number;
   blesscomn_name: string;
   is_present?: boolean;
+  isLoading?: boolean;
 }
 
-export interface IMappingHospitalityReport {
-  //   id: number;
-  //   name: string;
-  //   alias: string;
-  //   description: string;
-  //   key: string;
-  //   label: string;
+export interface IReponseSundayServiceReport {
+  sum: IHospitalityReportSundayService[]
+  count: IHospitalityReportSumSundayService
+}
+
+
+export interface IHospitalityReportSumSundayService {
+  total_female: number
+  total_new_female: number
+  total_new_male: number
+  total_male: number
+  total: number
 }
