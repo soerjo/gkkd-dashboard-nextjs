@@ -1,5 +1,5 @@
 import { IApiResponse, TPaginationResponse } from "@/interfaces/apiResponse";
-import { ICreateHospitalityReport, IFilterHospitalityReport, IHospitalityReportSundayService, IResponseHospitalityReport } from "@/interfaces/hospitalityReport.interface";
+import { ICreateHospitalityReport, IFilterHospitalityReport, IHospitalityReportSundayService, IHospitalRegenerateReport, IReponseSundayServiceReport, IResponseHospitalityReport } from "@/interfaces/hospitalityReport.interface";
 import { AUTH_TOKEN, getAuthCookie } from "@/lib/cookies";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -23,6 +23,14 @@ export const hospitalityReport = createApi({
       }),
       invalidatesTags: ["MyHospitalityReport"],
     }),
+    regenerate: builder.mutation<IApiResponse<undefined>, IHospitalRegenerateReport>({
+      query: (payload) => ({
+        url: "/regenerate",
+        method: "POST",
+        body: payload,
+      }),
+      // invalidatesTags: ["MyHospitalityReport"],
+    }),
     update: builder.mutation<IApiResponse<undefined>, Partial<ICreateHospitalityReport> & { id: number }>({
       query: ({ id, ...payload }) => ({
         url: `/${id}`,
@@ -31,10 +39,11 @@ export const hospitalityReport = createApi({
       }),
       invalidatesTags: ["MyHospitalityReport"],
     }),
-    delete: builder.mutation<IApiResponse<undefined>, { id: number }>({
-      query: ({ id }) => ({
-        url: `/${id}`,
-        method: "DELETE",
+    delete: builder.mutation<IApiResponse<undefined>, ICreateHospitalityReport>({
+      query: (payload) => ({
+        url: `/delete`,
+        method: "PATCH",
+        body: payload,
       }),
       invalidatesTags: ["MyHospitalityReport"],
     }),
@@ -58,14 +67,14 @@ export const hospitalityReport = createApi({
         method: "GET",
       }),
     }),
-    GetReport: builder.query<IHospitalityReportSundayService[], IFilterHospitalityReport>({
+    GetReport: builder.query<IReponseSundayServiceReport, IFilterHospitalityReport>({
       query: (payload) => ({
         url: `/sunday-service`,
         method: "GET",
         params: payload,
       }),
       providesTags: ["HospitalityReport","MyHospitalityReport"],
-      transformResponse: (response: IApiResponse<IHospitalityReportSundayService[]>) => {
+      transformResponse: (response: IApiResponse<IReponseSundayServiceReport>) => {
         return response.data
       }
     }),
@@ -81,4 +90,5 @@ export const {
   useGetByIdQuery,
   useLazyGetByIdQuery,
   useDeleteMutation,
+  useRegenerateMutation,
 } = hospitalityReport;

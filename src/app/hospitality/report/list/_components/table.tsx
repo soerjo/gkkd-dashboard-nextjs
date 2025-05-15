@@ -108,6 +108,8 @@ export function DataTable() {
     setLocalData(data?.data?.entities ?? []);
   }, [data]);
 
+
+
   const createReport = async (props: ICreateHospitalityReport) => {
     try {
         await createData(props);
@@ -118,9 +120,9 @@ export function DataTable() {
     }
   }
 
-  const deleteReport = async (id: number) => {
+  const deleteReport = async (props: ICreateHospitalityReport) => {
     try {
-        await deleteData({id});
+        await deleteData(props);
         // toast.success('update data success!', {autoClose: 500})
     } catch (error) {
         const errorMessage = getErroMessage(error);
@@ -131,17 +133,21 @@ export function DataTable() {
   const updateReport = async (props: IResponseHospitalityReport) => {
     const sunday_service = Number(searchParams.get("sunday_service"));
     const date = searchParams.get("date");
-    if(!sunday_service || !date) return;
+    if(!sunday_service || !date || props.isLoading) return;
 
     setLocalData((prevData) =>
       prevData.map((item) =>
-        item.id === props.id ? { ...item, is_present: !item.is_present } : item
+        item.id === props.id ? { ...item, is_present: !item.is_present, isLoading: true } : item
       )
     );
 
     try {
       if(props.is_present) {
-        await deleteReport(props.report_id);
+        await deleteReport({
+          date: date,
+          sunday_service_id: sunday_service,
+          hospitality_data_id: props.id,
+        });
       } else {
         await createReport({
           date: date,
@@ -149,6 +155,13 @@ export function DataTable() {
           hospitality_data_id: props.id,
         });
       }
+
+    setLocalData((prevData) =>
+      prevData.map((item) =>
+        item.id === props.id ? { ...item, isLoading: false } : item
+      )
+    );
+
 
     } catch (error) {
         const errorMessage = getErroMessage(error);
@@ -241,6 +254,7 @@ export function DataTable() {
             <TableRow
               key={row.original.id}
               onDoubleClick={() => updateReport(row.original)}
+              className={row.original.isLoading ? "animate-pulse bg-blue-200" : ""}
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
