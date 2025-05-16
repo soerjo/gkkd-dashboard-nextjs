@@ -17,36 +17,38 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
   const authData = useSelector((state: RootState) => state.auth)
 
   return (
-    <div className='relative h-full overflow-hidden bg-background'>
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      <div
-        id='content'
-        className={`overflow-x-hidden transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-64'} h-full`}
-      >
-        <div className='min-h-screen'>
-          <MyNewNavbar />
-          <div className='container mx-auto space-y-4 md:px-8 px-4 mt-4'>
-            {
-              !authData.isPhoneValidate && (
-                <Alert className='flex flex-row justify-between items-center'>
-                  <div>
-                    <AlertTitle>Linked!</AlertTitle>
-                    <AlertDescription>
-                      linked you telegram to get notification and updated information.
-                    </AlertDescription>
-                  </div>
-                  <Link href="https://t.me/EgerejaBot" target="_blank">
-                    <Button size={'sm'}>
-                      Link Telegram
-                    </Button>
-                  </Link>
-                </Alert>
-              )
-            }
-            {children}
+    <>
+      <MyNewNavbar />
+      <div className='relative h-full overflow-hidden bg-background'>
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        <div
+          id='content'
+          className={`overflow-x-hidden transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-64'} h-full`}
+        >
+          <div className='min-h-screen'>
+            <div className='container mx-auto space-y-4 md:px-8 px-4 mt-4'>
+              {
+                !authData.isPhoneValidate && (
+                  <Alert className='flex flex-row justify-between items-center'>
+                    <div>
+                      <AlertTitle>Linked!</AlertTitle>
+                      <AlertDescription>
+                        linked you telegram to get notification and updated information.
+                      </AlertDescription>
+                    </div>
+                    <Link href="https://t.me/EgerejaBot" target="_blank">
+                      <Button size={'sm'}>
+                        Link Telegram
+                      </Button>
+                    </Link>
+                  </Alert>
+                )
+              }
+              {children}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
