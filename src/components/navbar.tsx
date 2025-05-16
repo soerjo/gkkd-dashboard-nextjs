@@ -13,7 +13,7 @@ import ThemeSwitch from "@/components/theme-switch";
 import { AUTH_PAYLOAD, getAuthCookie } from "@/lib/cookies";
 
 import { UserPayload } from "@/interfaces/auth.interface";
-import Nav, { NavLinkDropdown } from "./nav";
+import { NavLinkDropdown } from "./nav";
 import { sidelinks } from "@/data/sidelinks";
 
 export const MyNewNavbar = () => {
@@ -23,7 +23,7 @@ export const MyNewNavbar = () => {
   const userPayload: UserPayload = JSON.parse(cookiesPayload ?? "{}");
 
   return (
-    <Navbar isBordered onMenuOpenChange={setIsMenuOpen} className="mx-0 px-0 flex justify-end">
+    <Navbar isBordered onMenuOpenChange={setIsMenuOpen} className="mx-0 px-0 flex justify-end" position="sticky">
       <NavbarContent >
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
