@@ -2,26 +2,29 @@
 
 import { DataTable } from './_components/table'
 import { useLazyGetAllTableChurchQuery } from '@/store/services/church'
-import CustomSelect from '@/components/select';
-import CustomSearchInput from '@/components/search';
-import { Button } from '@/components/custom/button';
-import { DownloadIcon, PlusIcon } from 'lucide-react';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { MyDrawer } from '@/components/my-drawer';
-import { CreateForm } from './_components/form-create-member';
+import { CreateFormDrawer } from './_components/form-create-member';
 import MyBreadcrum from '@/components/my-breadcrum';
+import { Input, useDisclosure } from "@heroui/react";
+import { Button, Card, CardBody } from "@heroui/react";
+import { Search, PlusIcon } from "lucide-react";
+import { useSearchParams } from 'next/navigation';
+import useQueryParams from '@/hooks/user-query-params';
+import debounce from 'lodash.debounce';
 
 export default function Dashboard() {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure({id: "create-data"});
   const [lazy] = useLazyGetAllTableChurchQuery();
-  const fetch = async (query: string) => {
-    try {
-      const res = await lazy({ page: 1, search: query }).unwrap();
-      return res.data.entities.map(data => ({ label: data.name, value: data }))
-    } catch (error) {
-      return []
-    }
-  }
+  // const fetch = async (query: string) => {
+  //   try {
+  //     const res = await lazy({ page: 1, search: query }).unwrap();
+  //     return res.data.entities.map(data => ({ label: data.name, value: data }))
+  //   } catch (error) {
+  //     return []
+  //   }
+  // }
+
+  const searchParams = useSearchParams();
+  const [_, setSearchName] = useQueryParams({ key: "search", value: null });
   return (
     <>
       <div className='flex flex-col '>
@@ -32,20 +35,30 @@ export default function Dashboard() {
       </div>
 
       <div className="flex items-center gap-2 justify-end">
-        <MyDrawer DrawerForm={CreateForm}>
-          <Button variant="outline" size="sm" className="flex gap-2">
-            <PlusIcon className="size-4" aria-hidden="true" />
-            {isDesktop && "New Cermon"}
-          </Button>
-        </MyDrawer>
-
+        <Button onPress={onOpen} startContent={<PlusIcon />} variant="solid" color="primary">
+          New Data
+        </Button>
       </div>
-      <div className='flex lg:flex-row flex-col gap-4'>
-        <CustomSearchInput />
-        <CustomSelect compName={'church'} fetchQuery={fetch} />
-      </div>
-      <DataTable />
 
+      <Card>
+        <CardBody className="flex flex-col gap-4">
+          <div className="flex lg:flex-row flex-col gap-4">
+            <Input
+              isClearable
+              startContent={ <Search className="text-2xl text-default-400 pointer-events-none flex-shrink-0" /> }
+              defaultValue={searchParams.get("search") ?? ""}
+              onValueChange={debounce(setSearchName, 500)}
+              placeholder="search..."
+            />
+          </div>
+          <DataTable />
+        </CardBody>
+      </Card>
+
+      <CreateFormDrawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      />
     </>
   )
 }

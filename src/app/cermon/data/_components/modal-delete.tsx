@@ -1,6 +1,6 @@
-import { IResponseHospitalityData } from "@/interfaces/hospitalityData.interface";
+import { ICermon } from "@/interfaces/cermon.interface";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMutation } from "@/store/services/hospitality-data";
+import { useDeleteMutation } from "@/store/services/cermon";
 import {
   Modal,
   ModalContent,
@@ -8,44 +8,41 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@heroui/react";
 import { toast } from "react-toastify";
+
 
 export interface ModalDangerProps {
   id: number;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   isOpen: boolean;
-  data: IResponseHospitalityData;
+  data: ICermon;
 }
 
 export function ModalDanger({id, data, isOpen, onOpenChange}: ModalDangerProps) {
-    const [fetch] = useDeleteMutation()
-
-    const handleSubmit = async () => {
-        try {
-            await fetch({id})
-            toast.success("update data success!");
-            onOpenChange(false);
-        } catch (error) {
-            const errorMessage = getErroMessage(error);
-            toast.error(JSON.stringify(errorMessage));
-        }
-    }
+        const [deleteData] = useDeleteMutation();
+        const handleSubmit = async () => {
+            try {
+                await deleteData({ id }).unwrap();
+            } catch (error) {
+                const errorMessage = getErroMessage(error);
+                toast.error(JSON.stringify(errorMessage));
+            }
+        };
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
         <ModalContent>
             {(onClose) => (
             <>
-                <ModalHeader className="flex flex-col gap-1">Delete Hospitality Data</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">Delete Sunday Service</ModalHeader>
                 <ModalBody>
                 <p>
                     Are you sure you want to delete this data? <br />
                 </p>
                 <div className="flex flex-col">
                     <p className="text-medium font-bold text-danger-500"> {data.name} </p>
-                    <p className="text-sm text-default-400"> {data.alias} </p>
+                    <p className="text-sm text-default-400"> {data.segment} </p>
                 </div>
                 </ModalBody>
                 <ModalFooter>

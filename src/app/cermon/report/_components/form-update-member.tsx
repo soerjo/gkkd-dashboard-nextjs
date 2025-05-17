@@ -24,8 +24,9 @@ import { Button } from "@/components/custom/button";
 import { toast } from "react-toastify";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
-import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
+import { CreateCermonReport, ICermonReport } from "@/interfaces/cermon-report.interface";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/cermon-report";
+import { Drawer, DrawerContent } from "@heroui/react";
 import { useLazyGetAllQuery } from "@/store/services/cermon";
 import { PopoverClose } from "@radix-ui/react-popover";
 
@@ -59,15 +60,16 @@ const FormSchema = z.object({
     cermon: dropDownSchema,
 });
 
-export type UpdateFormInputProps = React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: number;
+export type FormUpdateDataProps = {
+  id: number;
+  onClose: () => void;
+  data: ICermonReport;
 };
 
 export const UpdateFormInput = ({
-    onOpenChange,
-    data: id,
-}: UpdateFormInputProps) => {
+    onClose,
+    id,
+}: FormUpdateDataProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [updateData] = useUpdateMutation();
@@ -102,7 +104,7 @@ export const UpdateFormInput = ({
             }).unwrap();
 
             toast.success('update data success!')
-            onOpenChange(val => !val);
+            onClose();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -357,4 +359,21 @@ export const UpdateFormInput = ({
             </div>
         </div>
     );
+};
+
+export type UpdateFormProps = {
+  id: number;
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
+  data: ICermonReport;
+};
+
+export const UpdateFormDrawer = ({ id, onOpenChange, isOpen, data }: UpdateFormProps) => {
+  return (
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+      <DrawerContent>
+        {(onClose) => <UpdateFormInput id={id} data={data} onClose={onClose} />}
+      </DrawerContent>
+    </Drawer>
+  );
 };

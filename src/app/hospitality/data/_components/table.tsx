@@ -179,6 +179,7 @@ export function DataTable() {
 
   return (
     <div className="flex-col flex gap-2">
+      <div className="max-h-[70vh] overflow-auto">
       <Table
         removeWrapper
         isHeaderSticky
@@ -187,7 +188,7 @@ export function DataTable() {
         selectionBehavior="replace"
         selectionMode="single"
       >
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10">
           {table.getFlatHeaders().map((header) => (
             <TableColumn key={header.id}>
               {header.isPlaceholder
@@ -221,6 +222,7 @@ export function DataTable() {
         </TableBody>
       </Table>
 
+      </div>
       <PaginationFooter table={table} />
     </div>
   );
