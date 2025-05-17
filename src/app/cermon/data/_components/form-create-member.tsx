@@ -24,6 +24,7 @@ import { useCreateMutation } from "@/store/services/cermon";
 import { TimePicker } from "@/components/custom/time-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/format-time";
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateCermon, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
@@ -52,11 +53,11 @@ const FormSchema = z.object({
     region: dropDownSchema.nullable().optional(),
 });
 
-export type CreateFormProps = React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+export type CreateFormDataProps = React.ComponentProps<"form"> & {
+    onClose: () => void
 };
 
-export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
+export const CreateFormData = ({ onClose }: CreateFormDataProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const [time, setTime] = React.useState<Date | undefined>(undefined);
 
@@ -79,7 +80,7 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             }).unwrap()
 
             toast.success('create data success!')
-            onOpenChange(val => !val);
+            onClose();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -249,4 +250,20 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             </div>
         </div>
     );
+};
+
+export type CreateFormProps = React.ComponentProps<"form"> & {
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
+};
+
+export const CreateFormDrawer = ({ onOpenChange, isOpen }: CreateFormProps) => {
+  return (
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+      <DrawerContent>
+        {(onClose) => (<CreateFormData onClose={onClose}/>)}
+        
+      </DrawerContent>
+    </Drawer>
+  );
 };

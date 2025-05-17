@@ -25,7 +25,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
           id='content'
           className={`overflow-x-hidden transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-64'} h-full`}
         >
-          <div className='min-h-screen'>
+          {/* <div className='min-h-screen'> */}
             <div className='container mx-auto space-y-4 md:px-8 px-4 mt-4'>
               {
                 !authData.isPhoneValidate && (
@@ -46,7 +46,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
               }
               {children}
             </div>
-          </div>
+          {/* </div> */}
         </div>
       </div>
     </>

@@ -26,10 +26,12 @@ import { useLazyGetAllChurchQuery } from "@/store/services/church";
 import debounce from "lodash.debounce";
 import AsyncSelect from "@/components/react-select";
 import { useGetByIdQuery, useLazyGetByIdQuery, useUpdateMutation } from "@/store/services/cermon";
-import { CreateCermon, weekDays } from "@/interfaces/cermon.interface";
+import { CreateCermon, ICermon, weekDays } from "@/interfaces/cermon.interface";
 import { formatTime } from "@/lib/format-time";
 import { TimePicker } from "@/components/custom/time-picker";
 import { Textarea } from "@/components/ui/textarea";
+
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
 
 type dropDown = { label: string, value: string | number }
 type CreateInputForm = Omit<CreateCermon, "region_id" | 'day' | 'time'> & { region?: dropDown, time: Date }
@@ -58,14 +60,21 @@ const FormSchema = z.object({
     region: dropDownSchema.nullable().optional(),
 });
 
-export type UpdateFormInputProps = React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-    data: number;
+// export type UpdateFormInputProps = React.ComponentProps<"form"> & {
+//     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+//     id: number;
+// };
+
+export type UpdateFormInputProps = {
+  id: number;
+  onClose: () => void;
+  data: ICermon;
 };
 
 export const UpdateFormInput = ({
-    onOpenChange,
-    data: id,
+    onClose,
+    id,
+    data
 }: UpdateFormInputProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -98,7 +107,8 @@ export const UpdateFormInput = ({
             }).unwrap();
 
             toast.success('update data success!')
-            onOpenChange(val => !val);
+            // onOpenChange(val => !val);
+            onClose();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -310,4 +320,21 @@ export const UpdateFormInput = ({
             </div>
         </div>
     );
+};
+
+export type UpdateFormProps = {
+  id: number;
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
+  data: ICermon;
+};
+
+export const UpdateFormDrawer = ({ id, onOpenChange, isOpen, data }: UpdateFormProps) => {
+  return (
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+      <DrawerContent>
+        {(onClose) => <UpdateFormInput id={id} data={data} onClose={onClose} />}
+      </DrawerContent>
+    </Drawer>
+  );
 };

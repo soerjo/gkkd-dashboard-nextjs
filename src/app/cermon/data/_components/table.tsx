@@ -10,17 +10,18 @@ import {
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
+    Row,
     useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+// import { Button } from "@/components/ui/button";
+// import {
+//     Table,
+//     TableBody,
+//     TableCell,
+//     TableHead,
+//     TableHeader,
+//     TableRow,
+// } from "@/components/ui/table";
 import {
     Select,
     SelectContent,
@@ -39,12 +40,81 @@ import { ICermon } from "@/interfaces/cermon.interface";
 import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
 
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableColumn,
+  Button,
+  useDisclosure,
+  Tooltip,
+} from "@heroui/react";
+import { PaginationFooter } from "@/components/pagination-footer";
+import { EditIcon, TrashIcon } from "lucide-react";
+import { UpdateFormDrawer } from "./form-update-member";
+import { ModalDanger } from "./modal-delete";
+
+
+const UpdateDrawerButton = ({ row }: { row: Row<ICermon> }) => {
+  const {
+    isOpen: isOpenUpdate,
+    onOpen: onOpenUpdate,
+    onOpenChange: onOpenChangeUpdate,
+  } = useDisclosure({ id: "update-data" });
+
+    const {
+      isOpen: isOpenDelete,
+      onOpen: onOpenDelete, 
+      onOpenChange: onOpenChangeDelete
+    } = useDisclosure({ id: "delete-data" });
+
+
+  return (
+    <div className="flex flex-row gap-2">
+      <Tooltip content="Edit data">
+        <Button
+          isIconOnly
+          size="sm"
+          startContent={<EditIcon className="text-success-300" />}
+          variant="light"
+          onPress={onOpenUpdate}
+        />
+      </Tooltip>
+      <Tooltip content="Delete data">
+        <Button
+          isIconOnly
+          size="sm"
+          startContent={<TrashIcon className="text-danger-300" />}
+          variant="light"
+          onPress={onOpenDelete}
+        />
+      </Tooltip>
+
+      <ModalDanger
+        id={row.original.id}
+        data={row.original}
+        isOpen={isOpenDelete}
+        onOpenChange={onOpenChangeDelete}
+      />
+
+      <UpdateFormDrawer
+        id={row.original.id}
+        data={row.original}
+        isOpen={isOpenUpdate}
+        onOpenChange={onOpenChangeUpdate}
+      />
+    </div>
+  );
+};
+
 export const columns: ColumnDef<ICermon>[] = [
-    {
-        accessorKey: "unique_id",
-        header: "ID",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("unique_id")}</div>,
-    },
+    // {
+    //     accessorKey: "unique_id",
+    //     header: "ID",
+    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("unique_id")}</div>,
+    // },
     {
         accessorKey: "name",
         header: "Name",
@@ -65,17 +135,15 @@ export const columns: ColumnDef<ICermon>[] = [
     //     header: "Description",
     //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("description")}</div>,
     // },
+    // {
+    //     accessorKey: "region_name",
+    //     header: "Region",
+    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
+    // },
     {
-        accessorKey: "region_name",
-        header: "Region",
-        cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    },
-    {
-        id: "actions",
-        enableHiding: true,
-        accessorKey: "actions",
-        header: () => <div className="text-center">Actions</div>,
-        cell: ({ row }) => <DropdownAction row={row} />,
+        accessorKey: "action",
+        header: "Action",
+        cell: ({ row }) => <UpdateDrawerButton row={row} />,
     },
 ];
 
@@ -134,146 +202,50 @@ export function DataTable() {
     });
 
     return (
-        <div className="w-full">
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map(headerGroup => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map(header => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    );
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {!isLoading &&
-                            table.getRowModel().rows?.length > 0 &&
-                            table.getRowModel().rows.map(row => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map(cell => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        {!isLoading && !table.getRowModel().rows?.length && (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                        {isLoading && (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    <div className="w-full flex justify-center items-center">
-                                        <Spinner size="medium" className="m-auto">
-                                            <span>Loading ...</span>
-                                        </Spinner>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+        <div className="flex-col flex gap-2">
+            <Table
+            removeWrapper
+            isHeaderSticky
+            shadow="none"
+            className="overflow-auto"
+            selectionBehavior="replace"
+            selectionMode="single"
+            >
+            <TableHeader>
+                {table.getFlatHeaders().map((header) => (
+                <TableColumn key={header.id}>
+                    {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}{" "}
+                </TableColumn>
+                ))}
+            </TableHeader>
 
-            <div className="flex w-full flex-col-reverse items-center justify-end gap-4 pt-4 sm:flex-row sm:gap-8">
-                <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
-                    <div className="flex items-center space-x-2">
-                        <p className="whitespace-nowrap text-sm font-medium">
-                            Rows per page
-                        </p>
-                        <Select
-                            value={`${table.getState().pagination.pageSize}`}
-                            onValueChange={value => {
-                                table.setPageSize(Number(value));
-                            }}
-                        >
-                            <SelectTrigger className="h-8 w-[4.5rem]">
-                                <SelectValue
-                                    placeholder={table.getState().pagination.pageSize}
-                                />
-                            </SelectTrigger>
-                            <SelectContent side="top">
-                                {pageSizeOptions.map(pageSize => (
-                                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                                        {pageSize}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="flex items-center justify-center text-sm font-medium">
-                        Page {table.getState().pagination.pageIndex + 1} of{" "}
-                        {table.getPageCount()}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Button
-                            aria-label="Go to first page"
-                            variant="outline"
-                            className="hidden size-8 p-0 lg:flex"
-                            onClick={() => table.setPageIndex(0)}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            <DoubleArrowLeftIcon className="size-4" aria-hidden="true" />
-                        </Button>
-                        <Button
-                            aria-label="Go to previous page"
-                            variant="outline"
-                            size="icon"
-                            className="size-8"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            <ChevronLeftIcon className="size-4" aria-hidden="true" />
-                        </Button>
-                        <Button
-                            aria-label="Go to next page"
-                            variant="outline"
-                            size="icon"
-                            className="size-8"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            <ChevronRightIcon className="size-4" aria-hidden="true" />
-                        </Button>
-                        <Button
-                            aria-label="Go to last page"
-                            variant="outline"
-                            size="icon"
-                            className="hidden size-8 lg:flex"
-                            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            <DoubleArrowRightIcon className="size-4" aria-hidden="true" />
-                        </Button>
-                    </div>
+            <TableBody
+                emptyContent={"No found."}
+                items={!isLoading ? table.getRowModel().rows : []}
+                isLoading={isLoading}
+                loadingContent={
+                <div className="w-full flex justify-center items-center">
+                    <Spinner size="medium" className="m-auto">
+                    <span>Loading ...</span>
+                    </Spinner>
                 </div>
-            </div>
+                }
+            >
+                {(row) => (
+                <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                    ))}
+                </TableRow>
+                )}
+            </TableBody>
+            </Table>
+
+            <PaginationFooter table={table} />
         </div>
     );
 }
