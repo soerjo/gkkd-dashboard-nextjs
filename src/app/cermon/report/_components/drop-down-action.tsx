@@ -124,9 +124,9 @@ export const DropdownAction = ({ row }: { row: Row<ICermonReport> }) => {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <SheetContent className="">
+                    {/* <SheetContent className="">
                         <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
-                    </SheetContent>
+                    </SheetContent> */}
                 </Sheet>
             </div>
         );
@@ -160,9 +160,9 @@ export const DropdownAction = ({ row }: { row: Row<ICermonReport> }) => {
                         </AlertDialogTrigger>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <DrawerContent>
+                {/* <DrawerContent>
                     <UpdateFormInput onOpenChange={setOpen} data={row.original.id} />
-                </DrawerContent>
+                </DrawerContent> */}
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

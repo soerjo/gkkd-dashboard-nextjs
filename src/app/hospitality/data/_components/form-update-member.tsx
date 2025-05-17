@@ -8,12 +8,8 @@ import { useUpdateMutation } from "@/store/services/hospitality-data";
 import { Autocomplete, AutocompleteItem, Button, Input } from "@heroui/react";
 import { useGetAllMapQuery as useGetAllBCQuery } from "@/store/services/fellowship";
 import { useGetAllQuery as useGetAllSegQuery } from "@/store/services/segment";
-
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
-import {
-  ICreateHospitalityData,
-  IResponseHospitalityData,
-} from "@/interfaces/hospitalityData.interface";
+import { ICreateHospitalityData, IResponseHospitalityData } from "@/interfaces/hospitalityData.interface";
 import debounce from "lodash.debounce";
 
 const FormSchema = z.object({

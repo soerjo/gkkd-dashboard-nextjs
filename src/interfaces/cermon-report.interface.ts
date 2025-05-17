@@ -26,4 +26,6 @@ export interface CermonReportFilter {
   page?: number;
   search?: string;
   region_id?: number;
+  date_from?: Date | string;
+  date_to?: Date | string;
 }

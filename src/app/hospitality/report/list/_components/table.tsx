@@ -19,12 +19,10 @@ import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
 import { useLazyGetAllQuery, useCreateMutation, useDeleteMutation } from "@/store/services/hospitality-report";
-// import { getErroMessage } from "../../../../lib/rtk-error-validation";
 import { toast } from "react-toastify";
 import { PaginationFooter } from "@/components/pagination-footer";
 import { ICreateHospitalityReport, IResponseHospitalityReport } from "@/interfaces/hospitalityReport.interface";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-// import { UpdateFormDrawer } from "./form-update-member";
 
 export const columns: ColumnDef<IResponseHospitalityReport>[] = [
   {
@@ -38,9 +36,7 @@ export const columns: ColumnDef<IResponseHospitalityReport>[] = [
     cell: ({ row }) => (
       <div>
         <div className="text-nowrap text-base capitalize">{row.getValue("name")}</div>
-        <div className="text-nowrap text-primary-900 text-opacity-70">
-          {row.original.alias || "-"}
-        </div>
+        <div className="text-nowrap text-primary-900 text-opacity-70"> {row.original.alias || "-"}</div>
       </div>
     ),
   },
@@ -61,25 +57,6 @@ export const columns: ColumnDef<IResponseHospitalityReport>[] = [
       <div className="text-nowrap uppercase">{row.getValue("blesscomn_name")}</div>
     ),
   },
-  // {
-  //     accessorKey: "action",
-  //     header: "Action",
-  //     cell: ({ row }) => {
-  //       const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure({id: "update-data"});
-
-  //       return (
-  //       <>
-  //         <Button isIconOnly startContent={< EditIcon className="text-success-300" /> } variant="light" onPress={onOpenUpdate}/>
-  //         <UpdateFormDrawer
-  //           id={row.original.id}
-  //           data={row.original}
-  //           isOpen={isOpenUpdate}
-  //           onOpenChange={onOpenChangeUpdate}
-  //         />
-  //       </>
-  //       )
-  //     },
-  // },
 ];
 
 export type FetchMemberProps = {
@@ -219,7 +196,7 @@ export function DataTable() {
 
   return (
     <div className="flex-col flex gap-2">
-    <div className="max-h-[500px] overflow-auto">
+    <div className="max-h-[55vh] overflow-auto">
       <Table
         removeWrapper
         // isVirtualized
@@ -228,7 +205,7 @@ export function DataTable() {
         selectionBehavior="replace"
         selectionMode="single"
       >
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10">
           {table.getFlatHeaders().map((header) => (
             <TableColumn key={header.id}>
               {header.isPlaceholder

@@ -30,6 +30,7 @@ import debounce from "lodash.debounce";
 import { useCreateMutation } from "@/store/services/cermon-report";
 import { useLazyGetAllQuery } from "@/store/services/cermon";
 import { CreateCermonReport } from "@/interfaces/cermon-report.interface";
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
 import { PopoverClose } from "@radix-ui/react-popover";
 
 type dropDown = { label: string, value: number }
@@ -60,11 +61,11 @@ const FormSchema = z.object({
     }).refine(data => data.value, { message: 'cermon is required' }),
 });
 
-export type CreateFormProps = React.ComponentProps<"form"> & {
-    onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+export type FormCreateDataProps = React.ComponentProps<"form"> & {
+    onClose: () => void;
 };
 
-export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
+export const FormCreateData = ({ onClose }: FormCreateDataProps) => {
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const form = useForm<CreateBaptismForm>({
@@ -90,8 +91,8 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
                 cermon_id: values.cermon.value,
             }).unwrap();
 
-            toast.success('create data success!')
-            onOpenChange(val => !val);
+            toast.success('create data success!');
+            onClose();
         } catch (error) {
             const errorMessage = getErroMessage(error);
             toast.error(JSON.stringify(errorMessage));
@@ -305,4 +306,20 @@ export const CreateForm = ({ onOpenChange }: CreateFormProps) => {
             </div>
         </div>
     );
+};
+
+export type CreateFormProps = React.ComponentProps<"form"> & {
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
+};
+
+export const CreateFormDrawer = ({ onOpenChange, isOpen }: CreateFormProps) => {
+  return (
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+      <DrawerContent>
+        {(onClose) => (<FormCreateData onClose={onClose}/>)}
+        
+      </DrawerContent>
+    </Drawer>
+  );
 };

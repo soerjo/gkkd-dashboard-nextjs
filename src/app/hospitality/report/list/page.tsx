@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "./_components/table";
-import { Card, CardBody, DatePicker, Divider, Accordion, AccordionItem, Button } from "@heroui/react";
+import { Card, CardBody, DatePicker, Accordion, AccordionItem, Button } from "@heroui/react";
 import { Search } from "lucide-react";
 import MyBreadcrum from "@/components/my-breadcrum";
 import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
@@ -9,7 +9,6 @@ import { getLocalTimeZone, today, parseDate } from "@internationalized/date";
 import useQueryParams from "@/hooks/user-query-params";
 import { useState } from "react";
 import { useGetAllQuery } from "@/store/services/segment";
-import { useGetAllMapQuery as useGetAllBCQuery } from "@/store/services/fellowship";
 import { useGetAllMapQuery as useGetAllSsQuery } from "@/store/services/cermon";
 import { useGetReportQuery, useRegenerateMutation } from "@/store/services/hospitality-report";
 import { useSearchParams } from "next/navigation";
@@ -21,11 +20,11 @@ export default function Dashboard() {
   const [searchSegment, setSearchSegment] = useState<string>("");
   const { data = [], isFetching } = useGetAllQuery({ name: searchSegment });
 
-  const [searchBcId, setSearchBcId] = useQueryParams({ key: "blesscomn", value: null });
-  const [searchBlesscomn, setSearchBlesscomn] = useState<string>("");
-  const { data: dataBc = [], isFetching: isFetchingBc } = useGetAllBCQuery({
-    search: searchBlesscomn,
-  });
+  // const [searchBcId, setSearchBcId] = useQueryParams({ key: "blesscomn", value: null });
+  // const [searchBlesscomn, setSearchBlesscomn] = useState<string>("");
+  // const { data: dataBc = [], isFetching: isFetchingBc } = useGetAllBCQuery({
+  //   search: searchBlesscomn,
+  // });
 
   const [searchSsId, setSearchSsId] = useQueryParams({ key: "sunday_service", value: null });
   const [searchSs] = useState<string>("");
@@ -133,35 +132,29 @@ export default function Dashboard() {
       </Button>
       {
         dataReport?.sum && dataReport?.count && (
-          <Accordion selectionMode="multiple" variant="shadow" isCompact>
+          <Accordion selectionMode="multiple" variant="shadow" isCompact className="p-4">
             <AccordionItem key={1} aria-label="segment" title={"Details Segment"}>
-              <div className="flex flex-col gap-2">
-                <div
-                  
-                  className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full"
-                >
-                {dataReport?.sum &&
-                  dataReport.sum.map((item) => (
-                      <p key={item.id} className=" uppercase text-small">
-                        {item.alias} : {item.count}
-                      </p>
-                  ))}
-                  </div>
-              </div>
+              <p className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full" >
+              {dataReport?.sum && dataReport.sum.map((item) => (
+                <span key={item.id} className=" uppercase text-small">
+                  {item.alias} : {item.count}
+                </span>
+              ))}
+              </p>
             </AccordionItem>
 
             <AccordionItem key={2} aria-label="segment" title={"Details Total"}>
               <div className="flex flex-col gap-2">
                 {dataReport?.count &&
                   (
-                    <div className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full">
-                      <p className="text-small"> Total Laki-laki : {dataReport.count.total_male} </p>
-                      <p className="text-small"> Total Laki-laki Baru : {dataReport.count.total_new_male} </p>
-                      <p className="text-small"> Total Perempuan : {dataReport.count.total_female} </p>
-                      <p className="text-small mb-1"> Total Perempuan Baru: {dataReport.count.total_new_female} </p>
-                      <Divider />
-                      <p className="text-small mt-1"> Total : {dataReport.count.total} </p>
-                    </div>
+                    <p className="flex flex-col justify-center items-start px-4 py-2 bg-default-100 rounded-lg w-full">
+                      <span className="text-small"> Total Laki-laki : {dataReport.count.total_male} </span>
+                      <span className="text-small"> Total Laki-laki Baru : {dataReport.count.total_new_male} </span>
+                      <span className="text-small"> Total Perempuan : {dataReport.count.total_female} </span>
+                      <span className="text-small mb-1"> Total Perempuan Baru: {dataReport.count.total_new_female} </span>
+                      <span className="text-small"> -------------------------------------------- + </span>
+                      <span className="text-small mt-1"> Total : {dataReport.count.total} </span>
+                    </p>
                   )
                 }
               </div>

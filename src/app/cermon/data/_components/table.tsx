@@ -1,11 +1,5 @@
 import * as React from "react";
 import {
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    DoubleArrowLeftIcon,
-    DoubleArrowRightIcon,
-} from "@radix-ui/react-icons";
-import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
@@ -13,24 +7,6 @@ import {
     Row,
     useReactTable,
 } from "@tanstack/react-table";
-// import { Button } from "@/components/ui/button";
-// import {
-//     Table,
-//     TableBody,
-//     TableCell,
-//     TableHead,
-//     TableHeader,
-//     TableRow,
-// } from "@/components/ui/table";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { DropdownAction } from "./drop-down-action";
-
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
@@ -110,11 +86,6 @@ const UpdateDrawerButton = ({ row }: { row: Row<ICermon> }) => {
 };
 
 export const columns: ColumnDef<ICermon>[] = [
-    // {
-    //     accessorKey: "unique_id",
-    //     header: "ID",
-    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("unique_id")}</div>,
-    // },
     {
         accessorKey: "name",
         header: "Name",
@@ -130,16 +101,6 @@ export const columns: ColumnDef<ICermon>[] = [
         header: "Segment",
         cell: ({ row }) => <div className="text-nowrap">{row.getValue("segment")}</div>,
     },
-    // {
-    //     accessorKey: "description",
-    //     header: "Description",
-    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("description")}</div>,
-    // },
-    // {
-    //     accessorKey: "region_name",
-    //     header: "Region",
-    //     cell: ({ row }) => <div className="text-nowrap">{row.getValue("region_name")}</div>,
-    // },
     {
         accessorKey: "action",
         header: "Action",
@@ -203,6 +164,7 @@ export function DataTable() {
 
     return (
         <div className="flex-col flex gap-2">
+              <div className="max-h-[70vh] overflow-auto">
             <Table
             removeWrapper
             isHeaderSticky
@@ -211,7 +173,7 @@ export function DataTable() {
             selectionBehavior="replace"
             selectionMode="single"
             >
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10">
                 {table.getFlatHeaders().map((header) => (
                 <TableColumn key={header.id}>
                     {header.isPlaceholder
@@ -244,6 +206,7 @@ export function DataTable() {
                 )}
             </TableBody>
             </Table>
+            </div>
 
             <PaginationFooter table={table} />
         </div>

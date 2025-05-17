@@ -144,10 +144,12 @@ function NavLinkIcon({ title, icon, label, href, setIsCollapsed, closeNav }: Nav
           onClick={() => setIsCollapsed!(false)}
           className={cn(
             buttonVariants({
-              variant: checkActiveNav(href) ? 'secondary' : 'ghost',
+              variant: 'ghost',
+              // variant: 'secondary',
               size: 'icon',
+              className: checkActiveNav(href) && 'bg-default-400 text-foreground-900',
             }),
-            'h-14 w-14 cursor-pointer hover:bg-default-200'
+            'h-14 w-14 cursor-pointer hover:bg-default-200 ' ,
           )}
         >
           {icon}

@@ -1,6 +1,6 @@
-import { IResponseHospitalityData } from "@/interfaces/hospitalityData.interface";
+import { ICermonReport } from "@/interfaces/cermon-report.interface";
 import { getErroMessage } from "@/lib/rtk-error-validation";
-import { useDeleteMutation } from "@/store/services/hospitality-data";
+import { useDeleteMutation } from "@/store/services/cermon-report";
 import {
   Modal,
   ModalContent,
@@ -8,7 +8,6 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@heroui/react";
 import { toast } from "react-toastify";
 
@@ -16,7 +15,7 @@ export interface ModalDangerProps {
   id: number;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   isOpen: boolean;
-  data: IResponseHospitalityData;
+  data: ICermonReport;
 }
 
 export function ModalDanger({id, data, isOpen, onOpenChange}: ModalDangerProps) {
@@ -24,7 +23,10 @@ export function ModalDanger({id, data, isOpen, onOpenChange}: ModalDangerProps) 
 
     const handleSubmit = async () => {
         try {
-            await fetch({id})
+            const result = await fetch({id})
+            if ('error' in result) 
+                return toast.error((result.error as any)?.data?.message ?? "something went wrong");
+
             toast.success("update data success!");
             onOpenChange(false);
         } catch (error) {
@@ -38,14 +40,14 @@ export function ModalDanger({id, data, isOpen, onOpenChange}: ModalDangerProps) 
         <ModalContent>
             {(onClose) => (
             <>
-                <ModalHeader className="flex flex-col gap-1">Delete Hospitality Data</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">Delete Sunday Service Report</ModalHeader>
                 <ModalBody>
                 <p>
                     Are you sure you want to delete this data? <br />
                 </p>
                 <div className="flex flex-col">
-                    <p className="text-medium font-bold text-danger-500"> {data.name} </p>
-                    <p className="text-sm text-default-400"> {data.alias} </p>
+                    <p className="text-medium font-bold text-danger-500"> {data.cermon_name} </p>
+                    <p className="text-sm text-default-400"> {new Date(data.date).toDateString()} </p>
                 </div>
                 </ModalBody>
                 <ModalFooter>

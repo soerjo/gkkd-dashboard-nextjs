@@ -35,7 +35,7 @@ export function ModalDanger({id, data, isOpen, onOpenChange}: ModalDangerProps) 
         <ModalContent>
             {(onClose) => (
             <>
-                <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                <ModalHeader className="flex flex-col gap-1">Delete Sunday Service</ModalHeader>
                 <ModalBody>
                 <p>
                     Are you sure you want to delete this data? <br />
