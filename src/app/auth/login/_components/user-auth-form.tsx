@@ -1,6 +1,6 @@
 "use client";
 
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,19 +12,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/custom/button";
+
+// import { Input } from "@/components/ui/input";
+// import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
 import { useLoginMutation } from "@/store/services/auth";
 import { getErroMessage } from "@/lib/rtk-error-validation";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { Input, Button } from "@heroui/react";
+import { EyeFilledIcon, EyeSlashFilledIcon } from "@/assets/EyePasswordIcon";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
-  email: z.string().min(1, { message: "Please enter your email" }),
+  email: z.string().min(1, { message: "Please enter your user or email" }),
   password: z
     .string()
     .min(1, {
@@ -36,6 +39,8 @@ const formSchema = z.object({
 });
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const toggleVisibility = () => setIsVisible(!isVisible);
   const [login, { isLoading }] = useLoginMutation();
   const { push } = useRouter();
 
@@ -47,7 +52,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   });
 
-  const { handleSubmit } = form;
+  const { handleSubmit, formState: { isSubmitting, errors }  } = form;
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
@@ -67,46 +72,51 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-          <div className="grid gap-2">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Username or email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  {/* <div className="flex items-center justify-between"> */}
-                  <FormLabel>Password</FormLabel>
-                  {/* <Link
-                      href="/forgot-password"
-                      className="text-sm font-medium text-muted-foreground hover:opacity-75"
+        <form onSubmit={handleSubmit(onSubmit)} id="auth-login" className="flex flex-col gap-4">
+                    <Input
+                      labelPlacement="outside"
+                      placeholder="your username or email"
+                      variant="faded"
+                      label="Username or Email"
+                      isInvalid={!!errors.email}
+                      errorMessage={errors.email?.message}
+                      {...form.register("email")}
+                    />
+                    <Input
+                      labelPlacement="outside"
+                      placeholder="*********"
+                      variant="faded"
+                      label="Password"
+                      type={isVisible ? "text" : "password"}
+                      isInvalid={!!errors.password}
+                      errorMessage={errors.password?.message}
+                      {...form.register("password")}
+                      endContent={
+                        <button
+                          aria-label="toggle password visibility"
+                          className="focus:outline-none"
+                          type="button"
+                          onClick={toggleVisibility}
+                        >
+                          {isVisible ? (
+                            <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                          ) : (
+                            <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                          )}
+                        </button>
+                      }
+                    />
+                     <Button
+                      className="mt-4"
+                      color="primary"
+                      isLoading={isLoading}
+                      variant="solid"
+                      type="submit"
+                      form="auth-login"
+                      size="lg"
                     >
-                      Forgot password?
-                    </Link> */}
-                  {/* </div> */}
-                  <FormControl>
-                    <PasswordInput placeholder="********" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button className="mt-2" loading={isLoading}>
-              Login
-            </Button>
-          </div>
+                      Submit
+                    </Button>
         </form>
       </Form>
     </div>

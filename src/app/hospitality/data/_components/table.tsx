@@ -16,8 +16,9 @@ import {
   TableColumn,
   Button,
   useDisclosure,
+  Tooltip,
 } from "@heroui/react";
-import { EditIcon } from "lucide-react";
+import { EditIcon, TrashIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import useQueryParams from "@/hooks/user-query-params";
@@ -27,6 +28,7 @@ import { toast } from "react-toastify";
 import { PaginationFooter } from "@/components/pagination-footer";
 import { IResponseHospitalityData } from "@/interfaces/hospitalityData.interface";
 import { UpdateFormDrawer } from "./form-update-member";
+import { ModalDanger } from "./modal-delete";
 
 const UpdateDrawerButton = ({ row }: { row: Row<IResponseHospitalityData> }) => {
   const {
@@ -35,21 +37,48 @@ const UpdateDrawerButton = ({ row }: { row: Row<IResponseHospitalityData> }) => 
     onOpenChange: onOpenChangeUpdate,
   } = useDisclosure({ id: "update-data" });
 
+    const {
+      isOpen: isOpenDelete,
+      onOpen: onOpenDelete, 
+      onOpenChange: onOpenChangeDelete
+    } = useDisclosure({ id: "delete-data" });
+
+
   return (
-    <>
-      <Button
-        isIconOnly
-        startContent={<EditIcon className="text-success-300" />}
-        variant="light"
-        onPress={onOpenUpdate}
+    <div className="flex flex-row gap-2">
+      <Tooltip content="Edit data">
+        <Button
+          isIconOnly
+          size="sm"
+          startContent={<EditIcon className="text-success-300" />}
+          variant="light"
+          onPress={onOpenUpdate}
+        />
+      </Tooltip>
+      <Tooltip content="Delete data">
+        <Button
+          isIconOnly
+          size="sm"
+          startContent={<TrashIcon className="text-danger-300" />}
+          variant="light"
+          onPress={onOpenDelete}
+        />
+      </Tooltip>
+
+      <ModalDanger
+        id={row.original.id}
+        data={row.original}
+        isOpen={isOpenDelete}
+        onOpenChange={onOpenChangeDelete}
       />
+
       <UpdateFormDrawer
         id={row.original.id}
         data={row.original}
         isOpen={isOpenUpdate}
         onOpenChange={onOpenChangeUpdate}
       />
-    </>
+    </div>
   );
 };
 
