@@ -95,7 +95,7 @@ export default function Dashboard() {
               onValueChange={debounce(setSearchName, 500)}
               placeholder="search..."
             />
-            {/* <Autocomplete
+            <Autocomplete
               selectedKey={searchSegmentId}
               isLoading={isFetching}
               defaultItems={data}
@@ -107,7 +107,7 @@ export default function Dashboard() {
             >
               {(item) => <AutocompleteItem key={item?.id}>{item?.label}</AutocompleteItem>}
             </Autocomplete>
-            <Autocomplete
+            {/* <Autocomplete
               selectedKey={searchBcId}
               isLoading={isFetchingBc}
               defaultItems={dataBc}
